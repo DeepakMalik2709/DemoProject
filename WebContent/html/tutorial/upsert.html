@@ -1,0 +1,49 @@
+ <div class="col-sm-9" ng-init="initTutorialForm();">
+<form class="form-horizontal" name="tutorialForm">
+  <div class="form-group" ng-class="{'has-error' : ((tutorialForm.title.$error.required || tutorialForm.lasttName.$error.required) && pageState.showErrorMessages) }">
+    <label for="title" class="col-sm-2 control-label">Ttile</label>
+    <div class="col-sm-10">
+    <input type="text" class="form-control" ng-required="true" name="title" id="title" ng-model="tutorial.title" placeholder="Title">
+    </div>
+  </div>
+    <div class="form-group" ng-class="{'has-error' : ((tutorialForm.url.$error.required   )&& pageState.showErrorMessages) }">
+    <label for="url" class="col-sm-2 control-label">Video Url</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" ng-required="true" name="url" id="url" ng-model="tutorial.url" placeholder="Video Url">
+    </div>
+  </div>
+  
+      <div class="form-group" ng-class="{'has-error' : ((tutorialForm.url.$error.required   )&& pageState.showErrorMessages) }">
+    <label for="url" class="col-sm-2 control-label">Convert Youtube Url</label>
+    <div class="col-sm-10">
+    <input type="checkbox"    ng-model="tutorial.convertToEmbed" />
+    </div>
+  </div>
+    <div class="form-group" >
+    <label for="description" class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-10">
+      <textarea class="form-control" rows="3" name="description" id="description" ng-model="tutorial.description" placeholder="description"></textarea>
+    </div>
+  </div>
+  
+   <div class="form-group" ng-class="">
+    <label for="url" class="col-sm-2 control-label">Tags</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="newTag" id="url" ng-model="tutorial.newTag" placeholder="Tags" ng-enter="addTagToTutorial();" uib-tooltip ="Press Enter to add tag">
+      <span class="file-tag blue" ng-repeat="tag in tutorial.tags track by $index">
+    	{{tag}} <span  ng-click="removeTagFromTutorial(tag)" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </span>
+    </div>
+  </div>
+  
+  <div class="form-group">
+  <div class="row">
+    <div class="col-sm-4 ">
+      <button type="button" ng-disabled="tutorialForm.$invalid" ng-click="saveTutorial(tutorialForm.$invalid);" class="btn btn-default">Save</button>
+    </div>
+    </div>
+  </div>
+</form>
+ 
+ </div>
+

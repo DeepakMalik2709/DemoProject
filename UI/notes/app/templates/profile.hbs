@@ -1,0 +1,139 @@
+  <div class="row">
+                <div class="col-lg-12">
+                   
+                     <h1 class="page-header ">Profile</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            
+            
+            
+            
+<div class="form-horizontal">
+
+ <div class="form-group">
+<div class="pull-left image">
+                    <img src="{{model.photoUrl}}" class="profile-img avatar" />
+                     <span class="{{if isSaving 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
+                      <button type="button"   onclick="$('#photo-upload').click();" class="btn btn-default" disabled={{if isSaving true}}>Change</button>
+                     {{#if model.hasUploadedPhoto}}
+                      <button type="button"   {{action 'removePhoto' model}} class="btn btn-default" disabled={{if isSaving true}}>Remove</button>
+                    {{/if}}
+                    <input accept="image/*"  id="photo-upload" onchange={{action "uploadPhoto"}} type="file" style="width: 0px; height: 0px; overflow: hidden;"  >
+                    </div>
+                    
+  </div>       
+         <div class="form-group">
+       <label class="col-sm-2 control-label">Google Drive  </label>
+       <div class="col-sm-10">
+              
+                       
+        <i {{action "toggleGoogleDrive"}} class="fa fa-2x {{if model.useGoogleDrive 'fa-toggle-on text-primary' 'fa-toggle-off'  }}" aria-hidden="true"></i>
+        {{#if model.refreshTokenAccountEmail}}
+        <span class="connectedAccount">Connected account : {{model.refreshTokenAccountEmail}}</span>
+        {{/if}}
+        <div>If you enable Google Drive storage, we will save all your uploads to your Google Drive. All files will be uploaded to folder "Notes Uploads" .
+              This will only grant us permission to access files in "Notes Uploads". We will not have access to your personal files on Google Drive. 
+              You must have a google account to enable this feature. Google drive removes 10MB upload limit.</div>
+       </div>
+    </div>
+               
+    <div class="form-group has-feedback {{if model.isValidFirstName 'has-success' 'has-error'}}">
+        <label class="col-sm-2 control-label">Frist name*</label>
+        <div class="col-sm-10">
+          {{input type="text" value=model.firstName class="form-control" placeholder="First name"}}
+          {{#if model.isValid}}<span class="glyphicon glyphicon-ok form-control-feedback"></span>{{/if}}
+        </div>
+    </div>
+    <div class="form-group has-feedback {{if model.isValidLastName 'has-success' 'has-error'}}">
+        <label class="col-sm-2 control-label">Last name*</label>
+        <div class="col-sm-10">
+          {{input type="text" value=model.lastName class="form-control" placeholder="Last name"}}
+        </div>
+    </div>
+    
+        <div class="form-group has-feedback {{if  model.isInValidPassword 'has-error'}}">
+        <label class="col-sm-2 control-label">Change Password</label>
+        <div class="col-sm-10">
+          {{input type="text" value=model.password class="form-control" placeholder="Password"}}
+        </div> 
+    </div>
+    
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Retype new password</label>
+        <div class="col-sm-10">
+          {{input type="text" value=model.password2 class="form-control" placeholder="Confirm password"}}
+        </div>
+    </div>
+    <br>
+   <h3 class="">Notifications</h3>
+        <hr />
+    
+        
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+       	 <i {{action "toggleValue" "sendGroupPostEmail"}} class="fa fa-2x {{if model.sendGroupPostEmail 'fa-toggle-on text-primary' 'fa-toggle-off'  }}" aria-hidden="true"></i>
+        </label>
+        <div class="col-sm-10">
+        Email when someone posts in group.
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+       	 <i {{action "toggleValue" "sendGroupPostMentionEmail"}} class="fa fa-2x {{if model.sendGroupPostMentionEmail 'fa-toggle-on text-primary' 'fa-toggle-off'  }}" aria-hidden="true"></i>
+        </label>
+        <div class="col-sm-10">
+        Email when someone tags you in group post.
+        </div>
+    </div>
+        <div class="form-group">
+        <label class="col-sm-2 control-label">
+       	 <i {{action "toggleValue" "sendPostCommentedEmail"}} class="fa fa-2x {{if model.sendPostCommentedEmail 'fa-toggle-on text-primary' 'fa-toggle-off'  }}" aria-hidden="true"></i>
+        </label>
+        <div class="col-sm-10">
+        Email when someone comments on your post.
+        </div>
+    </div>
+        <div class="form-group">
+        <label class="col-sm-2 control-label">
+       	 <i {{action "toggleValue" "sendCommentMentiondEmail"}} class="fa fa-2x {{if model.sendCommentMentiondEmail 'fa-toggle-on text-primary' 'fa-toggle-off'  }}" aria-hidden="true"></i>
+        </label>
+        <div class="col-sm-10">
+        Email when someone mentions you in comments.
+        </div>
+    </div>
+        <div class="form-group">
+        <label class="col-sm-2 control-label">
+       	 <i {{action "toggleValue" "sendCommentOnMentiondPostEmail"}} class="fa fa-2x {{if model.sendCommentOnMentiondPostEmail 'fa-toggle-on text-primary' 'fa-toggle-off'  }}" aria-hidden="true"></i>
+        </label>
+        <div class="col-sm-10">
+        Email when someone comments on a post you are tagged in.
+        </div>
+    </div>
+        <div class="form-group">
+        <label class="col-sm-2 control-label">
+       	 <i {{action "toggleValue" "sendCommentReplyEmail"}} class="fa fa-2x {{if model.sendCommentReplyEmail 'fa-toggle-on text-primary' 'fa-toggle-off'  }}" aria-hidden="true"></i>
+        </label>
+        <div class="col-sm-10">
+        Email when replies to your comment
+        </div>
+    </div>
+        <div class="form-group">
+        <label class="col-sm-2 control-label">
+       	 <i {{action "toggleValue" "sendCommentOnCommentEmail"}} class="fa fa-2x {{if model.sendCommentOnCommentEmail 'fa-toggle-on text-primary' 'fa-toggle-off'  }}" aria-hidden="true"></i>
+        </label>
+        <div class="col-sm-10">
+        Email when someone comments or replies to a comment
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+        <span class="{{if isSaving 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
+            <button type="submit" class="btn btn-default" {{action 'saveProfile' item}} disabled={{unless model.isValid true}} disabled={{if isSaving true}}>Save</button>
+          {{#nav-link-to 'dashboard'   class="btn btn-default"  tagName="button"}}Cancel
+              {{/nav-link-to}}
+        </div>
+    </div>
+</div>

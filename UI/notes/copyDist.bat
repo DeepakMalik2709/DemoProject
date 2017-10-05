@@ -1,0 +1,1 @@
+xcopy dist ..\..\WebContent /E /Y /I

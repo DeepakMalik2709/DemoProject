@@ -1,0 +1,104 @@
+<div class="form-horizontal">
+    <div class="form-group has-feedback {{if item.isValid 'has-success'}}">
+        <label class="col-sm-3 control-label">Name*</label>
+        <div class="col-sm-9">
+          {{input type="text" value=item.title class="form-control" placeholder="Tutorial title"}}
+          {{#if item.isValid}}<span class="glyphicon glyphicon-ok form-control-feedback"></span>{{/if}}
+        </div>
+    </div>
+        <div class="form-group">
+        <label class="col-sm-3 control-label">Attachments</label>
+        <div class="col-sm-9">
+           <button type="button"   onclick="$('#file-upload').click();" class="btn btn-default"  disabled={{if item.showLoading true}}>Attach Files</button>  <span class="{{if item.showLoading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
+            <ol >
+        {{#each item.files as |file|}}
+        <li>
+        {{file.name}}&nbsp;({{file.size}})
+         &nbsp;<span  {{action 'removeFile' file}} class="glyphicon glyphicon-remove pointer" aria-hidden="true"></span>
+        </li>
+        {{/each}}
+        </ol>
+         <input  multiple id="file-upload" onchange={{action "uploadFile"}} type="file" style="width: 0px; height: 0px; overflow: hidden;"  >
+        </div>
+        
+       
+    </div>
+    
+
+        
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Video Url</label>
+        <div class="col-sm-9">
+          {{input type="text" value=item.url class="form-control" placeholder="Video Url"}}
+        </div>
+    </div>
+    
+        <div class="form-group">
+        <label class="col-sm-3 control-label">Convert Youtube Url</label>
+        <div class="col-sm-9">
+          {{input type="checkbox" checked=item.convertToEmbed class="" placeholder="Video Url"}}
+        </div> 
+    </div>
+    
+        
+<!--     <div class="form-group">
+        <label class="col-sm-3 control-label">Language</label>
+        <div class="col-sm-9">
+        {{select-box
+  content=languages
+  selection=item.language
+  className='form-control'
+  didChangeAction='changeLanguage'
+}}
+        </div>
+    </div> -->
+    
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Language</label>
+        <div class="col-sm-9">
+        {{select-box
+  content=languages
+  prompt='Select Language(s)'
+  className='form-control'
+  didChangeAction='addLanguage'
+}}
+   {{#each item.languagesUI as |lang|}}
+                <span class="file-tag blue" >
+    	{{lang.label}} <span  {{action 'removeLanguage' lang}} class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </span>
+    	{{/each}}
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Description</label>
+        <div class="col-sm-9">
+          {{input type="text" value=item.description class="form-control" placeholder="Description"}}
+        </div>
+    </div>
+    
+        <div class="form-group">
+        <label class="col-sm-3 control-label">Tags</label>
+        <div class="col-sm-9 pos-rel">
+        <div class="tooltip top-tooltip process-tip {{if item.newTag.length 'active' ''}}"   role="tooltip">
+                <div class="tooltip-arrow"></div>
+                <div class="tooltip-inner">Enter to add</div>
+           </div>
+           {{tag-autocomplete tagClick="addTag"}}
+           
+           {{#each item.tags as |tag|}}
+                <span class="file-tag blue" >
+    	{{tag.name}} <span  {{action 'removeTagFromTutorial' tag}} class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </span>
+    	{{/each}}
+    
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="submit" class="btn btn-default" {{action 'saveTutorial' item}} disabled={{unless item.isValid true}}>{{buttonLabel}}</button>
+              <button type="submit" class="btn btn-default" {{action 'cancelClicked' item}}>Cancel</button>
+        </div>
+    </div>
+</div>

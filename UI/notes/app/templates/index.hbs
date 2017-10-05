@@ -1,0 +1,53 @@
+      <div class="row">
+     <div class="col-md-8 col-md-offset-2 m-top20">
+        <form class="form-inline" id="searchForm" onsubmit="return false;">
+              {{input type="text" class="form-control pull-left width80"  placeholder="Enter search text or tag"   value=model.searchTerm  autofocus="autofocus" insert-newline='doSearch'  }}
+              <button {{action 'doSearch'}} type="button" disabled={{isSearchButtonDisabled}} class="btn btn-default pull-left"><i class="glyphicon glyphicon-search"></i></button>
+            </form>
+        </div>
+        </div>
+     
+       <div class="row index-page">
+                <div class="col-lg-12">
+                    <h3 class="page-header">{{model.title}} 
+                  </h3>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            
+       <div class="row index-page">
+    
+    <div class="col-md-12"> 
+      
+      <div class="panel {{if model.noBoxShadow 'no-box-shadow' ''}}" ng-show="searchResults.length">
+        <div class="panel-body" >   
+        
+        {{#if model.searchResults}}
+  <!--/stories-->
+    {{#each model.searchResults as |tutorial|}}
+ {{#tutorial-search-result item=tutorial isLoggedIn=isLoggedIn}}
+ {{/tutorial-search-result}}
+          {{/each}}
+     {{/if}}      
+ {{#if model.noResults}}         
+           <div class="row index-page">
+                <div class="col-lg-12 message">
+                   No results
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+  {{/if}}        
+            <!--/stories-->
+            
+<!-- {{#if model.nextLink}}
+ <a href="javascript:void(0);"  {{action "loadTutorials"}} class="btn btn-primary pull-right btnNext">More <i class="glyphicon glyphicon-chevron-right"></i></a>
+ {{/if}} -->
+          
+        </div>
+      </div>
+                                                                                       
+	                                                
+                                                      
+   	</div><!--/col-12-->
+  </div>

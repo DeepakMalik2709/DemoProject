@@ -1,0 +1,17 @@
+  <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">Tags</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            
+            <div class="col-sm-9 pos-rel" >
+      
+      <button {{action 'createTag'}} type="button" class="btn btn-default pull-left">Create Tag</button>
+      <br>      
+           
+           {{tag-autocomplete tagClick="editTag"}}
+             
+      
+</div>

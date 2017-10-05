@@ -1,0 +1,22 @@
+  <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="page-header">Recent
+                  </h3>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+
+ <div class="row">
+{{#each posts as |post|}}
+ <div class="row">
+{{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
+</div>   
+{{/each}}
+
+{{#if noRecords}}
+ <div class="row">
+There are no posts in this group.
+ </div>
+ {{/if}}
+</div>            

@@ -1,0 +1,97 @@
+
+  {{partial 'navbar'}}
+  
+  <div class="wrapper row-offcanvas row-offcanvas-left">
+            <!-- Left side column. contains the logo and sidebar -->
+            <aside class="left-side sidebar-offcanvas">
+                <!-- sidebar: style can be found in sidebar.less -->
+                <section class="sidebar">
+                    <!-- Sidebar user panel -->
+                    <div class="user-panel">
+                        <div class="pull-left image">
+                            <img src="{{model.loginUser.photoUrl}}" class="img-circle" alt="User Image" />
+                        </div>
+                        <div class="pull-left info">
+                            <p>Hello, {{model.loginUser.displayName}}</p>
+
+                            <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                        </div>
+                    </div>
+                    <!-- search form -->
+                    <form action="#" method="get" class="sidebar-form">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" placeholder="Search..."/>
+                            <span class="input-group-btn">
+                                <button type='submit' name='seach' id='search-btn' class="btn btn-flat"><i class="fa fa-search"></i></button>
+                            </span>
+                        </div>
+                    </form>
+                    <!-- /.search form -->
+                    <!-- sidebar menu: : style can be found in sidebar.less -->
+                    <ul class="sidebar-menu">
+                         {{#nav-link-to 'dashboard'  tagName="li"}}                           
+                                <i class="fa fa-dashboard"></i> <span>Dashboard</span>                           
+                        {{/nav-link-to}}
+                        <li class="treeview">
+                       
+                             <a href="#">
+                                <i class="fa fa-group fa-fw"></i> <span>Groups</span> <i class="fa fa-angle-left pull-right"></i>
+                             </a>
+                             <ul class="treeview-menu">
+                                    {{#nav-link-to 'group.create'  tagName="li"}} <i class="fa fa-edit fa-fw"></i>Create  {{/nav-link-to}}
+                      
+                     					 {{#each myGroups as |group|}}
+                               {{#nav-link-to 'group.posts' group.id  tagName="li"}}<i class="fa fa-th"></i>{{group.name}}{{/nav-link-to}}
+                             {{/each}}
+                               </ul>
+                           
+                        </li>
+                        <li class="treeview">
+                       
+                             <a href="#">
+                                <i class="fa fa-edit"></i> <span>New</span> <i class="fa fa-angle-left pull-right"></i>
+                             </a>
+                             <ul class="treeview-menu">
+                                    {{#nav-link-to 'new.event'  tagName="li"}} <i class="fa fa-angle-double-right"></i>Schedule  {{/nav-link-to}}
+                      		</ul>
+                           
+                        </li>
+                         {{#nav-link-to 'calendar'  tagName="li"}}
+                                <i class="fa fa-calendar"></i> <span>Calendar</span>
+                                <small class="badge pull-right bg-red">3</small>
+                       {{/nav-link-to}}
+                        
+                    </ul>
+                </section>
+                <!-- /.sidebar -->
+            </aside>
+ 			<aside class="right-side">
+ 				
+ 						{{outlet}}
+    				
+             
+              </aside>
+        </div><!-- ./wrapper -->
+  
+    
+
+<footer>
+  <div class="container">
+  
+    <div class="row">
+    <div class="col col-sm-6 pull-right">
+      
+     
+      <div class="btn-group">
+       <a class="btn btn-md" href="javascript:void(0);">Follow us</a>
+      <!--  <a class="btn btn-twitter btn-md" href="javascript:void(0);"><i class="icon-twitter icon-large"></i> Twitter</a> -->
+	   <a class="btn btn-facebook btn-md" href="https://www.facebook.com/AllSchool-1536209369774783/"><i class="icon-facebook icon-large"></i> Facebook</a>
+	 <!--   <a class="btn btn-google-plus btn-md" href="javascript:void(0);"><i class="icon-google-plus icon-large"></i> Google+</a> -->
+      </div>
+       <p class="pull-right">&copy; <i class="icon-heart-empty"></i> <a href="/">AllSchool 2017</a></p>      
+    </div>
+    
+  </div>
+  
+  </div>
+</footer>

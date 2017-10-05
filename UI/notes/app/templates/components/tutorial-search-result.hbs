@@ -1,0 +1,50 @@
+         <div class="row searchResult" >    
+            <br>
+            <div class="col-md-12 col-sm-12">
+              <h3>{{item.title}}</h3>
+              <div class="row">
+               <div class="col-xs-9">
+               <div> <small>{{item.description}}</small></div>
+                <div class="col-xs-3"></div>
+              </div>
+                <div class="col-xs-9">
+                 {{#if item.files.length}}
+                  <ol class="file-list">
+        {{#each item.files as |file|}}
+        <li class="pos-rel">
+        {{tutorial-item-file-preview item=file isEditing=false }}
+        </li>
+        {{/each}}
+        </ol>
+        {{/if}}
+                {{#if item.tags}}
+                  <h4>
+                   {{#each item.tags as |tag|}}
+                  <span class="label label-default" >{{tag.name}}</span>
+                  {{/each }}
+                  &nbsp;</h4>
+                  {{/if}}
+                  <h4>
+                  
+                  <small style="font-family:courier,'new courier';" class="text-muted">{{item.createdDisplayTime}}  
+                  • 
+                   {{#link-to 'tutorial.view' item.id tagName="a" class="text-muted cp"}}
+                   Read More
+                  {{/link-to}}
+                  {{#if item.url}}
+                   • <a href="javascript:void(0);" {{action "toggleVideo"}} target="_blank" class="text-muted">Toggle Video</a>
+                   {{/if}}
+                   </small>
+                   
+                  </h4></div>
+                <div class="col-xs-3"></div>
+              </div>
+              {{#if item.showVideo}}
+              <div class="row" >
+               <div class="col-xs-12">
+               <iframe src="{{item.url}}" class="tutorial-iframe-video" frameborder="0" height="315" allowfullscreen></iframe>
+               </div>
+              </div>
+              {{/if}}
+            </div>
+          </div>

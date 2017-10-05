@@ -1,0 +1,92 @@
+<div class="form-horizontal">
+    <div class="form-group has-feedback {{if item.isValid 'has-success'}}">
+        <label class="col-sm-2 control-label">Name*</label>
+        <div class="col-sm-10">
+          {{input type="text" value=item.name class="form-control" placeholder="Group title"}}
+          {{#if item.isValidName}}<span class="glyphicon glyphicon-ok form-control-feedback"></span>{{/if}}
+        </div>
+    </div>
+     <div class="form-group">
+        <label class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-10">
+          {{textarea type="text" value=item.description class="form-control" placeholder="Description"}}
+        </div>
+    </div>
+    
+<!--     <div class="form-group has-feedback {{if item.isValid 'has-success'}}">
+        <label class="col-sm-2 control-label">Sharing</label>
+        <div class="col-sm-10">
+			{{select-box prompt='Select' content=sharingOptions
+			selection=item.sharing className='form-control'
+			didChangeAction='setSharing' }} {{#if item.isValidSharing}}
+			<span class="glyphicon glyphicon-ok form-control-feedback"></span>{{/if}}
+        </div>
+    </div> -->
+    
+      <!--   <div class="form-group">
+        <label class="col-sm-2 control-label">Icon</label>
+        <div class="col-sm-10">
+          
+        </div> 
+    </div> -->
+    
+        
+<!--     <div class="form-group">
+        <label class="col-sm-2 control-label">Language</label>
+        <div class="col-sm-10">
+        {{select-box
+  content=languages
+  prompt='Select Language'
+  className='form-control'
+  didChangeAction='addLanguage'
+}}
+   {{#each item.languagesUI as |lang|}}
+                <span class="file-tag blue" >
+    	{{lang.label}} <span  {{action 'removeLanguage' lang}} class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </span>
+    	{{/each}}
+        </div>
+    </div> -->
+    
+    {{#unless item.id}}
+        <div class="form-group ">
+        <label class="col-sm-2 control-label">Members</label>
+        <div class="col-sm-10 pos-rel">
+        <div class="tooltip top-tooltip process-tip {{if userSearchTerm.length 'active' ''}}"   role="tooltip">
+                            <div class="tooltip-arrow"></div>
+                            <div class="tooltip-inner">Enter to add</div>
+                       </div>
+          {{input type="text" class="form-control" placeholder="Email" value=userSearchTerm insert-newline='addMember'  }}
+          
+                      {{#each item.members as |user| }}    	
+                 <span class="file-tag blue" >
+                        {{user.email}}
+                        <span {{action "removeMember" user}} class="pointer close-slist"><i class="fa fa-times"></i></span>
+                </span>
+              {{/each}}
+        </div>
+    </div>
+   	{{/unless}}
+            <div class="form-group">
+        <label class="col-sm-2 control-label">Tags</label>
+        <div class="col-sm-10 pos-rel">
+	       <div class="tooltip top-tooltip process-tip {{if item.newTag.length 'active' ''}}"   role="tooltip">
+                <div class="tooltip-arrow"></div>
+                <div class="tooltip-inner">Enter to add</div>
+           </div>
+           {{tag-autocomplete tagClick="addTag"}}
+           {{#each item.tags as |tag|}}
+                <span class="file-tag blue" >
+    	{{tag.name}} <span  {{action 'removeTagFromGroup' tag}} class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </span>
+    	{{/each}}
+    
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default" {{action 'saveGroup' item}} disabled={{unless item.isValid true}}>{{buttonLabel}}</button>
+              <button type="submit" class="btn btn-default" {{action 'cancelClicked' item}}>Cancel</button>
+        </div>
+    </div>
+</div>

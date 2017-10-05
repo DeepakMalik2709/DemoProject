@@ -1,0 +1,46 @@
+  <li class="comment">
+                        <a class="pull-left" href="javascript:void(0);">
+                            <img class="avatar" src="{{item.photoUrl}}" alt="avatar">
+                        </a>
+                        <div class="comment-body">
+                            <div class="comment-heading">
+                                <h4 class="user">{{item.createdByName}}</h4>
+                                <h5 class="time">{{item.createdDisplayTime}}</h5>
+                            </div>
+                            <p class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</p>
+                <p class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box  className="edit-comment"  save="updateComment" esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</p>
+              
+                                 <footer class="comment__footer"><menu class="comment-footer__menu">
+										{{#if canEdit}}
+								<li class="reply {{unless item.isEditing 'show' 'hide'}}" {{action "editComment"}} data-role="reply-link"><a href="javascript:void(0);"
+									data-action="reply"> <span class="text">Edit</span></a></li>
+									<li class="reply {{if item.isEditing 'show' 'hide'}}" {{action "cancelEditing"}} data-role="reply-link"><a href="javascript:void(0);"
+									data-action="reply"> <span class="text">Cancel Editing</span></a></li>
+								<li class="bullet" aria-hidden="true">•</li>
+								{{/if}}
+								{{#if canDelete}}
+									<li class="reply" data-role="reply-link" {{action "deleteComment"}}><a href="javascript:void(0);"
+									data-action="reply"> <span class="text">Delete</span></a></li>
+							<!-- 	<li class="bullet" aria-hidden="true">•</li> -->
+								{{/if}}
+							<!-- 	<li class="reply" data-role="reply-link"><a href="javascript:void(0);"
+								data-action="reply"> <span class="text">Reply</span></a></li> -->
+							</menu>
+									</footer>
+                        </div>
+                   
+                        
+                        
+                        <ul class="comments-list">
+                          {{#each item.comments as |subComment|}}
+			              {{post-item-comment-reply item=subComment update="updateCommentReply" deleteCommentReply="deleteCommentReply" group=group}}
+			                {{/each}}
+			                <div class="post-footer">
+                <div class="input-group contenteditable-input-group"> 
+                    
+                    {{post-comment-box className="" placeholder="Add a reply"  save='saveSubComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
+                </div>
+                </div>
+           
+                        </ul>
+                    </li>

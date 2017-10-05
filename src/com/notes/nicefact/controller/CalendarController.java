@@ -1,0 +1,265 @@
+package com.notes.nicefact.controller;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+import org.apache.log4j.Logger;
+import org.glassfish.jersey.server.mvc.Viewable;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttendee;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
+import com.google.api.services.calendar.model.Events;
+import com.notes.nicefact.entity.Tutorial;
+import com.notes.nicefact.exception.AppException;
+import com.notes.nicefact.service.AppUserService;
+import com.notes.nicefact.service.GoogleCalendarService;
+import com.notes.nicefact.service.TutorialService;
+import com.notes.nicefact.to.AppUserTO;
+import com.notes.nicefact.to.EventTO;
+import com.notes.nicefact.to.EventsTO;
+import com.notes.nicefact.to.SearchTO;
+import com.notes.nicefact.to.TutorialTO;
+import com.notes.nicefact.util.Constants;
+import com.notes.nicefact.util.EntityManagerHelper;
+import com.notes.nicefact.util.Utils;
+
+@Path("/calendar")
+public class CalendarController extends CommonController {
+
+	private final static Logger logger = Logger.getLogger(CalendarController.class.getName());
+
+	@POST
+	@Path("/register")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void registerUser(AppUserTO appUserTO, @Context HttpServletResponse response) {
+		logger.info("getPostGroupOrder start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			AppUserService appUserService = new AppUserService(em);
+			if (StringUtils.isBlank(appUserTO.getPassword())) {
+				throw new AppException("Password is required field");
+			} else if (StringUtils.isBlank(appUserTO.getEmail())) {
+				throw new AppException("Email is required field");
+			} else if (!Utils.isValidEmailAddress(appUserTO.getEmail())) {
+				throw new AppException(appUserTO.getEmail() + " is not a valid email");
+			}
+			AppUserTO userTo = new AppUserTO(appUserService.registerNewUser(appUserTO));
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, userTo);
+
+		} catch (Exception e) {
+			logger.error( e.getMessage(), e);
+			
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		}finally{
+			if(em.isOpen()){
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("getPostGroupOrder exit");
+	}
+
+	@POST
+	@Path("/insertEvent")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void createEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+		Map<String, Object> json = new HashMap<>();
+		try {
+			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
+			System.out.println("event : "+schedule);
+			
+			/*Event event = new Event()
+			    .setSummary(schedule.getTitle())
+			    .setLocation(schedule.getLocation())
+			    .setDescription(schedule.getDescription());
+			
+			DateTime startDateTime = new DateTime(schedule.getStart());
+			EventDateTime start = new EventDateTime()
+			    .setDateTime(startDateTime)
+			    .setTimeZone("America/Los_Angeles");
+			event.setStart(start);
+			
+			DateTime endDateTime = new DateTime(schedule.getEnd());
+			EventDateTime end = new EventDateTime()
+			    .setDateTime(endDateTime)
+			    .setTimeZone("America/Los_Angeles");
+			event.setEnd(end);
+			
+			String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
+			event.setRecurrence(Arrays.asList(recurrence));
+			
+			EventAttendee[] attendees = new EventAttendee[] {
+			    new EventAttendee().setEmail("deepak.m18@fms.edu"),
+			    new EventAttendee().setEmail("gcsharma99@gmail.com"),
+			};
+			event.setAttendees(Arrays.asList(attendees));
+			
+			EventReminder[] reminderOverrides = new EventReminder[] {
+			    new EventReminder().setMethod("email").setMinutes(24 * 60),
+			    new EventReminder().setMethod("popup").setMinutes(10),
+			};
+			Event.Reminders reminders = new Event.Reminders()
+			    .setUseDefault(false)
+			    .setOverrides(Arrays.asList(reminderOverrides));
+			event.setReminders(reminders);
+			
+			String calendarId = "primary";
+			event = service.events().insert(calendarId, event).execute();
+			System.out.printf("Event created: %s\n", event.getHtmlLink());
+			json.put(Constants.CODE, Constants.OK);
+			json.put(Constants.DATA_ITEM, event);*/
+			
+		} catch (IOException e) {
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());	
+			e.printStackTrace();
+		}
+		renderResponseJson(json, response);
+		logger.info("getPostGroupOrder exit");
+	    
+	}
+	
+	@GET
+	@Path(GoogleCalendarService.CALENDAR_CALLBACK)
+	public void googleDriveCallback(@QueryParam("code") String code, @QueryParam("error") String error, @Context HttpServletResponse response, @Context HttpServletRequest request) throws IOException,
+			JSONException {
+		System.out.println("code :"+code+" error "+error+" response "+response.getStatus());
+	}
+	
+
+	@GET
+	@Path("/calendars")
+	public void publicHome(@Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+		
+		System.out.println("in google event ");
+		com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
+	    
+	
+		
+		
+		Map<String, Object> json = new HashMap<>();
+	        // List the next 10 events from the primary calendar.
+	        DateTime now = new DateTime(System.currentTimeMillis());
+	        Events events = service.events().list("primary").execute();
+	        List<Event> items = events.getItems();
+	        List<EventTO> eventTos = new ArrayList<EventTO>();	       
+	      
+	        if (items.size() == 0) {
+	        	json.put(Constants.CODE, Constants.NO_RESULT);
+	            System.out.println("No upcoming events found.");
+	        } else {
+	        	
+	            System.out.println("Upcoming events");
+	            for (Event event : items) {
+	                DateTime start = event.getStart().getDateTime();
+	                DateTime end = event.getEnd().getDateTime();
+	                if (start == null) {
+	                    start = event.getStart().getDate();
+	                }
+	                if (end == null) {
+	                	end = event.getEnd().getDate();
+	                }
+	                eventTos.add(new EventTO(event.getId(),event.getSummary(), start,end,"#112233","#cc3344"));
+	                System.out.printf("%s (%s)\n", event.getSummary(), start);
+	            }
+	            EventsTO eventsTo = new EventsTO("1",eventTos);
+	            json.put(Constants.CODE, Constants.RESPONSE_OK);
+	        	json.put(Constants.DATA_ITEM, eventsTo);
+	        }
+	        
+			json.put(Constants.TOTAL, items.size());
+			
+			renderResponseJson(json, response);
+	}
+		
+	@GET
+	@Path("/{id}")
+	public void  fetchTutorial(@PathParam("id")  long id, @Context HttpServletResponse response){
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		logger.info("fetchTutorial start");
+		Map<String, Object> json = new HashMap<>();
+		try {
+			TutorialService notesService = new TutorialService(em);
+			Tutorial tutorial = notesService.get(id);
+			if (null == tutorial) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			}else{
+				TutorialTO savedTO = new TutorialTO(tutorial);
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, savedTO);
+			}
+			
+		} catch (Exception e) {
+			logger.error( e.getMessage(), e);
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		}finally{
+			if(em.isOpen()){
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("fetchTutorial exit");
+	}
+	
+	@GET
+	@Path("/search")
+	public void  searchTutorial(@QueryParam("q") String searchTerm, @QueryParam("offset") int offset,@Context HttpServletRequest request,   @Context HttpServletResponse response){
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		logger.info("searchTutorial start");
+		Map<String, Object> json = new HashMap<>();
+		try {
+			TutorialService notesService = new TutorialService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
+			List<Tutorial> tutorials =  notesService.search(searchTO);
+			List<TutorialTO> tutorialTos = Utils.adaptTutorialTO(tutorials);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.TOTAL, tutorialTos.size());
+			json.put(Constants.DATA_ITEMS, tutorialTos);
+			if(!tutorialTos.isEmpty()){
+				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+			}
+			
+		} catch (Exception e) {
+			logger.error( e.getMessage(), e);
+			
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		}finally{
+			if(em.isOpen()){
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("searchTutorial exit");
+	}	
+	
+}

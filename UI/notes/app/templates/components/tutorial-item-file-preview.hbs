@@ -1,0 +1,17 @@
+  <a rel="popover" href="javascript:void(0)"  class="pointer" {{action "hovered" on="mouseEnter"}}>{{item.name}}&nbsp;({{item.size}}) </a>
+  <a class="{{if item.isDriveFile 'hide' 'show-inline' }}" target="blank" href="/a/public/tutorial/download?name={{item.serverName}}" download> <i class="fa fa-download" aria-hidden="true"></i></a>
+   <a class="{{if item.isDriveFile   'show-inline' 'hide'}}" target="blank" href="{{item.driveLink}}" > <i  class="fa fa-external-link" aria-hidden="true"></i></a>
+  
+        &nbsp;<span  {{action 'removeFile' file}} class="glyphicon glyphicon-remove pointer {{if isEditing 'inlineblock' 'hide'}}" aria-hidden="true"></span>
+                     <div class="popover-box" class=" {{if showPreview 'show' 'hide' }}">
+                                        <div class="popover fade top in" role="tooltip" >
+                                            <div class="arrow" ></div>
+                                            <div class="popover-content">
+                                                <div class="popup-file-preview">
+                                                    <img  src="{{item.thumbnailLink}}">
+                                                </div>
+                                                
+                                            </div>
+                                       </div>     
+                                    </div>
+        

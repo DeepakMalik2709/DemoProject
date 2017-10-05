@@ -1,0 +1,8 @@
+Dear $appUser.getDisplayName(),<br>
+ Please verify your email address by clicking <a href="$verifyEmailUrl">here</a> or copy and paste following link in your browser:
+ <br><br>
+ $verifyEmailUrl
+ <br><br>
+ Thankyou,  <br>
+ $appName<br>
+ $appUrl

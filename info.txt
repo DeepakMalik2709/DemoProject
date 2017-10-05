@@ -1,0 +1,9 @@
+crate file ~/.ssh/config and add
+Host amazon
+	Hostname ec2-54-186-163-31.us-west-2.compute.amazonaws.com
+	User ec2-user
+	IdentityFile /Volumes/Xtra/workspace/BharatRailsTomcat/keys/bharatRailAmazon.pem 
+
+ 
+ checkout with git clone amazon:elim.git
+ you can ssh with : ssh amazon

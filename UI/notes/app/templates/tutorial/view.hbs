@@ -1,0 +1,106 @@
+  <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">Tutorial - {{model.title}}</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            
+            <div class="col-sm-9" ng-init="initTutorialForm();">
+<form class="form-horizontal" name="deviceForm">
+  <div class="form-group" >
+    <label for="inputEmail3" class="col-sm-4 control-label">Title</label>
+    <div class="col-sm-8">
+   <p class="form-control-static"> {{model.title}}</p>
+    </div>
+  </div>
+  {{#if model.url}}
+   <div class="form-group" >
+    <label for="inputEmail3" class="col-sm-4 control-label">Video Url</label>
+    <div class="col-sm-8">
+   <p class="form-control-static"> <a href="{{model.url}}" target="_blank"> {{model.url}}</a></p>
+   <p class="form-control-static"> 
+    <a href="javascript:void(0);" {{action "playVideo"}} target="_blank">
+     {{#if model.showVideo}}
+      Hide Video
+      {{else}}
+  		Play Video
+    {{/if}}
+    </a>
+   </p>
+    </div>
+  </div>
+  {{/if}}
+  {{#if model.files.length}}
+  <div class="form-group" >
+    <label for="inputEmail3" class="col-sm-4 control-label">Files</label>
+    <div class="col-sm-8">
+          <ol class="file-list">
+        {{#each model.files as |file|}}
+        <li class="pos-rel">
+        {{tutorial-item-file-preview item=file isEditing=false }}
+        </li>
+        {{/each}}
+        </ol>
+          </div>
+  </div>
+  {{/if}}
+  {{#if model.languagesUI.length}}
+      <div class="form-group" >
+    <label for="inputEmail3" class="col-sm-4 control-label">Language(s)</label>
+    <div class="col-sm-8">
+          <p class="form-control-static"> {{#each model.languagesUI as |lang|}}
+                <span class="file-tag blue" >
+    	{{lang.label}} 
+    </span>
+    	{{/each}}</p>
+    </div>
+  </div>
+  {{/if}}
+  {{#if model.description}}
+    <div class="form-group" >
+    <label for="inputEmail3" class="col-sm-4 control-label">Description</label>
+    <div class="col-sm-8">
+     <p class="form-control-static"> {{model.description}}</p>
+    </div>
+  </div>
+  {{/if}}
+  {{#if model.tags.length}}
+    <div class="form-group">
+    <label for="inputEmail3" class="col-sm-4 control-label">Tags</label>
+    <div class="col-sm-8">
+     <p class="form-control-static"> 
+       {{#each model.tags as |tag|}}
+                <span class="file-tag blue" >
+    	{{tag.name}}
+    </span>
+    	{{/each}}
+    
+     </p>
+    </div>
+  </div>
+  {{/if}}
+   {{#if model.showVideo}}
+       <div class="form-group" >
+      <div class="col-sm-12">
+      <iframe src="{{model.url}}" style="width:100%" frameborder="0" height="315" allowfullscreen></iframe>
+      </div>
+     </div>
+  {{/if}}
+         {{#if isLoggedIn}}
+  <div class="form-group" ng-show="appState.loginUser && appState.loginUser.email == model.createdBy">
+   <div class=" col-sm-4 col-sm-offset-3">
+    {{#link-to 'tutorial.edit' model.id tagName="button" class="btn btn-default"}}Edit
+      {{/link-to}}
+    </div>
+    
+     <div class="col-sm-4">
+      <button type="button"   {{action "confirmAndDeleteTutorial" }} class="btn btn-default">Delete</button>
+    </div>
+  </div>
+  {{/if}}
+</form>
+ 
+ </div>
+ 
+ 

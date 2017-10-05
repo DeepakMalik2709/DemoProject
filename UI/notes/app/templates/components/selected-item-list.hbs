@@ -1,0 +1,5 @@
+   {{#each items as |item|}}
+                <span class="file-tag blue" >
+    	{{item.label}} <span  {{action 'removeItem' item}} class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </span>
+    	{{/each}}

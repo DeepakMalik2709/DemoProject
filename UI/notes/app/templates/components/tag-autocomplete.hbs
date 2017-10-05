@@ -1,0 +1,6 @@
+{{input type="text" class="form-control pull-left width80"  placeholder="search tags"   value=searchTerm  autofocus="autofocus" insert-newline='returnPressed' }}
+      <ul class="dropdown-menu add-mem-box active {{if tags.length 'show'}}" id="tagAutocomplete" >
+      {{#each tags as |tag|}}
+	 	<li {{action "tagClick" tag}}> <a href="javascript:void(0);" class="{{if tag.isFocussed 'hovered'}}"   > <span class="menu-text">{{tag.name}}</span> </a> </li>
+	 	{{/each}}
+	</ul>

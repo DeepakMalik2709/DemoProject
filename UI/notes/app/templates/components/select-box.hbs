@@ -1,0 +1,12 @@
+<select disabled={{disabled}} class="{{className}}" {{action 'change' on='change'}}>
+  {{#if prompt}}
+    <option disabled selected={{is-not selection}}>
+      {{prompt}}
+    </option>
+  {{/if}}
+  {{#each content as |item|}}
+    <option value={{item.id}} selected={{item.selected}}>
+      {{item.label}}
+    </option>
+  {{/each}}
+</select>

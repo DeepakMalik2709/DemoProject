@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="bg-black">
+    <head>
+        <meta charset="UTF-8">
+        <title>AdminLTE | Log in</title>
+        <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+        <!-- bootstrap 3.0.2 -->
+        <link href="../../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- font Awesome -->
+        <link href="../../css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+        <!-- Theme style -->
+        <link href="../../css/AdminLTE.css" rel="stylesheet" type="text/css" />
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body class="bg-black">
+
+        <div class="form-box" id="login-box">
+            <div class="header">Sign In</div>
+            <form method="POST">
+                <div class="body bg-gray">
+                    <div class="form-group">
+                        <input type="text" id="username" name="username" class="form-control" placeholder="User ID"/>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Password"/>
+                    </div>          
+                    <div class="form-group">
+                        <input type="checkbox" name="remember_me"/> Remember me
+                    </div>
+                </div>
+                <div class="footer">                                                               
+                    <button onclick="doLogin();"  id="singlebutton" name="singlebutton" type="submit" class="btn bg-olive btn-block">Sign me in</button>  
+                    
+                    <p><a  href="javascript:void(0);" data-toggle="modal" data-target="#forgot-password1">I forgot my password</a></p>
+                    
+                    <a href="register.html" class="text-center">Register a new membership</a>
+                </div>
+            </form>
+
+            <div class="margin text-center">
+                <span>Sign in using social networks</span>
+                <br/>
+                <a href="/a/oauth/facebookLogin" class="btn bg-light-blue btn-circle"><i class="fa fa-facebook"></i></a>
+               <!--  <button class="btn bg-aqua btn-circle"><i class="fa fa-twitter"></i></button> -->
+                <a href="/a/oauth/googleLogin" class="btn bg-red btn-circle"><i class="fa fa-google-plus"></i></a>
+
+            </div>
+        </div>
+
+
+        <!-- jQuery 2.0.2 -->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+        <!-- Bootstrap -->
+        <script src="../../js/bootstrap.min.js" type="text/javascript"></script>        
+
+ <div class="modal fade" id="forgot-password1" tabindex="-1" role="dialog" aria-labelledby="add-user" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Forgot Password?</h4>
+          </div>
+            <form name='requestResetCodeForm1'>
+          <div class="modal-body form-horizontal text-center clearfix">
+          	<div class="top-buttons mtop-20 text-justify">To reset/change your password, enter your registered email address for us to send password reset instructions.
+          	<br><br>Alternatively you can also you Login with Facebook or Google.</div><br>
+          	<div class="form-group">
+                <div class="col-sm-10 col-sm-offset-1">
+                   <input type="email" name="primaryEmail" id ="primaryEmail" class="form-control"  placeholder="Email">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-12">          
+            		<button  type="button" onclick="sendPasswordResetInstructions()" class="btn btn-sky btn-sm" data-dismiss="modal" data-toggle="modal">Send reset instructions</button>
+              	</div>
+         	</div>
+          </div>   
+              </form>   
+        </div>
+      </div>
+    </div>
+ <script>
+    
+    function isValidEmail(text){
+    	return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(text);
+    }
+    
+    function createAccount(){
+
+		var json = {
+				"email" : $("#email").val(),
+				firstName : $("#firstName").val(),
+				lastName : $("#lastName").val(),
+				password : $("#accountPassword").val(),
+			}
+
+    	if(!json.firstName){
+    		alert("First Name is required.");
+    	}else if(!json.lastName){
+    		alert("Last Name is required.");
+    	}else if(!json.email){
+    		alert("Email is required.");
+    	}else if(!json.password){
+    		alert("Password is required.");
+    	}else if (!isValidEmail(json.email)) {
+    		alert(json.email + " is not a valid email address");
+    		
+    	}else{
+    		$("#new-user-form").modal("hide");
+    		$.ajax({
+    			url:"/a/public/register",
+    			method:"post",
+    			contentType: 'application/json',
+    			data: JSON.stringify(json),
+    			success : function(data){
+    				if(data.code== 0){
+    					var msg = "An email has been sent to "+ json.email + ". Please verify your account to login.";
+    					$("#errorContainer .text-danger").html(msg);
+    					alert(msg)
+    				}else if(data.message){
+    					$("#errorContainer .text-danger").html(data.message);
+    					alert(data.message)
+    				}else{
+    					alert("An error occurred. Please try again later.")
+    				}
+    			}
+    		})
+    	}
+    }
+    
+    function sendPasswordResetInstructions(){
+    	var email = $("#primaryEmail").val();
+    	if (isValidEmail(email)) {
+    		$.ajax({
+    			url:"/a/public/sendPasswordResetInstructions",
+    			method:"post",
+    			data: {email : email},
+    			success : function(data){
+    				if(data.code== 0){
+    					var msg = "Password reset instructions sent to your email address.";
+    					$("#errorContainer .text-danger").html(msg);
+    					alert(msg)
+    				}else{
+    					$("#errorContainer .text-danger").html(data.message);
+    					alert(data.message);
+    				}
+    			}
+    		})
+    	}else{
+    		var msg = "Please enter a valid email address".
+    		alert(msg);
+    		$("#forgot-password1").modal("show");
+    	}
+    }
+    
+    function doLogin(){
+    	
+    	var json = {
+				username : $("#username").val(),
+				password : $("#password").val(),
+			}
+
+    	if(!json.username){
+    		alert("Username is required.");
+    	}else if(!json.password){
+    		alert("Password is required.");
+    	}else{
+    		$("#singlebutton").hide();
+        	$("#login-loader").show();
+    	 	$.ajax({
+    			url:"/a/public/login",
+    			method:"post",
+    			data: json,
+    			success : function(data){
+    				$("#singlebutton").show();
+    		    	$("#login-loader").hide();
+    				if(data.code== 0){
+    					var recirectUrl = data.recirectUrl ;
+    					if(!recirectUrl){
+    						recirectUrl = "/home" ;
+    					}
+    					window.location.href = recirectUrl;
+    				}else if(data.message){
+    					$("#errorContainer .text-danger").html(data.message);
+    				}
+    			}
+    		}) 
+    	}
+    }
+    
+    function keyUp(){
+    	var evt = window.event;
+		if(evt.which == 13){
+			doLogin();
+		}		    		
+    }
+    
+    var contextMsg = "${commonContext.message}";
+    if(contextMsg){
+		$("#errorContainer .text-danger").html(contextMsg);
+	}
+    </script>
+
+    </body>
+</html>
