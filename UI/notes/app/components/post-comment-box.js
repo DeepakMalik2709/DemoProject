@@ -1,7 +1,8 @@
 import Ember from 'ember';
 import utilsMixin from '../mixins/utils';
+import ajaxMixin from '../mixins/ajax';
 
-export default Ember.Component.extend(utilsMixin,{
+export default Ember.Component.extend(utilsMixin,ajaxMixin,{
   classNames: ['ember-content-editable'],
   classNameBindings: ['extraClass', 'clearPlaceholderOnFocus:clear-on-focus'],
   attributeBindings: [
@@ -28,11 +29,13 @@ export default Ember.Component.extend(utilsMixin,{
   allowNewlines: true,
   autofocus: false,
   clearPlaceholderOnFocus: false,
-
   inputType: "html",
-init : function(){
+  init : function(){
 	 this._super(...arguments);
 	 this.set('value', '');
+	 this.set('isSchedule',  (this.get('schedule.postType') =="schedule"));
+	 this.set('isAttendee',  (this.get('schedule.postPriv') =="attendee"));
+	 this.set('isCreator',  (this.get('schedule.postPriv') =="creator"));
 	 if(this.controllerRef){
 		 this.controllerRef.component = this;
 	 }
@@ -631,6 +634,31 @@ click(event){
 		var rect = $el.offset();
 		rect.bottom = rect.top + this.thisQuery.el.height();
 		return rect;
-	}
+	},
+	actions: {
+    	updateResponse(response){
+    		
+    		 var event = {"id": this.get('schedule').get('eventId'),
+    				 	"attendees":[{"responseStatus":response}]};
+    		
+    		    return new Ember.RSVP.Promise((resolve, reject) =>{
+    		   	var url = '/rest/calendar/updateEvent';
+    		   	this.doPost(url , event).then(function(data) {
+    		   	 this.transitionTo('calendar')
+    		     }, function(jqXHR) {
+    		        jqXHR.then = null; // tame jQuery's ill mannered promises
+    		        Ember.run(null, reject, jqXHR);
+    		      });
+    		    });
+    	},
+    	 willTransition(transition) {
+	         //   let model = this.controller.get('model');
+	            /*
+	             * if(model.get('hasDirtyAttributes')){ let confirmation =
+	             * confirm("leave without saving ? "); if(confirmation){
+	             * model.rollbackAttributes(); }else{ transition.abort(); } }
+	             */
+	        }
+	},
   
 });

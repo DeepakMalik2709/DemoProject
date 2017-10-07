@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.api.services.calendar.model.EventAttendee;
 import com.notes.nicefact.entity.PostComment;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -16,6 +17,9 @@ public class CommentTO {
 	List<PostRecipientTO> recipients = new ArrayList<>();
 
 	String senderPosition;
+	String attendeeId;
+
+	
 
 	String senderDepartment;
 
@@ -43,9 +47,28 @@ public class CommentTO {
 	String updatedByName;
 
 	String updatedByEmail;
+	
+	String resposeStatus;
 
-	public CommentTO() {
+	public String getResposeStatus() {
+		return resposeStatus;
+	}
+
+	public void setResposeStatus(String resposeStatus) {
+		this.resposeStatus = resposeStatus;
+	}
+
+	public CommentTO(EventAttendee attendee) {
 		super();
+		this.attendeeId = attendee.getId();
+		this.comment = attendee.getComment();
+		this.createdByEmail = attendee.getEmail();
+		this.createdByName = attendee.getDisplayName();
+		this.updatedByEmail =attendee.getEmail();
+		this.updatedByName =attendee.getDisplayName();
+		this.resposeStatus=attendee.getResponseStatus();
+		
+		
 	}
 
 	public CommentTO(PostComment postComment) {
@@ -96,6 +119,14 @@ public class CommentTO {
 		this.commentId = commentId;
 	}
 
+	public String getAttendeeId() {
+		return attendeeId;
+	}
+
+	public void setAttendeeId(String attendeeId) {
+		this.attendeeId = attendeeId;
+	}
+	
 	public Long getSubCommentId() {
 		if(null == subCommentId){
 			return -1l;

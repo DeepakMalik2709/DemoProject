@@ -6,7 +6,7 @@
                 </div>
                 <div class="col-md-9 col-sm-9 col-lg-9">
                 	<div class="row">
-	                    <div class="title h5 col-md-8 col-sm-8 col-lg-8">
+	                    <div class="title h5 col-md-8 col-sm-8 col-lg-8"> 
 	                        <a href="javascript:void(0);"><b>{{item.createdByName}}</b></a>
 	                       posted in <b> {{#link-to 'group.posts' item.groupId tagName="a" class="text-muted cp"}}{{item.groupName}}{{/link-to}}</b>.
 	                    </div>
@@ -34,9 +34,9 @@
 						</footer>
 					</div>
 					<div class="row">
-					  <div class="col-md-8 col-sm-8 col-lg-8"> 
-			                <p class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</p>
-			                <p class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</p>
+					  	<div class="col-md-8 col-sm-8 col-lg-8"> 
+			                <div class="{{unless item.isEditing 'show' 'hide'}}">{{item.comment}}</div>
+			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box schedule=item className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
 						        <ol class="file-list">
 						        {{#each item.files as |file|}}
@@ -50,26 +50,21 @@
 			                    <a href="javascript:void(0);" class="btn btn-default stat-item" disabled={{disableReactButton}} {{action "reactToPost"}}>
 			                        <i class="fa fa-thumbs-up icon"></i>{{item.numberOfReactions}}
 			                    </a>
-			           	 </div>
-			       	 </div>
+			           	 	</div>
+			       	 	</div>
 					</div>
                 </div>
-                 
-            </div> 
-         
-            <div class="post-footer {{if item.isEditing 'hideBorder' ''}}">
-                <div class="input-group contenteditable-input-group" > 
-                    {{post-comment-box showScheduleBtn=true  className="" placeholder="Add a comment"  save='saveComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
-                 <!--    <span class="input-group-addon">
-                        <a href="javascript:void(0);"><i class="fa fa-edit"></i></a>  
-                    </span> -->
+         </div> 
+       <div class="post-footer {{if item.isEditing 'hideBorder' ''}}">
+              <div class="input-group contenteditable-input-group" > 
+                    {{post-comment-box schedule=item className="" placeholder="Add a comment"  save='saveComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
                 </div>
-                <ul class="comments-list" style="padding-left: 9%;">
-                
+                <ul class="comments-list" style="padding-left: 9%;">                
                 {{#each item.comments as |comment|}}
               {{post-item-comment item=comment update="updateComment" deleteComment="deleteComment" group=group}}
                 {{/each}}
                 </ul>
-            </div>
-        </div>
+         </div> 
+        
+     </div> 
     </div>

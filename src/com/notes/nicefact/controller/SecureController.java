@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +34,7 @@ import org.json.JSONException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import com.notes.nicefact.comparator.CreatedDateComparator;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
@@ -918,15 +921,21 @@ public class SecureController extends CommonController {
 		        Events events = service.events().list("primary").execute();
 		        List<Event> items = events.getItems();
 		        List<EventTO> eventTos = new ArrayList<EventTO>();	       
-		      
+		        AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 		        if (items.size() > 0) {
+		        	for (Event event : items) {
+		        		postTos.add(new PostTO(event,user));
+					}
+		        	
 		        	json.put(Constants.CODE, Constants.NO_RESULT);
 		            System.out.println("No upcoming events found.");
 		        }		        
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.TOTAL, postTos.size());
-			json.put(Constants.DATA_ITEMS, postTos);
+			
 			if (!postTos.isEmpty()) {
+				Collections.sort(postTos, new CreatedDateComparator());
+				json.put(Constants.DATA_ITEMS, postTos);
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 			}
 

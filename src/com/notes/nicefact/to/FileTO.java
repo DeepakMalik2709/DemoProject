@@ -3,6 +3,7 @@ package com.notes.nicefact.to;
 import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.api.services.calendar.model.EventAttachment;
 import com.notes.nicefact.entity.AbstractFile;
 import com.notes.nicefact.util.Utils;
 
@@ -30,8 +31,13 @@ public class FileTO {
 	String embedLink;
 	boolean isDriveFile;
 	
-	public FileTO() {
+	public FileTO(EventAttachment attach) {
 		super();
+		this.name = attach.getTitle();
+		this.serverName = attach.getFileUrl();
+		this.mimeType = attach.getMimeType();
+		this.sizeBytes = attach.size();
+		this.size = Utils.readableFileSize(sizeBytes);
 		// TODO Auto-generated constructor stub
 	}
 

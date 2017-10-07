@@ -10,6 +10,13 @@ export default DS.Model.extend({
 	  updatedByName: DS.attr('string'),
 	  createdByName: DS.attr('string'),
 	  updatedByEmail: DS.attr('string'),
+	  postType:DS.attr('string'),
+	  postPriv:DS.attr('string'),
+	  eventId:DS.attr('string'),
+	  reponseYes: DS.attr('number'),
+	  reponseNo: DS.attr('number'),
+	  reponseMaybe: DS.attr('number'),
+	  totalAttendee: DS.attr('number'),
 	  isSaving : DS.attr('boolean'),
 	  files: DS.attr( {
 		    defaultValue() { return []; }

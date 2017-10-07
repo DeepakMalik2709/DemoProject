@@ -9,7 +9,14 @@ export default DS.Store.extend(ajaxMixin,{
 		 this._super(...arguments);
 		    this.set('items', []);
 	  },
-
+	  updateResponse: function(json) {
+			 return  new Ember.RSVP.Promise((resolve, reject) =>{
+					var url = "/rest/calendar/updateEvent";
+					this.doPost(url , json ).then((data ) =>{
+						  resolve(data);
+				      });
+			 });
+		 },
 
 	saveEvent:function(event){
 		event.languages  = [];

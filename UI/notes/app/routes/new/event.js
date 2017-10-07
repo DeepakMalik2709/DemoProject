@@ -19,7 +19,7 @@ export default Ember.Route.extend(authenticationMixin,{
 	    actions: {
 	    	
 	        saveEvent(event) {
-	    		 event.attendees=controller.get('attendees');
+	    		// event.attendees=controller.get('attendees');
 	        	event.save().then(() => this.transitionTo('calendar'));
 	        	
 	        },
