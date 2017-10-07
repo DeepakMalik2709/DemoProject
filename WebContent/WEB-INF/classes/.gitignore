@@ -1,0 +1,8 @@
+/META-INF/
+/app.properties
+/com/
+/log4j.properties
+/mailTemplate/
+/quartz.properties
+/quartz_data.xml
+/.DS_Store

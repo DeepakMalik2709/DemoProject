@@ -18,9 +18,7 @@
 	
   <servlet>
       <servlet-name>Notes Application</servlet-name>
-      <async-supported>true</async-supported>
-      <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-      
+       <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
          <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>com.notes.nicefact.controller</param-value>
@@ -34,6 +32,8 @@
         <param-value>com.notes.nicefact.MyApplication</param-value>
 
     </init-param> -->
+      <async-supported>true</async-supported>
+     
       </servlet>
    <servlet-mapping>
    <servlet-name>Notes Application</servlet-name>

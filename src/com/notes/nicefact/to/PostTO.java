@@ -35,7 +35,6 @@ public class PostTO {
 	
 	String updatedByEmail;
 	
-	String postType;
 
 	// List<GoogleDriveFileTO> files = new ArrayList<>() ;
 
