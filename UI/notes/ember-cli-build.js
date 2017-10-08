@@ -8,17 +8,17 @@ module.exports = function(defaults) {
   });
   
 
-  app.import('vendor/AdminLTE/css/bootstrap.min.css');  
+/*  app.import('vendor/AdminLTE/css/bootstrap.min.css');  
   app.import('vendor/AdminLTE/css/font-awesome.min.css');
   app.import('vendor/AdminLTE/css/ionicons.min.css');
-  app.import('vendor/AdminLTE/css/morris/morris.css');
-  app.import('vendor/AdminLTE/css/jvectormap/jquery-jvectormap-1.2.2.css');
+  /*app.import('vendor/AdminLTE/css/morris/morris.css');
+  app.import('vendor/AdminLTE/css/jvectormap/jquery-jvectormap-1.2.2.css');*/
   
 
   app.import('vendor/AdminLTE/css/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css');
  
   
-  app.import('vendor/AdminLTE/js/jquery.min.js');  
+ /* app.import('vendor/AdminLTE/js/jquery.min.js');  
   app.import('vendor/AdminLTE/js/jquery-ui-1.10.3.min.js');
   app.import('vendor/AdminLTE/js/bootstrap.min.js');
   app.import('vendor/AdminLTE/js/raphael-min.js');
@@ -28,12 +28,35 @@ module.exports = function(defaults) {
   app.import('vendor/AdminLTE/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js');
 
   app.import('vendor/AdminLTE/js/plugins/jqueryKnob/jquery.knob.js');
-
+*/
   app.import('vendor/AdminLTE/js/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js');
-  app.import('vendor/AdminLTE/js/plugins/iCheck/icheck.min.js');
+ /* app.import('vendor/AdminLTE/js/plugins/iCheck/icheck.min.js');
   app.import('vendor/AdminLTE/js/app.js');
-  app.import('vendor/AdminLTE/js/dashboard.js');
+  app.import('vendor/AdminLTE/js/dashboard.js');*/
+  app.import('vendor/common.js');
   
+ /*  app.import('vendor/fonts/fontawesome-webfont.eot', {
+	  destDir: 'fonts'
+  });
+   app.import('vendor/fonts/fontawesome-webfont.svg', {
+	  destDir: 'fonts'
+  });
+    app.import('vendor/fonts/fontawesome-webfont.ttf', {
+	  destDir: 'fonts'
+  });
+    app.import('vendor/fonts/fontawesome-webfont.woff', {
+	  destDir: 'fonts'
+  });*/
+   
+/*   app.import('vendor/fonts/ionicons.ttf', {
+	  destDir: 'fonts'
+  });
+    app.import('vendor/fonts/ionicons.woff', {
+	  destDir: 'fonts'
+  });*/
+     
+
+
   app.import('vendor/font-awesome/fonts/fontawesome-webfont.eot', {
 	  destDir: 'fonts'
   });
@@ -49,6 +72,8 @@ module.exports = function(defaults) {
   app.import('vendor/font-awesome/fonts/fontawesome-webfont.svg', {
 	  destDir: 'fonts'
   });
+  app.import('vendor/font-awesome/css/font-awesome.min.css');
+ 
   // Use `app.import` to add additional libraries to the generated
   // output files.
   //

@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import com.notes.nicefact.dao.AppUserDAO;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.AppUser.AUTHORIZED_SCOPES;
 import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.exception.EmailAlreadyExistsException;
 import com.notes.nicefact.to.AppUserTO;
@@ -319,14 +320,19 @@ public class AppUserService extends CommonService<AppUser> {
 		return user;
 	}
 
+	/** as of now it is not possible to revoke access by scope. so using common method */
 	public AppUser deauthorizeGoogleDrive(String email) {
 		AppUser user = getAppUserByEmail(email);
-		user.setAccessToken(null);
-		user.setRefreshToken(null);
-		user.setUseGoogleDrive(false);
-		user.setRefreshTokenAccountEmail(null);
-		user = upsert(user);
-		CacheUtils.addUserToCache(user);
+		if(StringUtils.isNotBlank(user.getRefreshToken())){
+			Utils.revokeToken(user.getRefreshToken());
+			user.setAccessToken(null);
+			user.setRefreshTokenAccountEmail(null);
+			user.setRefreshToken(null);
+			user.getScopes().clear();
+			user = upsert(user);
+			CacheUtils.addUserToCache(user);
+		}
 		return user;
 	}
+	
 }

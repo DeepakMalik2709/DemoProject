@@ -73,7 +73,7 @@ public class PostTO {
 	int reponseNo=0;
 	int reponseMaybe=0;
 	int totalAttendee=0;
-
+	public PostTO() {}
 	public PostTO(Post post) {
 		this.id = post.getId();
 		this.groupId = post.getGroupId();

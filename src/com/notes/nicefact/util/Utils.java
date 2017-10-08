@@ -45,6 +45,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -58,6 +59,7 @@ import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
+import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.TutorialTO;
@@ -284,18 +286,6 @@ public class Utils {
 		return null;
 	}
 
-	public enum GOOGLE_SCOPES {
-		PROFLE("https://www.googleapis.com/auth/userinfo.profile"), EMAIL("https://www.googleapis.com/auth/userinfo.email"), DRIVE("https://www.googleapis.com/auth/drive.file");
-		String scopeUrl;
-
-		GOOGLE_SCOPES(String scopeUrl) {
-			this.scopeUrl = scopeUrl;
-		}
-
-		public String getScopeUrl() {
-			return scopeUrl;
-		}
-	}
 
 	public static String n2b(String str) {
 		if (str == null || "null".equals(str)) {
@@ -312,6 +302,34 @@ public class Utils {
 		return token;
 	}
 
+	public static void revokeToken(String refreshToken){
+		try {
+			HttpClient client = HttpClients.createDefault();
+			List<Header> headers = new ArrayList<>();
+			headers.add(new BasicHeader("Content-Type", "application/x-www-form-urlencoded"));
+			String url = "https://accounts.google.com/o/oauth2/revoke?token=" + refreshToken;
+				int i = 0;
+				HttpGet request1 = new HttpGet(url);
+				logger.info("attempt : " + i);
+				if (headers != null) {
+					for (Header header : headers) {
+						request1.addHeader(header);
+					}
+				}
+				HttpResponse response = client.execute(request1);
+				logger.warn("resp : " + response.getStatusLine().getStatusCode());
+				if (response.getEntity() != null) {
+					String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
+					logger.info(respStr);
+				}
+				
+				request1.releaseConnection();
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+	
 	public static String refreshAccessToken() {
 		String token = null;
 		try {

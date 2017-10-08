@@ -15,7 +15,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	  
 	    setupController: function(controller, model) {
 	        this._super(controller, model);
-	        console.log( model.toJSON());
+	       
 	        controller.set('attendees', []);
 	       
 	        controller.set('pageTitle', 'Create Schedule');

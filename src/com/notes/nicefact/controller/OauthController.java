@@ -37,6 +37,7 @@ import org.json.JSONObject;
 
 import com.google.api.services.calendar.CalendarScopes;
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.AppUser.AUTHORIZED_SCOPES;
 import com.notes.nicefact.entity.AppUser.GENDER;
 import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.service.AppUserService;
@@ -58,7 +59,7 @@ public class OauthController {
 
 	public static final String GOOGLE_OAUTH_TOKEN_URL = "https://accounts.google.com/o/oauth2/token";
 
-	public static final String GOOGLE_SCOPES = "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile "+CalendarScopes.CALENDAR+" "+CalendarScopes.CALENDAR_READONLY;
+	public static final String GOOGLE_SCOPES = "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile ";
 
 	public static final String GOOGLE_CALLBACK = "googleCallback";
 	
@@ -78,41 +79,73 @@ public class OauthController {
 			JSONException {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
-		if (StringUtils.isNotBlank(code)) {
-			AppUserService appUserService = new AppUserService(em);
-			BackendTaskService backendTaskService = new BackendTaskService(em) ;
-			AppUser user = appUserService.getAppUserByEmail(CurrentContext.getEmail());
-			getRefreshTokenFromAuthorizatoinCode(Constants.GOOGLE_DRIVE_SCOPES, "/a/oauth/" + GOOGLE_DRIVE_CALLBACK, code, user);
-			if(StringUtils.isNotBlank(user.getRefreshToken())){
-				user.setUseGoogleDrive(true);
-				AppUserTO userTo = getGoogleUserProfile(user.getAccessToken());
-				user.setRefreshTokenAccountEmail(userTo.getEmail());
-				appUserService.upsert(user);
-				CacheUtils.addUserToCache(user);
-				request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-				backendTaskService.createGoogleDriveFolderForUserTask(user);
+			logger.info("start googleDriveCallback : " + request.getQueryString());
+			if (StringUtils.isNotBlank(code)) {
+				AppUserService appUserService = new AppUserService(em);
+				BackendTaskService backendTaskService = new BackendTaskService(em);
+				AppUser sessionUser = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+				AppUser user = appUserService.getAppUserByEmail(sessionUser.getEmail());
+				String allScopes = request.getParameter("scope").replaceAll("\\+", " ");
+				getRefreshTokenFromAuthorizatoinCode(allScopes, "/a/oauth/" + GOOGLE_DRIVE_CALLBACK, code, user);
+				if (StringUtils.isNotBlank(user.getRefreshToken())) {
+					
+					if (allScopes.contains(CalendarScopes.CALENDAR)) {
+						user.getScopes().add(AUTHORIZED_SCOPES.CALENDAR);
+					}
+					if (allScopes.contains(Constants.GOOGLE_DRIVE_SCOPES)) {
+						user.getScopes().add(AUTHORIZED_SCOPES.DRIVE);
+					}
+
+					AppUserTO userTo = getGoogleUserProfile(user.getAccessToken());
+					user.setRefreshTokenAccountEmail(userTo.getEmail());
+					appUserService.upsert(user);
+					CacheUtils.addUserToCache(user);
+					request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
+					backendTaskService.createGoogleDriveFolderForUserTask(user);
+				}
+
+			} else {
+				CurrentContext.getCommonContext().setMessage("Google Drive could not be enabled for your account. Please try again.");
+				logger.error("message : " + error);
 			}
-			
-		} else {
-			CurrentContext.getCommonContext().setMessage("Google Drive could not be enabled for your account. Please try again.");
-			logger.error("message : " + error);
-		}
 		} finally {
 			if (em.isOpen()) {
 				em.close();
 			}
 		}
 		response.sendRedirect(Constants.PROFILE_PAGE);
+		logger.info("exit googleDriveCallback ");
 	}
 
 	@GET
 	@Path("/driveAuthorization")
 	public Response driveAuthorization(@Context HttpServletResponse response) throws IOException, URISyntaxException {
-		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(Constants.GOOGLE_DRIVE_SCOPES, Constants.UTF_8) + "&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
+		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(Constants.GOOGLE_DRIVE_SCOPES + Constants.PROFILE_SCOPES, Constants.UTF_8) + "&include_granted_scopes=true&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
 				+ AppProperties.getInstance().getGoogleClientId() + "&redirect_uri="
 				+ URLEncoder.encode(AppProperties.getInstance().getApplicationUrl() + "/a/oauth/" + GOOGLE_DRIVE_CALLBACK, Constants.UTF_8);
 		return Response.seeOther(new URI(url)).build();
 	}
+	
+	@GET
+	@Path("/calendarAuthorization")
+	public Response calendarAuthorization(@Context HttpServletResponse response) throws IOException, URISyntaxException {
+		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(CalendarScopes.CALENDAR  + Constants.PROFILE_SCOPES , Constants.UTF_8) + "&include_granted_scopes=true&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
+				+ AppProperties.getInstance().getGoogleClientId() + "&redirect_uri="
+				+ URLEncoder.encode(AppProperties.getInstance().getApplicationUrl() + "/a/oauth/" + GOOGLE_DRIVE_CALLBACK, Constants.UTF_8);
+		return Response.seeOther(new URI(url)).build();
+	}
+	
+	@GET
+	@Path("/googleAllAuthorization")
+	public Response googleAuthorization(@Context HttpServletResponse response) throws IOException, URISyntaxException {
+		String allScopes = Constants.GOOGLE_DRIVE_SCOPES +" " + CalendarScopes.CALENDAR   + Constants.PROFILE_SCOPES ;
+		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(allScopes, Constants.UTF_8) + "&include_granted_scopes=true&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
+				+ AppProperties.getInstance().getGoogleClientId() + "&redirect_uri="
+				+ URLEncoder.encode(AppProperties.getInstance().getApplicationUrl() + "/a/oauth/" + GOOGLE_DRIVE_CALLBACK, Constants.UTF_8);
+		return Response.seeOther(new URI(url)).build();
+	}
+	
+
 	
 	@GET
 	@Path(GOOGLE_CALLBACK)

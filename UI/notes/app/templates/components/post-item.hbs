@@ -59,7 +59,7 @@
               <div class="input-group contenteditable-input-group" > 
                     {{post-comment-box schedule=item className="" placeholder="Add a comment"  save='saveComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
                 </div>
-                <ul class="comments-list" style="padding-left: 9%;">                
+                <ul class="comments-list" style="padding-left: 1%;">                
                 {{#each item.comments as |comment|}}
               {{post-item-comment item=comment update="updateComment" deleteComment="deleteComment" group=group}}
                 {{/each}}

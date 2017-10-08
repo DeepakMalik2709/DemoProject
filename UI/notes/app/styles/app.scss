@@ -1,16 +1,27 @@
+@import "bootstrap";
+@import "ember-power-select";
 @import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic);
 
 @import url(http://fonts.googleapis.com/css?family=Kaushan+Script);
-/*! 
- *   AdminLTE v1.0
- *   Author: AlmsaeedStudio.com
- *   License: Open source - MIT
- *           Please visit http://opensource.org/licenses/MIT for more information
-!*/
-/*
-    Core: General style
-----------------------------
-*/
+
+.pointer{
+cursor:pointer;
+}
+.show,
+.display{
+display:block;
+}
+.hide,
+.nodisplay{
+display:none;
+}
+.show-inline,
+.inlinedisplay{
+display:inline;
+}
+.noborder{
+	border : 0;
+}
 html,
 body {
   overflow-x: hidden!important;
@@ -70,18 +81,25 @@ a:focus {
   .left-side {
     top: 50px;
   }
-  /*Right side strech mode*/
+  Right side strech mode
   .right-side.strech {
     margin-left: 0;
   }
   .right-side.strech > .content-header {
     margin-top: 0px;
   }
-  /* Left side collapse */
+  Left side collapse
   .left-side.collapse-left {
     left: -220px;
   }
 }
+
+  .left-side {
+    top: 50px;
+  }
+  .left-side.collapse-left {
+    left: -220px;
+  }
 /*Give content full width on xs screens*/
 @media screen and (max-width: 992px) {
   .right-side {
@@ -494,7 +512,8 @@ table.text-center th {
   }
   body.fixed > .wrapper,
   body.fixed .sidebar-offcanvas {
-    margin-top: 100px!important;
+   /*  margin-top: 100px!important; */
+   position:fixed;
   }
 }
 /*
@@ -2274,10 +2293,10 @@ Component: timeline
 /* 
     Page: register and login
 */
-.form-box {
+/* .form-box {
   width: 360px;
   margin: 90px auto 0 auto;
-}
+} */
 .form-box .header {
   -webkit-border-top-left-radius: 4px;
   -webkit-border-top-right-radius: 4px;
@@ -2952,4 +2971,25 @@ width:100%;
 }
 /*post css end */
 
-@import "ember-power-select";
+
+.notification-li{
+	margin : 10px;
+}
+aside.right-side .row:nth-child(2){
+	    margin-left: 10px;
+    margin-right: 10px;
+}
+.profile-img.avatar{
+	    margin-right: 50px;
+    margin-left: 100px;
+}
+@media screen and (max-width: 500px) {
+	.navbar-right .user-profile-dropdown,
+	  .navbar-right .tasks-menu,
+  .navbar-right .notifications-menu{
+   display:none;
+  }
+  
+}
+footer.page-footer{
+}

@@ -12,7 +12,15 @@ export default Ember.Route.extend({
     init: function() {
     	
     },
+    router: Ember.inject.service('-routing'),
     groupService: Ember.inject.service('group'),
+    onRouteChange: Ember.observer('router.currentRouteName', function(){ 
+    	 if ($(window).width() <= 992) {
+            $('.left-side').addClass("collapse-left");
+            $(".right-side").removeClass("hide");
+            $('.row-offcanvas').removeClass("active relative");
+        }
+    }),
     setupController: function(controller, model) {
         this._super(controller, model);
         controller.set("isLoggedIn", Ember.computed.notEmpty("model"));
@@ -25,15 +33,15 @@ export default Ember.Route.extend({
         		if(googleDriveMsgDate){
         			model.set('loginUser.googleDriveMsgDate', null);
         			var diff = new Date().getTime() - googleDriveMsgDate ;
-        			if(diff > (10*24*60*60*1000)){
+        			if(diff > (1*24*60*60*1000)){
         				showGoogleDriveMsgDate = true;
         			}
         		}else{
         			showGoogleDriveMsgDate = true;
         		}
         		if(showGoogleDriveMsgDate){
-        			if(confirm("Would you like to save all your uploads to your google drive. Google drive removes 10MB upload limit.")){
-        				window.location.href= "/a/oauth/driveAuthorization";
+        			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar. Granting Google drive permission removes 10MB upload limit.")){
+        				window.location.href= "/a/oauth/googleAllAuthorization";
         			}
         		}
         	}
@@ -41,6 +49,9 @@ export default Ember.Route.extend({
 	        let request = this.get('groupService').fetchMyGroups();
 	        request.then((response) => {
 	        	   controller.set("myGroups" ,response );
+	        	   Ember.run.later((function() {
+	        		   $(".sidebar .treeview").tree();
+	        		 }), 2000);
 	        });
 	        this.contextService.fetchNotifications().then((response) => {
 	        		if(response && response.length){
