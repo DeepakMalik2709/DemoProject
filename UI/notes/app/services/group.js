@@ -30,6 +30,7 @@ export default DS.Store.extend(ajaxMixin ,{
 				    				  }
 				    			  }
 				    		  }
+				    		  this.myGroups=[];
 				    		  this.myGroups.pushObject(record);
 			    		  }
 			    	  }

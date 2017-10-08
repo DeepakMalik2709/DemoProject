@@ -34,14 +34,18 @@ import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
+import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.GoogleCalendarService;
+import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
+import com.notes.nicefact.to.GroupMemberTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.Constants;
@@ -86,6 +90,39 @@ public class CalendarController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("getPostGroupOrder exit");
 	}
+	
+	@POST
+	@Path("/updateEvent")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void updateEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+		Map<String, Object> json = new HashMap<>();
+		try {
+			String calendarId = "primary";
+			String eventId = schedule.getId();
+			
+			AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+		//	attendee.setId(user.getu);
+			
+			
+			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
+			Event event = service.events().get(calendarId, eventId).execute(); 
+			for(EventAttendee evAtt :  event.getAttendees()){
+				if(evAtt.getEmail().equalsIgnoreCase(user.getEmail())){
+					evAtt.setResponseStatus(schedule.getAttendees().get(0).getResponseStatus());
+				}				
+			}
+			Event updatedEvent  = service.events().update(calendarId, event.getId(), event).execute();
+			json.put(Constants.CODE, Constants.OK);
+			json.put(Constants.DATA_ITEM, updatedEvent);
+			
+		} catch (IOException e) {
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());	
+			e.printStackTrace();
+		}
+		renderResponseJson(json, response);
+		logger.info("getPostGroupOrder exit");
+	}
 
 	@POST
 	@Path("/insertEvent")
@@ -96,7 +133,7 @@ public class CalendarController extends CommonController {
 			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
 			System.out.println("event : "+schedule);
 			
-			/*Event event = new Event()
+			Event event = new Event().set("sendNotifications", true)
 			    .setSummary(schedule.getTitle())
 			    .setLocation(schedule.getLocation())
 			    .setDescription(schedule.getDescription());
@@ -115,12 +152,16 @@ public class CalendarController extends CommonController {
 			
 			String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
 			event.setRecurrence(Arrays.asList(recurrence));
+			List<EventAttendee> attendees = null;
+			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+			GroupService groupService = new GroupService(em);
 			
-			EventAttendee[] attendees = new EventAttendee[] {
-			    new EventAttendee().setEmail("deepak.m18@fms.edu"),
-			    new EventAttendee().setEmail("gcsharma99@gmail.com"),
-			};
-			event.setAttendees(Arrays.asList(attendees));
+			
+			if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
+				attendees =groupService.fetchMemberEmailFromGroup(schedule.getGroups());
+			}
+			
+			event.setAttendees(attendees);
 			
 			EventReminder[] reminderOverrides = new EventReminder[] {
 			    new EventReminder().setMethod("email").setMinutes(24 * 60),
@@ -135,7 +176,7 @@ public class CalendarController extends CommonController {
 			event = service.events().insert(calendarId, event).execute();
 			System.out.printf("Event created: %s\n", event.getHtmlLink());
 			json.put(Constants.CODE, Constants.OK);
-			json.put(Constants.DATA_ITEM, event);*/
+			json.put(Constants.DATA_ITEM, event);
 			
 		} catch (IOException e) {
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);

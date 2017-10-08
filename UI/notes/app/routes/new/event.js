@@ -1,25 +1,41 @@
 import Ember from 'ember';
+import scrollMixin from '../../mixins/scroll';
 import authenticationMixin from '../../mixins/authentication';
 
-export default Ember.Route.extend(authenticationMixin,{
+export default Ember.Route.extend(scrollMixin,authenticationMixin,{
+		attendees:null,
 		
+		groupService: Ember.inject.service('group'),
+	    init() {
+		    this._super(...arguments);
+		  },
 		model() {
 			 return this.store.createRecord('new.event');
-
 	    },
-
+	  
 	    setupController: function(controller, model) {
-	    	   var names = ['kkuldeepjoshi5@gmail.com', 'deepak.m18@fms.edu'];
 	        this._super(controller, model);
+	        console.log( model.toJSON());
+	        controller.set('attendees', []);
+	       
 	        controller.set('pageTitle', 'Create Schedule');
-	        controller.set('names',names);
-	     
+	        let request = this.get('groupService').fetchMyGroups();
+	        request.then((response) => {
+	        	   controller.set("myGroups" ,response );
+	        });        
 	        controller.set('buttonLabel', 'Save');
+	       
 	    },
+	   
 	    actions: {
-	    	
+	    	 
 	        saveEvent(event) {
-	    		 event.attendees=controller.get('attendees');
+	        	event.groups=[];	        	
+	        	this.controller.get('attendees').forEach(function(item) {
+	        		event.groups.push({id:item.id,name:item.name});
+	        		});
+	    		        	
+	        	console.log( event.toJSON());
 	        	event.save().then(() => this.transitionTo('calendar'));
 	        	
 	        },

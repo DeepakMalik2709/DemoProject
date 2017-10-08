@@ -1,8 +1,10 @@
 package com.notes.nicefact.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.api.services.calendar.model.EventAttendee;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
@@ -16,7 +18,8 @@ public class Event {
 	private String description;
 	private String location;
 	private String	eventType;
-	private String	attendees;
+	private List<EventAttendee>	attendees;
+	private List<Group> groups; 
 	
 	public String getTitle() {
 		return title;
@@ -86,11 +89,17 @@ public class Event {
 	public void setLocation(String location) {
 		this.location = location;
 	}
-	public String getAttendees() {
+	public List<EventAttendee> getAttendees() {
 		return attendees;
 	}
-	public void setAttendees(String attendees) {
+	public void setAttendees(List<EventAttendee> attendees) {
 		this.attendees = attendees;
+	}
+	public List<Group> getGroups() {
+		return groups;
+	}
+	public void setGroups(List<Group> groups) {
+		this.groups = groups;
 	}
 
 }

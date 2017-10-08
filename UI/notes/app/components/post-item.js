@@ -15,7 +15,7 @@ export default Ember.Component.extend(postMixin ,{
 		  this.set("recipientList" , []);
 	  },
     actions: {
-    	
+    
     	saveComment(component ){
     		if(!Ember.get(this, "isSaving") && this.postComment){
     			Ember.set(this, "isSaving", true)

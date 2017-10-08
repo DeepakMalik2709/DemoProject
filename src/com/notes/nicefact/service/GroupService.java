@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
+import com.google.api.services.calendar.model.EventAttendee;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.dao.GroupDAO;
 import com.notes.nicefact.dao.GroupMemberDAO;
@@ -322,6 +323,11 @@ public class GroupService extends CommonService<Group> {
 	
 	public void updateGroupMember(GroupMember  member){
 		groupMemberDAO.upsert(member);
+	}
+
+	public List<EventAttendee> fetchMemberEmailFromGroup(List<Group> groups) {
+		 List<EventAttendee> members = groupMemberDAO.getMemberEmailFromGroup(groups);		
+		return members;
 	}
 
 }

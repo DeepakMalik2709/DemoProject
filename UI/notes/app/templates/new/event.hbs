@@ -25,20 +25,24 @@
                 <form role="form">
                     <div class="box-body">
                         <div class="form-group">
-                                                  {{attendees}}
+                                                 
                             {{input type="text" value=model.title class="form-control" placeholder="Enter schedule  title" }}
                         </div> 
                         <div class="form-group">                                               
                             {{input type="text" value=model.location class="form-control" placeholder="Enter schedule  location" }}
                         </div>     
                         <div class="form-group">
-                          
-      						{{date-range-picker  label='Schedule Timing:'  start=model.start  end=model.end  }}
+                    		      {{input type="text" value=model.start class="form-control" placeholder="Enter start date" }}
+                       </div>  
+                         <div class="form-group">
+                    		      {{input type="text" value=model.end class="form-control" placeholder="Enter end date" }}
                         </div>  
                          <div class="form-group">
-	                        {{#power-select-multiple selected=attendees  options=names  placeholder="Please, select attendees"
-  							searchField="name"  onchange=(action (mut attendees))  as |attendees| }}
-							  {{attendees}}
+                         
+	                        {{#power-select-multiple selected=attendees  options=myGroups  
+	                        placeholder="Please, select attendees"
+  							  onchange=(action (mut attendees))  as |attendees| }}
+							  {{attendees.name}}
 							{{/power-select-multiple}}
 					  </div>                   
                         <div class="form-group">

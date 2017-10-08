@@ -30,7 +30,7 @@ export default Ember.Route.extend(tutorialMixin,scrollMixin,{
         if (model.get("searchTerm")) {
             this.fetchSearchResult();
         }else if(isLoggedIn){
-        	this.transitionTo('home');
+        	this.transitionTo("new.event");
         }else{
         	 this.fetchTrending();
         }

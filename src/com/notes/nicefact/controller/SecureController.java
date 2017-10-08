@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +31,10 @@ import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Events;
+import com.notes.nicefact.comparator.CreatedDateComparator;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
@@ -43,6 +50,7 @@ import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
+import com.notes.nicefact.service.GoogleCalendarService;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
@@ -50,6 +58,8 @@ import com.notes.nicefact.service.TagService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.CommentTO;
+import com.notes.nicefact.to.EventTO;
+import com.notes.nicefact.to.EventsTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
@@ -904,10 +914,28 @@ public class SecureController extends CommonController {
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
+			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
+		
+		        // List the next 10 events from the primary calendar.
+		        DateTime now = new DateTime(System.currentTimeMillis());
+		        Events events = service.events().list("primary").execute();
+		        List<Event> items = events.getItems();
+		        List<EventTO> eventTos = new ArrayList<EventTO>();	       
+		        AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+		        if (items.size() > 0) {
+		        	for (Event event : items) {
+		        		postTos.add(new PostTO(event,user));
+					}
+		        	
+		        	json.put(Constants.CODE, Constants.NO_RESULT);
+		            System.out.println("No upcoming events found.");
+		        }		        
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.TOTAL, postTos.size());
-			json.put(Constants.DATA_ITEMS, postTos);
+			
 			if (!postTos.isEmpty()) {
+				Collections.sort(postTos, new CreatedDateComparator());
+				json.put(Constants.DATA_ITEMS, postTos);
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 			}
 
