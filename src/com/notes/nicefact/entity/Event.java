@@ -20,6 +20,7 @@ public class Event {
 	private String	eventType;
 	private List<EventAttendee>	attendees;
 	private List<Group> groups; 
+
 	
 	public String getTitle() {
 		return title;

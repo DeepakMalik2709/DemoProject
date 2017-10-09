@@ -40,6 +40,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	        		});
 	    		        	
 	        	console.log( event.toJSON());
+
 	        	event.save().then(() => this.transitionTo('calendar'));
 	        	
 	        },
