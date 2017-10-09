@@ -46,6 +46,8 @@ public class PostService extends CommonService<Post> {
 	private GroupDAO groupDao;
 	private GroupMemberDAO groupMemberDAO;
 	private PostDAO postDAO;
+	TaskService taskService;
+	
 	private PostCommentDAO postCommentDAO;
 	PostReactionDAO postReactionDAO;
 	private PostFileDAO postFileDAO;
@@ -61,6 +63,7 @@ public class PostService extends CommonService<Post> {
 		postFileDAO  = new PostFileDAO(em);
 		backendTaskService = new BackendTaskService(em);
 		notificationService = new  NotificationService(em);
+		taskService = new TaskService(em);
 	}
 
 	@Override
@@ -96,9 +99,10 @@ public class PostService extends CommonService<Post> {
 				} else {
 					updateAttachedFiles(post, postTo);
 					post = upsert(post);
+					backendTaskService.savePostTask(post);
 				}
 			}
-			backendTaskService.savePostTask(post);
+			
 		} else {
 			throw new UnauthorizedException("You cannot post to this group.");
 		}
@@ -147,6 +151,7 @@ public class PostService extends CommonService<Post> {
 			logger.error("error for post Id : " + post.getId() + " , " +  e.getMessage(), e);
 		}
 	}
+	
 
 	public List<PostTO> search(SearchTO searchTO) {
 		List<Post> posts = postDAO.search(searchTO);
@@ -312,4 +317,7 @@ public class PostService extends CommonService<Post> {
 		List<PostFile> files = postDAO.getDrivePostFilesWithoutThumbnail(offset);
 		return files;
 	}
+
+	
+
 }

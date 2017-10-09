@@ -54,7 +54,7 @@ export default DS.Store.extend(ajaxMixin ,{
 							 const storePost = this.createRecord('post', thisItem);
 							 items.push(storePost);
 						}
-						resolve({code : 0 , items : items, nextLink : data.nextLink});
+						resolve({code : 0 , tasks : data.tasks ,items : items, nextLink : data.nextLink});
 					}
 			    	  resolve(data);
 			      });

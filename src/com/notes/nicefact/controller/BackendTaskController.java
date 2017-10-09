@@ -42,6 +42,8 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostRecipient;
+import com.notes.nicefact.entity.Task;
+import com.notes.nicefact.entity.TaskFile;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.entity.TutorialFile;
 import com.notes.nicefact.enums.NotificationAction;
@@ -54,6 +56,7 @@ import com.notes.nicefact.service.GoogleDriveService.GoogleFileTypes;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
+import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GoogleDriveFile;
@@ -1036,29 +1039,206 @@ public class BackendTaskController extends CommonController {
 		logger.info("exit runAsyncTask , path : " + path);
 	}
 
-	/*
-	 * private static int numberOfSuccessResponses = 0; private static int
-	 * numberOfFailures = 0; private static Throwable lastException = null;
-	 * 
-	 * @GET
-	 * 
-	 * @Path("async") public void asyncGetWithTimeout(@Suspended final
-	 * AsyncResponse asyncResponse) { asyncResponse.register(new
-	 * CompletionCallback() {
-	 * 
-	 * @Override public void onComplete(Throwable throwable) {
-	 * System.out.println("hola "); if (throwable == null) { // no throwable -
-	 * the processing ended successfully // (response already written to the
-	 * client) numberOfSuccessResponses++; } else { numberOfFailures++;
-	 * lastException = throwable; } } });
-	 * 
-	 * new Thread(new Runnable() {
-	 * 
-	 * @Override public void run() { System.out.println("running111"); String
-	 * result = veryExpensiveOperation(); asyncResponse.resume(result); }
-	 * 
-	 * private String veryExpensiveOperation() { try { Thread.sleep(3000); }
-	 * catch (InterruptedException e) { // TODO Auto-generated catch block
-	 * e.printStackTrace(); } return "veryExpensiveOperation"; } }).start(); }
-	 */
+	@POST
+	@Path("task/afterSave")
+	public void afterTaskSave(@QueryParam("taskId") Long taskId, @Context HttpServletResponse response) throws IOException, InterruptedException {
+		logger.info("start afterTaskSave, taskId : " + taskId);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			NotificationService notificationService = new NotificationService(em);
+			Task post = taskService.get(taskId);
+			AppUser sender = CacheUtils.getAppUser(post.getCreatedBy());
+			AppUser user;
+			NotificationRecipient notificationRecipient;
+			/* tagged notification for people tagged in post */
+			Set<String> recipientEmailSet = new HashSet<>();
+			/*
+			 * add person who created post so that he does not get notification
+			 */
+			recipientEmailSet.add(post.getCreatedBy());
+			Notification notification = new Notification(post, sender);
+			notificationService.upsert(notification);
+
+
+			/* notification for members of group */
+			Group group = CacheUtils.getGroup(post.getGroupId());
+			if (group != null && group.getMembers() != null) {
+				for (GroupMember member : group.getMembers()) {
+					if (recipientEmailSet.add(member.getEmail())) {
+						user = CacheUtils.getAppUser(member.getEmail());
+						if (user == null) {
+							notificationRecipient = new NotificationRecipient(member.getEmail());
+						} else {
+							notificationRecipient = new NotificationRecipient(user);
+							notificationRecipient.setSendEmail(user.getSendGroupPostEmail());
+						}
+						notificationRecipient.setAction(NotificationAction.POSTED_GROUP);
+						notificationRecipient.setNotification(notification);
+						notification.getRecipients().add(notificationRecipient);
+						notificationService.upsertRecipient(notificationRecipient);
+					}
+				}
+			}
+
+			if (notification.getRecipients().isEmpty()) {
+				notificationService.remove(notification);
+			} else {
+				notificationService.upsert(notification);
+				BackendTaskService backendTaskService = new BackendTaskService(em);
+				backendTaskService.createSendNotificationMailsTask(notification);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+
+		logger.info("exit afterTaskSave");
+		renderResponseRaw(true, response);
+	}
+	
+	private void moveGroupPostFilesToUserGoogleDrive(Task post, AppUser user, EntityManager em) {
+		CommonEntityService commonService = new CommonEntityService(em);
+		GoogleDriveService driveService = GoogleDriveService.getInstance();
+		List<TaskFile> files = post.getFiles();
+		GoogleDriveFile driveFile;
+		for (TaskFile postFile : files) {
+			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
+				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
+				try {
+					driveFile = driveService.uploadFileToUserAccount(postFile, user);
+					if (null != driveFile) {
+						driveService.moveFile(driveFile.getId(), user.getGoogleDriveFolderId(), user);
+						driveService.renameFile(driveFile.getId(), postFile.getName(), user);
+						postFile.setGoogleDriveId(driveFile.getId());
+						postFile.setIcon(driveFile.getIconLink());
+						postFile.setDriveLink(driveFile.getEditLink());
+						postFile.setEmbedLink(driveFile.getEmbedLink());
+						postFile.setUploadType(UPLOAD_TYPE.GOOGLE_DRIVE);
+						commonService.upsert(postFile);
+						try {
+							Files.deleteIfExists(Paths.get(postFile.getPath()));
+						} catch (IOException e) {
+							logger.error("could not delete : " + postFile.getPath() + " , " + e.getMessage(), e);
+						}
+						getGroupPostFilesThumbnailFromDriveFile(driveFile, postFile, user, commonService);
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			} else if (StringUtils.isBlank(postFile.getThumbnail())) {
+				driveFile = driveService.getFileFields(postFile.getGoogleDriveId(), "thumbnailLink", user);
+				getGroupPostFilesThumbnailFromDriveFile(driveFile, postFile, user, commonService);
+			}else {
+				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
+			}
+		}
+	}
+	
+	void getGroupPostFilesThumbnailFromDriveFile(GoogleDriveFile driveFile, TaskFile postFile, AppUser user, CommonEntityService commonService ) {
+		if (null != driveFile && StringUtils.isNotBlank(driveFile.getThumbnailLink())) {
+			GoogleDriveService driveService = GoogleDriveService.getInstance();
+			try {
+				HttpResponse httpResponse = driveService.doGet(driveFile.getThumbnailLink(), null, user);
+				if (null != httpResponse && httpResponse.getStatusLine().getStatusCode() == 200 && httpResponse.getEntity() != null) {
+					/*
+					 * save thumbnail file in local storage and
+					 * udpate database
+					 */
+					byte[] thumbnailBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
+					FileTO fileTo = Utils.writeGroupPostFileThumbnail(thumbnailBytes, postFile.getTask().getGroupId(), postFile.getName());
+					postFile.setThumbnail(fileTo.getServerName());
+					commonService.upsert(postFile);
+				} 
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+	}
+	
+	private void generateGroupPostFileThumbnail(EntityManager em, Task post) throws InterruptedException, IOException {
+		CommonEntityService commonService = new CommonEntityService(em);
+		GoogleDriveService driveService = GoogleDriveService.getInstance();
+		List<TaskFile> files = post.getFiles();
+		GoogleDriveFile driveFile;
+		List<GoogleDriveFile> driveFiles = new ArrayList<>();
+		for (TaskFile postFile : files) {
+			if (StringUtils.isBlank(postFile.getThumbnail())) {
+				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
+				driveFile = driveService.uploadFileToServiceAccount(postFile);
+				if (null != driveFile) {
+					driveService.moveFileServiceAccount(driveFile.getId(), AppProperties.getInstance().getDriveThumbnailFolderId());
+					driveFile.setServerPath(postFile.getPath());
+					driveFiles.add(driveFile);
+					postFile.setTempGoogleDriveId(driveFile.getId());
+					commonService.upsert(postFile);
+				}
+			}
+		}
+
+		Thread.sleep(60000);
+		/* download thumbnail links and update postfile in db */
+
+		for (GoogleDriveFile googleDriveFile : driveFiles) {
+			if (StringUtils.isBlank(googleDriveFile.getThumbnailLink())) {
+				driveFile = driveService.getFileFieldsServiceAccount(googleDriveFile.getId(), "thumbnailLink");
+				if (driveFile != null && StringUtils.isNotBlank(driveFile.getThumbnailLink())) {
+					googleDriveFile.setThumbnailLink(driveFile.getThumbnailLink());
+				}
+			}
+
+			if (StringUtils.isBlank(googleDriveFile.getThumbnailLink())) {
+				logger.info("failed to get thumbnail for : " + googleDriveFile.getMimeType() + " , " + googleDriveFile.getServerPath() + " , " + googleDriveFile.getTitle());
+			} else {
+				for (TaskFile postFile : files) {
+					if (StringUtils.isNotBlank(postFile.getPath()) && postFile.getPath().equals(googleDriveFile.getServerPath())) {
+						HttpResponse httpResponse = driveService.makeServiceAccountGetRequest(googleDriveFile.getThumbnailLink(), null);
+						if (null != httpResponse && httpResponse.getStatusLine().getStatusCode() == 200 && httpResponse.getEntity() != null) {
+							byte[] thumbnailBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
+							FileTO fileTo = Utils.writeGroupPostFileThumbnail(thumbnailBytes, post.getGroupId(), postFile.getName());
+
+							postFile.setThumbnail(fileTo.getServerName());
+							postFile.setTempGoogleDriveId(null);
+							commonService.upsert(postFile);
+							driveService.deleteFileServiceAccount(googleDriveFile.getId());
+						}
+						break;
+					}
+				}
+
+			}
+		}
+	}
+	
+	@POST
+	@Path("task/addThumbnail")
+	public void addThumbnailToTaskFiles(@QueryParam("taskId") Long taskId, @Context HttpServletResponse response) throws IOException, InterruptedException {
+		logger.info("addThumbnailToTaskFiles, taskId : " + taskId);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			Task post = taskService.get(taskId);
+			AppUser user = CacheUtils.getAppUser(post.getCreatedBy());
+			if (user.getUseGoogleDrive() && StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
+				moveGroupPostFilesToUserGoogleDrive(post, user, em);
+			} else {
+				generateGroupPostFileThumbnail(em, post);
+			}
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+
+		logger.info("exit addThumbnailToTaskFiles");
+		renderResponseRaw(true, response);
+	}
+
+
 }

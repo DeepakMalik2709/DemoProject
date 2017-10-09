@@ -19,6 +19,7 @@ import com.notes.nicefact.entity.BackendTask.BackendTaskStatus;
 import com.notes.nicefact.entity.Notification;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
+import com.notes.nicefact.entity.Task;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.util.AppProperties;
 
@@ -86,6 +87,21 @@ public class BackendTaskService extends CommonService<BackendTask> {
 
 		}
 	}
+	
+	public void saveTaskTask(Task post) {
+		BackendTask task = new BackendTask();
+		task.setPath("task/afterSave");
+		task.addToParamsMap("taskId", post.getId());
+		saveAndTrigger(task);
+		if (!post.getFiles().isEmpty()) {
+			task = new BackendTask();
+			task.setPath("task/addThumbnail");
+			task.addToParamsMap("taskId", post.getId());
+			saveAndTrigger(task);
+
+		}
+	}
+
 
 	public void createGoogleDriveFolderForUserTask(AppUser user) {
 		BackendTask task = new BackendTask();

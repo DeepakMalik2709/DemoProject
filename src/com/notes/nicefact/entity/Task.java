@@ -1,13 +1,17 @@
 package com.notes.nicefact.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 
 import com.notes.nicefact.to.TaskTO;
 
@@ -38,6 +42,10 @@ public class Task extends CommonEntity{
 	Boolean isEdited = false;
 	
 	private String zipFilePath;
+	
+	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+	protected List<TaskFile> files = new ArrayList<>();
+	
 
 	public Task(TaskTO task) {
 		super();
@@ -60,6 +68,14 @@ public class Task extends CommonEntity{
 		super();
 	}
 	
+	public List<TaskFile> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<TaskFile> files) {
+		this.files = files;
+	}
+
 	public int getNoOfSubmissions() {
 		return noOfSubmissions;
 	}

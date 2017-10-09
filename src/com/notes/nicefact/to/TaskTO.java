@@ -39,7 +39,7 @@ public class TaskTO {
 
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
 
-	
+	List<FileTO> files = new ArrayList<>();
 	
 	
 	public TaskTO(Task task) {
@@ -95,6 +95,13 @@ public class TaskTO {
 
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+	public List<FileTO> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<FileTO> files) {
+		this.files = files;
 	}
 
 	public long getCreatedTime() {
@@ -184,5 +191,7 @@ public class TaskTO {
 	public void setSubmissions(List<TaskSubmissionTO> submissions) {
 		this.submissions = submissions;
 	}
-
+	public boolean isTask(){
+		return true;
+	}
 }

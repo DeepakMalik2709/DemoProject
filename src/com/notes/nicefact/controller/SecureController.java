@@ -39,6 +39,7 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.Tag;
+import com.notes.nicefact.entity.Task;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.exception.NotFoundException;
@@ -51,6 +52,7 @@ import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.TagService;
+import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.CommentTO;
@@ -62,6 +64,7 @@ import com.notes.nicefact.to.NotificationTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TagTO;
+import com.notes.nicefact.to.TaskTO;
 import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
@@ -537,6 +540,33 @@ public class SecureController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("upsertGroupPost exit");
 	}
+	
+	@POST
+	@Path("/group/task")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void upsertGroupTask(TaskTO postTo, @Context HttpServletResponse response) {
+		logger.info("upsertGroupTask start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			Task post = taskService.upsertTask(postTo, CurrentContext.getAppUser());
+			TaskTO savedTO = new TaskTO(post);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, savedTO);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e );
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("upsertGroupTask exit");
+	}
 
 	@POST
 	@Path("/group/post/comment")
@@ -600,16 +630,19 @@ public class SecureController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			PostService postService = new PostService(em);
+			TaskService taskService = new TaskService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<PostTO> postTos = postService.search(searchTO);
+			List<TaskTO> taskTos = taskService.searchTasks(searchTO);
+			
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.TOTAL, postTos.size());
 			json.put(Constants.DATA_ITEMS, postTos);
-			if (!postTos.isEmpty()) {
+			json.put("tasks", taskTos);
+			if (!postTos.isEmpty() || !taskTos.isEmpty()) {
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 			}
-
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 
