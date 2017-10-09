@@ -75,8 +75,11 @@ a:focus {
     margin-left: 0;
   }
   .right-side.strech > .content-header {
-    margin-top: 0px;
+  	margin-top: 4%;
   }
+    .right-side > .content-header {
+  	margin-top: 4%;
+	}
   /* Left side collapse */
   .left-side.collapse-left {
     left: -220px;
@@ -87,6 +90,9 @@ a:focus {
   .right-side {
     margin-left: 0;
   }
+  .right-side > .content-header {
+  	margin-top: 26%;
+	}
 }
 /*
     By default the layout is not fixed but if you add the class .fixed to the body element
@@ -597,13 +603,13 @@ table.text-center th {
     right: -220px;
   }
   .row-offcanvas-left .sidebar-offcanvas {
-    left: -220px;
+    left: 0px;
   }
   .row-offcanvas-right.active {
     right: 220px;
   }
   .row-offcanvas-left.active {
-    left: 220px;
+    left:0px;
   }
   .sidebar-offcanvas {
     left: 0;

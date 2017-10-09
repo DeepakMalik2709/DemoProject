@@ -137,13 +137,17 @@ public class CalendarController extends CommonController {
 			    .setSummary(schedule.getTitle())
 			    .setLocation(schedule.getLocation())
 			    .setDescription(schedule.getDescription());
-			
+			if(schedule.getStart() ==null){
+				schedule.setStart(new Date());
+			}
 			DateTime startDateTime = new DateTime(schedule.getStart());
 			EventDateTime start = new EventDateTime()
 			    .setDateTime(startDateTime)
 			    .setTimeZone("America/Los_Angeles");
 			event.setStart(start);
-			
+			if(schedule.getEnd() ==null){
+				schedule.setEnd(new Date());
+			}
 			DateTime endDateTime = new DateTime(schedule.getEnd());
 			EventDateTime end = new EventDateTime()
 			    .setDateTime(endDateTime)
@@ -156,9 +160,9 @@ public class CalendarController extends CommonController {
 			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 			GroupService groupService = new GroupService(em);
 			
-			
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_100);
 			if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
-				attendees =groupService.fetchMemberEmailFromGroup(schedule.getGroups());
+				attendees =groupService.fetchMemberEmailFromGroup(schedule.getGroups(),searchTO);
 			}
 			
 			event.setAttendees(attendees);

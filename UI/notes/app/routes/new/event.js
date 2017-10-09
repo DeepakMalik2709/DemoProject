@@ -4,7 +4,8 @@ import authenticationMixin from '../../mixins/authentication';
 
 export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 		attendees:null,
-		
+		startDate:new Date(),
+		endDate:new Date(),
 		groupService: Ember.inject.service('group'),
 	    init() {
 		    this._super(...arguments);
@@ -17,7 +18,8 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	        this._super(controller, model);
 	        console.log( model.toJSON());
 	        controller.set('attendees', []);
-	       
+	        controller.set('startDate',new Date());
+	        controller.set('endDate',new Date());
 	        controller.set('pageTitle', 'Create Schedule');
 	        let request = this.get('groupService').fetchMyGroups();
 	        request.then((response) => {
@@ -30,7 +32,9 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    actions: {
 	    	 
 	        saveEvent(event) {
-	        	event.groups=[];	        	
+	        	event.groups=[];
+	        	event.start = new Date(this.controller.get('startDate'));
+	        	event.end = new Date(this.controller.get('endDate'));
 	        	this.controller.get('attendees').forEach(function(item) {
 	        		event.groups.push({id:item.id,name:item.name});
 	        		});

@@ -325,8 +325,8 @@ public class GroupService extends CommonService<Group> {
 		groupMemberDAO.upsert(member);
 	}
 
-	public List<EventAttendee> fetchMemberEmailFromGroup(List<Group> groups) {
-		 List<EventAttendee> members = groupMemberDAO.getMemberEmailFromGroup(groups);		
+	public List<EventAttendee> fetchMemberEmailFromGroup(List<Group> groups, SearchTO searchTO) {
+		 List<EventAttendee> members = groupMemberDAO.getMemberEmailFromGroup(groups,searchTO);		
 		return members;
 	}
 

@@ -52,23 +52,21 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 	}
 
 
-	public List<EventAttendee> getMemberEmailFromGroup(List<Group> groups) {
-		List<EventAttendee> results= null;
-		String groupIds="";
-		for (Group grp : groups) {
-			groupIds=+grp.getId()+",";
-		}		
-		groupIds= groupIds.substring(0, groupIds.length()-1);
-		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t.id,t.email from GroupMember t where  t.group_id IN (:groupIds)");
-		query.setParameter("groupIds", groupIds);
-		
+	public List<EventAttendee> getMemberEmailFromGroup(List<Group> groups, SearchTO searchTO) {
+		List<EventAttendee> attendees = new ArrayList<EventAttendee>();
+		List<GroupMember> results= new ArrayList<GroupMember>();		
 		try {
-			results= (List<EventAttendee>)query.getResultList();
-			
+			for (Group grp : groups) {
+				results.addAll(fetchGroupMembersByGroupId(grp.getId(),searchTO));
+			}		
+			for (GroupMember groupMember : results) {
+				EventAttendee att = new EventAttendee();
+				att.setId(groupMember.getId()+"");
+				att.setEmail(groupMember.getEmail());				
+			}		
 		} catch (NoResultException nre) {
 			return  new ArrayList<>();
 		}
-		return results;
+		return attendees;
 	}
 }
