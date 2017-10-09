@@ -61,7 +61,7 @@ public class FileTO {
 		this.downloadCount = file.getDownloadCount();
 		this.id = file.getId();
 		this.hasThumbnail = StringUtils.isNotBlank(file.getThumbnail());
-		this.thumbnailLink = submission.getThumbnail();
+		this.thumbnailLink = file.getThumbnail();
 		this.icon = file.getIcon();
 		this.embedLink = file.getEmbedLink();
 		this.driveLink = file.getDriveLink();
