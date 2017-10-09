@@ -24,6 +24,7 @@ public class FileTO {
 	
 	long downloadCount = 0;
 	boolean hasThumbnail ; 
+	String thumbnailLink;
 	long id;
 	
 	String driveLink;
@@ -60,6 +61,7 @@ public class FileTO {
 		this.downloadCount = file.getDownloadCount();
 		this.id = file.getId();
 		this.hasThumbnail = StringUtils.isNotBlank(file.getThumbnail());
+		this.thumbnailLink = submission.getThumbnail();
 		this.icon = file.getIcon();
 		this.embedLink = file.getEmbedLink();
 		this.driveLink = file.getDriveLink();
@@ -84,6 +86,14 @@ public class FileTO {
 
 	public boolean getIsDriveFile() {
 		return isDriveFile;
+	}
+
+	public String getThumbnailLink() {
+		return thumbnailLink;
+	}
+
+	public void setThumbnailLink(String thumbnailLink) {
+		this.thumbnailLink = thumbnailLink;
 	}
 
 	public void setIsDriveFile(boolean isDriveFile) {

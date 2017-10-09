@@ -63,7 +63,6 @@ public class Post extends AbstractComment {
 
 	public Post() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Post(PostTO post) {
