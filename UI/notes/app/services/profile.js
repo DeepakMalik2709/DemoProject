@@ -35,5 +35,13 @@ export default DS.Store.extend(ajaxMixin ,{
 					  resolve(data);
 			      });
 		 });
+	 },
+	 deauthorizeGoogleCalendar : function(){
+		 return  new Ember.RSVP.Promise((resolve, reject) =>{
+				var url = "/rest/secure/profile/deauthorizeGoogleCalendar";
+				this.doPost(url).then((data ) =>{
+					  resolve(data);
+			      });
+		 });
 	 }
 });

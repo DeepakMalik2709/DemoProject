@@ -13,6 +13,7 @@ export default Ember.Route.extend(authenticationMixin , {
         		photoUrl : result.loginUser.photoUrl,
         		hasUploadedPhoto :  result.loginUser.hasUploadedPhoto,
         		useGoogleDrive : result.loginUser.useGoogleDrive,
+        		useGoogleCalendar : result.loginUser.useGoogleCalendar,
         		refreshTokenAccountEmail : result.loginUser.refreshTokenAccountEmail,
         		sendGroupPostEmail : result.loginUser.sendGroupPostEmail  ,
         		sendGroupPostMentionEmail: result.loginUser.sendGroupPostMentionEmail  ,
@@ -65,11 +66,26 @@ export default Ember.Route.extend(authenticationMixin , {
 	        	}else{
 	        		this.get("profileService").deauthorizeGoogleDrive().then(result=>{
 	        			this.get("controller").set("isSaving", false);
+	        			model.set('useGoogleCalendar', false);
 	        		});
 	        	}
         	}
         },
-        
+        toggleGoogleCalendar : function(){
+        	if(!this.get("controller").get("isSaving")){
+        		this.get("controller").set("isSaving", true);
+	        	var model = this.controller.get('model');
+	        	model.toggleProperty('useGoogleCalendar');
+	        	if(model.get('useGoogleCalendar')){
+	        		window.location.href= "/a/oauth/calendarAuthorization";
+	        	}else{
+	        		this.get("profileService").deauthorizeGoogleCalendar().then(result=>{
+	        			this.get("controller").set("isSaving", false);
+	        			model.set('useGoogleDrive', false);
+	        		});
+	        	}
+        	}
+        },
         toggleValue : function(attribute){
         	var model = this.controller.get('model');
         	model.toggleProperty(attribute);

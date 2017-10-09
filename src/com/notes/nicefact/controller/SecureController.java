@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,7 +29,6 @@ import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.notes.nicefact.comparator.CreatedDateComparator;
@@ -43,7 +40,6 @@ import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.entity.Tutorial;
-import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.UnauthorizedException;
@@ -58,8 +54,6 @@ import com.notes.nicefact.service.TagService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.CommentTO;
-import com.notes.nicefact.to.EventTO;
-import com.notes.nicefact.to.EventsTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
@@ -531,7 +525,7 @@ public class SecureController extends CommonController {
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEM, savedTO);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e );
 
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
 			json.put(Constants.MESSAGE, e.getMessage());
@@ -914,29 +908,28 @@ public class SecureController extends CommonController {
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
-			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
-		
-		        // List the next 10 events from the primary calendar.
-		        DateTime now = new DateTime(System.currentTimeMillis());
-		        Events events = service.events().list("primary").execute();
-		        List<Event> items = events.getItems();
-		        List<EventTO> eventTos = new ArrayList<EventTO>();	       
-		        AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-		        if (items.size() > 0) {
-		        	for (Event event : items) {
-		        		postTos.add(new PostTO(event,user));
+			try {
+				com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
+				// List the next 10 events from the primary calendar.
+				Events events = service.events().list("primary").execute();
+				List<Event> items = events.getItems();
+				AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+				if (items.size() > 0) {
+					for (Event event : items) {
+						postTos.add(new PostTO(event, user));
 					}
-		        	
-		        	json.put(Constants.CODE, Constants.NO_RESULT);
-		            System.out.println("No upcoming events found.");
-		        }		        
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.TOTAL, postTos.size());
-			
-			if (!postTos.isEmpty()) {
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage());
+			}
+			if(postTos.isEmpty()){
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			}else{
 				Collections.sort(postTos, new CreatedDateComparator());
 				json.put(Constants.DATA_ITEMS, postTos);
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.TOTAL, postTos.size());
 			}
 
 		} catch (Exception e) {
@@ -989,6 +982,29 @@ public class SecureController extends CommonController {
 	@POST
 	@Path("/profile/deauthorizeGoogleDrive" )
 	public void deauthorizeGoogleDrive(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JSONException {
+		logger.info("deauthorizeGoogleDrive start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			AppUserService appUserService = new AppUserService(em);
+			AppUser user = appUserService.deauthorizeGoogleDrive(CurrentContext.getEmail());
+			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
+
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("deauthorizeGoogleDrive exit");
+
+	}
+	
+	
+	@POST
+	@Path("/profile/deauthorizeGoogleCalendar" )
+	public void deauthorizeGoogleCalendar(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JSONException {
 		logger.info("deauthorizeGoogleDrive start");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();

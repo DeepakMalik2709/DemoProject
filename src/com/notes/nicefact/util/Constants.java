@@ -71,8 +71,8 @@ public class Constants {
 
 	public static final String GOOGLE_SERVICE_ACCOUNT_SCOPES = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/cloud-platform";
 
-	public static final String GOOGLE_DRIVE_SCOPES = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
-	
+	public static final String GOOGLE_DRIVE_SCOPES = "https://www.googleapis.com/auth/drive.file";
+	public static final String PROFILE_SCOPES = " https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
 	public static final String GOOGLE_CALLBACK = "/googleCallback";
 	
 	public static final String NO_PREVIEW_IMAGE = "/img/no-preview-available.png";

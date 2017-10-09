@@ -14,10 +14,4 @@ App = Ember.Application.extend({
 });
 
 loadInitializers(App, config.modulePrefix);
-
 export default App;
-
-String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
-    return target.split(search).join(replacement);
-};

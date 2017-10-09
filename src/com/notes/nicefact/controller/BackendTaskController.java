@@ -28,10 +28,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
-import org.jsoup.helper.StringUtil;
 
 import com.notes.nicefact.entity.AbstractFile.UPLOAD_TYPE;
-import com.notes.nicefact.entity.AbstractFile;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.BackendTask;
 import com.notes.nicefact.entity.BackendTask.BackendTaskStatus;

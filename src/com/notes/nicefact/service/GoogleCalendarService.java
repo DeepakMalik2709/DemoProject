@@ -36,6 +36,7 @@ import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.Constants;
+import com.notes.nicefact.util.CurrentContext;
 
 public class GoogleCalendarService {
 
@@ -122,10 +123,9 @@ public class GoogleCalendarService {
      * @return an authorized Calendar client service
      * @throws IOException
      */
-    public static com.google.api.services.calendar.Calendar    getCalendarService(HttpServletRequest request) throws IOException {
+    public static com.google.api.services.calendar.Calendar    getCalendarService() throws IOException {
      //   Credential credential = authorize(request);
-        HttpSession session =	request.getSession();
-    	AppUser user = (AppUser) session.getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+    	AppUser user = CurrentContext.getAppUser();
    
     	List<Header> headers = new ArrayList<>();
 		headers.add(new BasicHeader("Authorization", "Bearer " + user.getAccessToken()));

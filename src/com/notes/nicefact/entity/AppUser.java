@@ -19,12 +19,21 @@ import javax.persistence.Transient;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.notes.nicefact.entity.AppUser.AUTHORIZED_SCOPES;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.util.Constants;
 
 @Entity
 public class AppUser extends CommonEntity {
 	private static final long serialVersionUID = -1727664102130129478L;
+	
+	public enum AUTHORIZED_SCOPES{
+		DRIVE, CALENDAR, CONTACTS , HANGOUTS;
+	}
+	
+	@Enumerated(EnumType.STRING)
+	@ElementCollection(fetch = FetchType.EAGER)
+	private Set<AUTHORIZED_SCOPES> scopes = new HashSet<>();
 
 	private String refreshToken;
 	
@@ -121,8 +130,6 @@ public class AppUser extends CommonEntity {
 	@Enumerated(EnumType.STRING)
 	GENDER gender;
 	
-	Boolean useGoogleDrive;
-	
 	String googleDriveFolderId;
 	
 	@Basic
@@ -169,6 +176,8 @@ public class AppUser extends CommonEntity {
 		map.put("isSuperAdmin", getIsSuperAdmin());
 		map.put("photoUrl", Constants.PUBLIC_URL_PREPEND + this.email + Constants.PHOTO_URL);
 		map.put("useGoogleDrive", getUseGoogleDrive());
+		map.put("useGoogleCalendar", getUseGoogleCalendar());
+		
 		map.put("refreshTokenAccountEmail", getRefreshTokenAccountEmail());
 		if(this.googleDriveMsgDate !=null){
 			map.put("googleDriveMsgDate", this.googleDriveMsgDate.getTime());
@@ -186,12 +195,25 @@ public class AppUser extends CommonEntity {
 		return map;
 	}
 
-	public Boolean getUseGoogleDrive() {
-		if(null == useGoogleDrive){
-			useGoogleDrive = false;
+	public Set<AUTHORIZED_SCOPES> getScopes() {
+		if(null == scopes){
+			scopes = new HashSet<>();
 		}
-		return useGoogleDrive;
+		return scopes;
 	}
+
+	public void setScopes(Set<AUTHORIZED_SCOPES> scopes) {
+		this.scopes = scopes;
+	}
+
+	public Boolean getUseGoogleDrive() {
+		return getScopes().contains(AUTHORIZED_SCOPES.DRIVE);
+	}
+	
+	public Boolean getUseGoogleCalendar() {
+		return getScopes().contains(AUTHORIZED_SCOPES.CALENDAR);
+	}
+	
 	public Date getGoogleDriveMsgDate() {
 		return googleDriveMsgDate;
 	}
@@ -270,10 +292,6 @@ public class AppUser extends CommonEntity {
 
 	public void setSendCommentLikeEmail(boolean sendCommentLikeEmail) {
 		this.sendCommentLikeEmail = sendCommentLikeEmail;
-	}
-
-	public void setUseGoogleDrive(Boolean useGoogleDrive) {
-		this.useGoogleDrive = useGoogleDrive;
 	}
 
 	public String getGoogleDriveFolderId() {

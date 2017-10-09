@@ -3,7 +3,6 @@ package com.notes.nicefact.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +20,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
 import org.apache.log4j.Logger;
-import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -36,7 +31,6 @@ import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
-
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.service.AppUserService;
@@ -46,7 +40,6 @@ import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
-import com.notes.nicefact.to.GroupMemberTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.Constants;
@@ -105,7 +98,7 @@ public class CalendarController extends CommonController {
 		//	attendee.setId(user.getu);
 			
 			
-			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
+			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
 			Event event = service.events().get(calendarId, eventId).execute(); 
 			for(EventAttendee evAtt :  event.getAttendees()){
 				if(evAtt.getEmail().equalsIgnoreCase(user.getEmail())){
@@ -131,7 +124,7 @@ public class CalendarController extends CommonController {
 	public void createEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
 		Map<String, Object> json = new HashMap<>();
 		try {
-			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
+			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
 			System.out.println("event : "+schedule);
 			
 			Event event = new Event().set("sendNotifications", true)
@@ -204,46 +197,47 @@ public class CalendarController extends CommonController {
 	@GET
 	@Path("/calendars")
 	public void publicHome(@Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
-		
+
 		System.out.println("in google event ");
-		com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService(request);
-	    
-	
-		
-		
 		Map<String, Object> json = new HashMap<>();
-	        // List the next 10 events from the primary calendar.
-	        DateTime now = new DateTime(System.currentTimeMillis());
-	        Events events = service.events().list("primary").execute();
-	        List<Event> items = events.getItems();
-	        List<EventTO> eventTos = new ArrayList<EventTO>();	       
-	      
-	        if (items.size() == 0) {
-	        	json.put(Constants.CODE, Constants.NO_RESULT);
-	            System.out.println("No upcoming events found.");
-	        } else {
-	        	
-	            System.out.println("Upcoming events");
-	            for (Event event : items) {
-	                DateTime start = event.getStart().getDateTime();
-	                DateTime end = event.getEnd().getDateTime();
-	                if (start == null) {
-	                    start = event.getStart().getDate();
-	                }
-	                if (end == null) {
-	                	end = event.getEnd().getDate();
-	                }
-	                eventTos.add(new EventTO(event.getId(),event.getSummary(), start,end,"#112233","#cc3344"));
-	                System.out.printf("%s (%s)\n", event.getSummary(), start);
-	            }
-	            EventsTO eventsTo = new EventsTO("1",eventTos);
-	            json.put(Constants.CODE, Constants.RESPONSE_OK);
-	        	json.put(Constants.DATA_ITEM, eventsTo);
-	        }
-	        
+		try {
+			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
+
+			// List the next 10 events from the primary calendar.
+			Events events = service.events().list("primary").execute();
+			List<Event> items = events.getItems();
+			List<EventTO> eventTos = new ArrayList<EventTO>();
+
+			if (items.size() == 0) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+				System.out.println("No upcoming events found.");
+			} else {
+
+				System.out.println("Upcoming events");
+				for (Event event : items) {
+					DateTime start = event.getStart().getDateTime();
+					DateTime end = event.getEnd().getDateTime();
+					if (start == null) {
+						start = event.getStart().getDate();
+					}
+					if (end == null) {
+						end = event.getEnd().getDate();
+					}
+					eventTos.add(new EventTO(event.getId(), event.getSummary(), start, end, "#112233", "#cc3344"));
+					System.out.printf("%s (%s)\n", event.getSummary(), start);
+				}
+				EventsTO eventsTo = new EventsTO("1", eventTos);
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, eventsTo);
+			}
+
 			json.put(Constants.TOTAL, items.size());
-			
-			renderResponseJson(json, response);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		}
+		renderResponseJson(json, response);
 	}
 		
 	@GET

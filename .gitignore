@@ -7,4 +7,5 @@
 /keys/allschool1.ppk
 /keys/allschool1.pub
 /keys/notes.txt
-/WebContent/
+/WebContent/WEB-INF/classes
+
