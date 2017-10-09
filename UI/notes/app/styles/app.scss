@@ -22,6 +22,26 @@ display:inline;
 .noborder{
 	border : 0;
 }
+.contenteditable.form-control{
+height:auto;
+}
+.contenteditable-input-group{
+width:100%;
+}
+
+.post-description{
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+    min-height: 52px;
+}
+
+.user-with-email{
+padding : 5px 0 ;
+}
+.black-border-1px{
+border: 1px solid black;
+}
 html,
 body {
   overflow-x: hidden!important;

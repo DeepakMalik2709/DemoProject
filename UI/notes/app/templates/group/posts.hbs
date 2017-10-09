@@ -14,6 +14,9 @@
                     <h3 class="page-header">{{model.name}} - Posts 
                       {{#if model.isAdmin}}
 	                    <span class="pull-right">
+	                      <button type="button" class="btn btn-default {{if showCreatePost 'nodisplay'  'inlinedisplay' }}" {{action 'showCreatePostAction' }}>Create Post</button>
+	                        <button type="button" class="btn btn-default {{if showCreateTask 'nodisplay'  'inlinedisplay' }}" {{action 'showCreateTaskAction' }}>Create Task</button>
+	                        
 	                       {{#link-to 'group.view' model.id tagName="button"  class="btn btn-default"}}
 	                  Group Details
 	                  {{/link-to}}
@@ -31,13 +34,18 @@
 
             <div class="row">
   
-  <div class="col-md-6">
+  <div class="col-md-6 {{if showCreatePost 'inlinedisplay' 'nodisplay' }}">
     {{post-item-form item=newPost buttonLabel='Save Post' savePost="savePost" cancelClicked="cancelCreatePost" controllerRef=controllerRef}}
   </div>
+  
+    <div class="col-md-6 {{if showCreateTask 'inlinedisplay' 'nodisplay' }}">
+    {{task-item-form item=newTask buttonLabel='Save Task' saveTask="saveTask" cancelClicked="cancelCreateTask" controllerRef=controllerRef}}
+  </div>
+  
     </div>
 <hr/>
  <div class="row">
-{{#each posts as |post|}}
+{{#each feeds as |post|}}
  <div class="row">
 {{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
 </div>   

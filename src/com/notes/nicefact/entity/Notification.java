@@ -68,8 +68,24 @@ public class Notification extends CommonEntity{
 	@Enumerated(EnumType.STRING)
 	NotificationType type;
 
-	
 	public Notification(){}
+	
+	public Notification(Task post, AppUser user){
+		this(user);
+		entityId = post.getId();
+		groupId = post.getGroupId();
+		if(null != groupId){
+			Group group = CacheUtils.getGroup(groupId);
+			groupName = group.getName();
+		}
+		
+		this.type = NotificationType.TASK;
+		this.title = stripEmailFromComments(post.getComment());
+		if(this.title.length() > 150){
+			this.title = this.title.substring(0, 150);
+		}
+		
+	}
 	
 	/* user is person generating notification , i.e. logged in user*/
 	public Notification(AppUser user){

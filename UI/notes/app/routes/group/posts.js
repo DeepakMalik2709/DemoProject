@@ -19,11 +19,14 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     setupController: function(controller, model) {
         this._super(controller, model);
         this.set('posts', []);
+        this.set('tasks', []);
         this.hasMoreRecords = true;
         this.nextPageLink = null;
         this.isFetching =false;
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         this.controller.set("posts", this.posts);
+        this.controller.set("tasks", this.tasks);
+        this.controller.set("feeds", []);
         this.controller.set('controllerRef', this)
         this.controller.set("noRecords", false);
         this.initCreatePost();
@@ -33,12 +36,27 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     willDestroy : function(){
     	this.unbindScrolling();
     },
+    initCreateTab : function(){
+    	this.controller.set("showCreatePost", false);
+    	this.controller.set("showCreateTask", false);
+    },
     initCreatePost : function(){
+    	 this.initCreateTab();
+    	this.controller.set("showCreatePost", true);
     	var group = this.controller.get("model");
     	 const newPost = this.store.createRecord('post', {
     		 groupId: group.id,
 	      }); 
     	  this.controller.set("newPost", newPost);
+    },
+    initCreateTask : function(){
+    	 this.initCreateTab();
+    	this.controller.set("showCreateTask", true);
+    	var group = this.controller.get("model");
+    	 const newTask = this.store.createRecord('task', {
+    		 groupId: group.id,
+	      }); 
+    	  this.controller.set("newTask", newTask);
     },
     fetchGroupPosts : function(){
     	if(this.hasMoreRecords && ! this.isFetching){
@@ -47,14 +65,25 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    	this.get("groupService").fetchGroupPosts(group, this.nextPageLink).then((result)=>{
 	    		this.isFetching = false;
 	    		if(result.code == 0 ){
+	    			var newFeeds = [];
 		    		if( result.items && result.items.length){
 		    			var thisPosts = result.items;
 		    			 this.controller.get("posts").pushObjects(thisPosts);
-		    		}else{
+		    			 newFeeds.pushObjects(thisPosts);
+		    		}
+		    		if( result.tasks && result.tasks.length){
+		    			var thisPosts = result.tasks;
+		    			this.controller.get("tasks").pushObjects(thisPosts);
+		    			newFeeds.pushObjects(thisPosts);
+		    		}
+		    		if(newFeeds.length == 0){
 	    				this.hasMoreRecords = false;
-	    				if( this.controller.get("posts").length == 0){
+	    				if( this.controller.get("feeds").length == 0){
 	    					this.controller.set("noRecords", true);
 	    				}
+		    		}else{
+		    			 this.controller.get("feeds").pushObjects(newFeeds.sortBy("updatedTime").reverse());
+		    			// this.controller.get("feeds");
 		    		}
 	   			 	this.nextPageLink = result.nextLink;
 		    	}
@@ -120,5 +149,49 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
         error(reason){
         	this.transitionTo('dashboard');
         },
+        showCreatePostAction(){
+        	this.initCreatePost();
+        },
+        showCreateTaskAction(){
+        	this.initCreateTask();
+        },
+        saveTask(task){
+    		if(!Ember.get(this, "isSaving") && task.comment){
+    			console.log(task.toJSON())
+    			Ember.set(this, "isSaving", true);
+    			Ember.set(task, "isSaving", true);
+    			Ember.set(task, "showLoading", true);
+	    		task.save().then((resp1) => {
+	    			Ember.set(this, "isSaving", false);
+	    			Ember.set(task, "isSaving", false);
+	    			Ember.set(task, "showLoading", false);
+	    			var tasks = this.controller.get("tasks");
+	    			var index = tasks.indexOf(task);
+	    			if(index > -1){
+	    				resp1.set('isEditing' , false)
+	    				tasks.replace(index, 1, resp1);
+	    			}else{
+	    				this.initCreateTask();
+	    				Ember.run.later(()=>{this.component.resetCommentBox();} , 10)
+	    				tasks.unshiftObject(resp1);
+	    			}
+	    		});
+    		}
+    	},
+    	cancelCreateTask(){
+  		  if (this.controller.get("newTask.comment")) {
+  			   let confirmation = confirm("Cancel task ?");
+  	            if (confirmation) {
+  	            	  	this.initCreatePost();
+  	    	    		this.component.resetCommentBox();
+  	    	    		Ember.set(this, "isSaving", false);
+  	            }
+  		  }else{
+  			  	this.initCreateTask();
+  	    		this.component.resetCommentBox();
+  	    		Ember.set(this, "isSaving", false);
+  		  }
+  	},
+        
     }
 });
