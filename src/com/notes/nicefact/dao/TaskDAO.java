@@ -23,15 +23,17 @@ public class TaskDAO  extends CommonDAOImpl<Task> {
 	
 	public List<Task> search(SearchTO searchTO) {
 		List<Task> results = new ArrayList<>();
-		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t from Task t where  t.groupId = :groupId order by t.updatedTime desc");
-		query.setParameter("groupId", searchTO.getGroupId());
-		query.setFirstResult(searchTO.getFirst());
+		if ( searchTO.getGroupId() >0) {
+			EntityManager pm = super.getEntityManager();
+			Query query = pm.createQuery("select t from Task t where  t.groupId = :groupId order by t.updatedTime desc");
+			query.setParameter("groupId", searchTO.getGroupId());
+			query.setFirstResult(searchTO.getFirst());
 
-		query.setMaxResults(searchTO.getLimit());
-		try {
-			results = (List<Task>) query.getResultList();
-		} catch (NoResultException nre) {
+			query.setMaxResults(searchTO.getLimit());
+			try {
+				results = (List<Task>) query.getResultList();
+			} catch (NoResultException nre) {
+			}
 		}
 		return results;
 	}

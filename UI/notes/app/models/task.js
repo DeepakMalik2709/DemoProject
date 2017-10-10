@@ -12,6 +12,9 @@ export default DS.Model.extend({
 	  createdByName: DS.attr('string'),
 	  updatedByEmail: DS.attr('string'),
 	  isSaving : DS.attr('boolean'),
+	  isTask :  DS.attr( {
+		    defaultValue() { true }
+	  }),
 	  files: DS.attr( {
 		    defaultValue() { return []; }
 		  }),

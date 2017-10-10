@@ -4,6 +4,66 @@
 
 @import url(http://fonts.googleapis.com/css?family=Kaushan+Script);
 
+.file-list a{
+text-decoration:none;
+}
+
+.file-list .popover-box {
+	position: absolute;
+	top: auto;
+	bottom: 0;
+	left: 0;
+	height: 250px;
+	width: 250px;
+	z-index:-50;
+}
+
+.file-list .popover-box.show {
+	z-index:0;
+}
+
+.file-list .popover {
+    top: auto;
+    border-radius: 0;
+    bottom: 29px;
+    font-size: 14px;
+    display:block;
+}
+
+.file-list .popover-content {
+    padding: 5px;
+}
+
+.file-list .popover-content .popup-file-preview {
+    -moz-box-shadow: inset 0 0 2px #ccc;
+    -webkit-box-shadow: inset 0 0 2px #ccc;
+    box-shadow: inset 0 0 2px #ccc;
+    border: 1px solid #ccc;
+    margin-bottom: 5px;
+}
+
+.file-list .popover-content .popup-file-preview img{
+	max-width: 100%;
+    margin: 1px 4px 0 0;
+    vertical-align: top;
+    }
+    
+.connectedAccount{
+	vertical-align: super;
+    font-weight: bold;
+}   
+
+.pos-rel {
+	position: relative;
+}
+
+.task-submission-comment{
+	width : 90%;
+}
+.post .post-description-div {
+    padding: 15px;
+    overflow: visible;
+}
 .pointer{
 cursor:pointer;
 }
@@ -42,6 +102,55 @@ padding : 5px 0 ;
 .black-border-1px{
 border: 1px solid black;
 }
+/* 
+aside.right-side .row:nth-child(2){
+	    margin-left: 10px;
+    margin-right: 10px;
+}
+ */
+ 
+ 
+/* content editable start */
+
+[contenteditable]:empty:not(:focus):before,
+[contenteditable]:focus:empty:before {
+  content: attr(placeholder);
+}
+
+.ember-content-editable.clear-on-focus[contenteditable]:empty:focus:before {
+  content: '';
+}
+
+[contenteditable] {
+  cursor: text;
+}
+
+.ember-content-editable:empty {
+  color: #a9a9a9;
+}
+
+.ember-content-editable:empty:after {
+  content: "\0000a0";
+}
+.usertag {
+    cursor: pointer;
+    padding: 0 5px;
+	margin: 3px 3px 3px 0;
+	display: inline-block;
+	white-space: nowrap;
+	background: #cde3f2;
+	border-radius: 4px;
+	border: 1px solid #B0D6F0;
+}
+.usertag.os-tag {
+	background: #e8e8e8;
+    border: 1px solid #d5d5d5;
+}
+.usertag.inactive{
+	background-color: #eee;
+	border-color : #eee;
+}
+/* content editable end*/
 html,
 body {
   overflow-x: hidden!important;
@@ -89,7 +198,11 @@ a:focus {
 /*right side - contins main content*/
 .right-side {
   background-color: #f9f9f9;
-  margin-left: 220px;
+  margin-left: 250px;
+   margin-right: 10px;
+}
+.right-side.strech {
+ margin-left: 10px;
 }
 /*left side - contains sidebar*/
 .left-side {
@@ -3001,10 +3114,7 @@ width:100%;
 .notification-li{
 	margin : 10px;
 }
-aside.right-side .row:nth-child(2){
-	    margin-left: 10px;
-    margin-right: 10px;
-}
+
 .profile-img.avatar{
 	    margin-right: 50px;
     margin-left: 100px;

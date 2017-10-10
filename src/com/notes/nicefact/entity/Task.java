@@ -2,6 +2,7 @@ package com.notes.nicefact.entity;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +36,9 @@ public class Task extends CommonEntity{
 	@ElementCollection(fetch = FetchType.LAZY)
 	Set<String> accessList;
 	
+	@ElementCollection(fetch = FetchType.LAZY)
+	Set<String> submitters = new HashSet<>();
+	
 	@Column(columnDefinition = "TEXT")
 	String  comment;
 	
@@ -42,6 +46,8 @@ public class Task extends CommonEntity{
 	Boolean isEdited = false;
 	
 	private String zipFilePath;
+	
+	String googleDriveFolderId;
 	
 	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
 	protected List<TaskFile> files = new ArrayList<>();
@@ -67,7 +73,14 @@ public class Task extends CommonEntity{
 	public Task() {
 		super();
 	}
-	
+	public String getGoogleDriveFolderId() {
+		return googleDriveFolderId;
+	}
+
+	public void setGoogleDriveFolderId(String googleDriveFolderId) {
+		this.googleDriveFolderId = googleDriveFolderId;
+	}
+
 	public List<TaskFile> getFiles() {
 		return files;
 	}
@@ -131,4 +144,17 @@ public class Task extends CommonEntity{
 	public void setZipFilePath(String zipFilePath) {
 		this.zipFilePath = zipFilePath;
 	}
+
+	public Set<String> getSubmitters() {
+		if(null == submitters){
+			submitters = new HashSet<>();
+		}
+		return submitters;
+	}
+
+	public void setSubmitters(Set<String> submitters) {
+		this.submitters = submitters;
+	}
+	
+	
 }

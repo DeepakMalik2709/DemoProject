@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.Task;
+import com.notes.nicefact.entity.TaskFile;
+import com.notes.nicefact.util.CurrentContext;
 
 /**
  * @author JKB DTO to send / get Task state
@@ -34,6 +36,8 @@ public class TaskTO {
 	String updatedByEmail;
 
 	Boolean isEdited = false;
+	
+	Boolean isSubmitted = false;
 
 	private String zipFilePath;
 
@@ -59,6 +63,13 @@ public class TaskTO {
 		this.updatedByEmail = task.getUpdatedBy();
 		this.isEdited = task.getIsEdited();
 		this.zipFilePath = task.getZipFilePath();
+		if(CurrentContext.getAppUser() !=null){
+			this.isSubmitted = task.getSubmitters().contains(CurrentContext.getEmail());
+		}
+		for( TaskFile file : task.getFiles()){
+			FileTO fileTO = new FileTO(file);
+			this.files.add(fileTO);
+		}
 	}
 
 	public TaskTO() {
@@ -191,7 +202,16 @@ public class TaskTO {
 	public void setSubmissions(List<TaskSubmissionTO> submissions) {
 		this.submissions = submissions;
 	}
-	public boolean isTask(){
+	public boolean getIsTask(){
 		return true;
 	}
+
+	public Boolean getIsSubmitted() {
+		return isSubmitted;
+	}
+
+	public void setIsSubmitted(Boolean isSubmitted) {
+		this.isSubmitted = isSubmitted;
+	}
+	
 }

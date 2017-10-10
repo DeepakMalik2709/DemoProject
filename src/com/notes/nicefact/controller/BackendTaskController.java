@@ -30,6 +30,7 @@ import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 
 import com.notes.nicefact.entity.AbstractFile.UPLOAD_TYPE;
+import com.notes.nicefact.dao.TaskSubmissionDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.BackendTask;
 import com.notes.nicefact.entity.BackendTask.BackendTaskStatus;
@@ -44,10 +45,13 @@ import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostRecipient;
 import com.notes.nicefact.entity.Task;
 import com.notes.nicefact.entity.TaskFile;
+import com.notes.nicefact.entity.TaskSubmission;
+import com.notes.nicefact.entity.TaskSubmissionFile;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.entity.TutorialFile;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.enums.NotificationType;
+import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
@@ -1100,18 +1104,22 @@ public class BackendTaskController extends CommonController {
 		renderResponseRaw(true, response);
 	}
 	
-	private void moveGroupPostFilesToUserGoogleDrive(Task post, AppUser user, EntityManager em) {
+	private void moveTaskFilesToUserGoogleDrive(Task task, AppUser user, EntityManager em) {
 		CommonEntityService commonService = new CommonEntityService(em);
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
-		List<TaskFile> files = post.getFiles();
+		List<TaskFile> files = task.getFiles();
 		GoogleDriveFile driveFile;
-		for (TaskFile postFile : files) {
+		for (int index = 0 ; index < files.size(); index++) {
+			TaskFile postFile = files.get(index);
 			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
 				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
 				try {
 					driveFile = driveService.uploadFileToUserAccount(postFile, user);
 					if (null != driveFile) {
-						driveService.moveFile(driveFile.getId(), user.getGoogleDriveFolderId(), user);
+						if(null == task.getGoogleDriveFolderId()){
+							makeTaskGoogleDriveFolder(task , user , em);
+						}
+						driveService.moveFile(driveFile.getId(), task.getGoogleDriveFolderId(), user);
 						driveService.renameFile(driveFile.getId(), postFile.getName(), user);
 						postFile.setGoogleDriveId(driveFile.getId());
 						postFile.setIcon(driveFile.getIconLink());
@@ -1159,60 +1167,6 @@ public class BackendTaskController extends CommonController {
 		}
 	}
 	
-	private void generateGroupPostFileThumbnail(EntityManager em, Task post) throws InterruptedException, IOException {
-		CommonEntityService commonService = new CommonEntityService(em);
-		GoogleDriveService driveService = GoogleDriveService.getInstance();
-		List<TaskFile> files = post.getFiles();
-		GoogleDriveFile driveFile;
-		List<GoogleDriveFile> driveFiles = new ArrayList<>();
-		for (TaskFile postFile : files) {
-			if (StringUtils.isBlank(postFile.getThumbnail())) {
-				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
-				driveFile = driveService.uploadFileToServiceAccount(postFile);
-				if (null != driveFile) {
-					driveService.moveFileServiceAccount(driveFile.getId(), AppProperties.getInstance().getDriveThumbnailFolderId());
-					driveFile.setServerPath(postFile.getPath());
-					driveFiles.add(driveFile);
-					postFile.setTempGoogleDriveId(driveFile.getId());
-					commonService.upsert(postFile);
-				}
-			}
-		}
-
-		Thread.sleep(60000);
-		/* download thumbnail links and update postfile in db */
-
-		for (GoogleDriveFile googleDriveFile : driveFiles) {
-			if (StringUtils.isBlank(googleDriveFile.getThumbnailLink())) {
-				driveFile = driveService.getFileFieldsServiceAccount(googleDriveFile.getId(), "thumbnailLink");
-				if (driveFile != null && StringUtils.isNotBlank(driveFile.getThumbnailLink())) {
-					googleDriveFile.setThumbnailLink(driveFile.getThumbnailLink());
-				}
-			}
-
-			if (StringUtils.isBlank(googleDriveFile.getThumbnailLink())) {
-				logger.info("failed to get thumbnail for : " + googleDriveFile.getMimeType() + " , " + googleDriveFile.getServerPath() + " , " + googleDriveFile.getTitle());
-			} else {
-				for (TaskFile postFile : files) {
-					if (StringUtils.isNotBlank(postFile.getPath()) && postFile.getPath().equals(googleDriveFile.getServerPath())) {
-						HttpResponse httpResponse = driveService.makeServiceAccountGetRequest(googleDriveFile.getThumbnailLink(), null);
-						if (null != httpResponse && httpResponse.getStatusLine().getStatusCode() == 200 && httpResponse.getEntity() != null) {
-							byte[] thumbnailBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
-							FileTO fileTo = Utils.writeGroupPostFileThumbnail(thumbnailBytes, post.getGroupId(), postFile.getName());
-
-							postFile.setThumbnail(fileTo.getServerName());
-							postFile.setTempGoogleDriveId(null);
-							commonService.upsert(postFile);
-							driveService.deleteFileServiceAccount(googleDriveFile.getId());
-						}
-						break;
-					}
-				}
-
-			}
-		}
-	}
-	
 	@POST
 	@Path("task/addThumbnail")
 	public void addThumbnailToTaskFiles(@QueryParam("taskId") Long taskId, @Context HttpServletResponse response) throws IOException, InterruptedException {
@@ -1223,9 +1177,7 @@ public class BackendTaskController extends CommonController {
 			Task post = taskService.get(taskId);
 			AppUser user = CacheUtils.getAppUser(post.getCreatedBy());
 			if (user.getUseGoogleDrive() && StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
-				moveGroupPostFilesToUserGoogleDrive(post, user, em);
-			} else {
-				generateGroupPostFileThumbnail(em, post);
+				moveTaskFilesToUserGoogleDrive(post, user, em);
 			}
 
 		} catch (Exception e) {
@@ -1240,5 +1192,117 @@ public class BackendTaskController extends CommonController {
 		renderResponseRaw(true, response);
 	}
 
+	private void moveTaskSubmissionFilesToUserGoogleDrive(Task task, TaskSubmission submission , AppUser user, EntityManager em) {
+		CommonEntityService commonService = new CommonEntityService(em);
+		GoogleDriveService driveService = GoogleDriveService.getInstance();
+		List<TaskSubmissionFile> files = submission.getFiles();
+		GoogleDriveFile driveFile;
+		for (TaskSubmissionFile postFile : files) {
+			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
+				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
+				try {
+					driveFile = driveService.uploadFileToUserAccount(postFile, user);
+					if (null != driveFile) {
+						if(null == task.getGoogleDriveFolderId()){
+							makeTaskGoogleDriveFolder(task , user , em);
+						}
+						driveService.moveFile(driveFile.getId(), task.getGoogleDriveFolderId(), user);
+						driveService.renameFile(driveFile.getId(), postFile.getName(), user);
+						postFile.setGoogleDriveId(driveFile.getId());
+						postFile.setIcon(driveFile.getIconLink());
+						postFile.setDriveLink(driveFile.getEditLink());
+						postFile.setEmbedLink(driveFile.getEmbedLink());
+						postFile.setUploadType(UPLOAD_TYPE.GOOGLE_DRIVE);
+						commonService.upsert(postFile);
+						try {
+							Files.deleteIfExists(Paths.get(postFile.getPath()));
+						} catch (IOException e) {
+							logger.error("could not delete : " + postFile.getPath() + " , " + e.getMessage(), e);
+						}
+						getGroupPostFilesThumbnailFromDriveFile(driveFile,task, postFile, user, commonService);
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			} else if (StringUtils.isBlank(postFile.getThumbnail())) {
+				driveFile = driveService.getFileFields(postFile.getGoogleDriveId(), "thumbnailLink", user);
+				getGroupPostFilesThumbnailFromDriveFile(driveFile, task, postFile, user, commonService);
+			}else {
+				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
+			}
+		}
+	}
+	
+	private void makeTaskGoogleDriveFolder(Task task ,  AppUser user, EntityManager em) {
+		Group group = CacheUtils.getGroup(task.getGroupId());
+		String name = group.getName() + "-task-" + task.getId();
+		GoogleDriveService googleDriveService = GoogleDriveService.getInstance();
+		 GoogleDriveFile folder = googleDriveService.createNewFile(name, GoogleFileTypes.FOLDER, user);
+		if (null == folder) {
+			String msg = "cannot make group task folder for : " + user.getEmail();
+			logger.error(msg);
+			throw new ServiceException(msg);
+		} else {
+			googleDriveService.moveFile(folder.getId(), user.getGoogleDriveFolderId(), user);
+			task.setGoogleDriveFolderId(folder.getId());
+			TaskService taskService = new TaskService(em);
+			taskService.upsert(task);
 
+		}
+		
+	}
+
+	void getGroupPostFilesThumbnailFromDriveFile(GoogleDriveFile driveFile,Task task, TaskSubmissionFile postFile, AppUser user, CommonEntityService commonService ) {
+		if (null != driveFile && StringUtils.isNotBlank(driveFile.getThumbnailLink())) {
+			GoogleDriveService driveService = GoogleDriveService.getInstance();
+			try {
+				HttpResponse httpResponse = driveService.doGet(driveFile.getThumbnailLink(), null, user);
+				if (null != httpResponse && httpResponse.getStatusLine().getStatusCode() == 200 && httpResponse.getEntity() != null) {
+					/*
+					 * save thumbnail file in local storage and
+					 * udpate database
+					 */
+					byte[] thumbnailBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
+					FileTO fileTo = Utils.writeGroupPostFileThumbnail(thumbnailBytes, task.getGroupId(), postFile.getName());
+					postFile.setThumbnail(fileTo.getServerName());
+					commonService.upsert(postFile);
+				} 
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+	}
+	
+	@POST
+	@Path("task/submission")
+	public void afterTaskSubmissionSave(@QueryParam("taskId") Long taskId, @QueryParam("submissionId") Long submissionId, @Context HttpServletResponse response) throws IOException, InterruptedException {
+		logger.info("afterTaskSubmissionSave, taskId : " + taskId + " , submissionId : " + submissionId);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			TaskSubmissionDAO taskSubmissionDAO = new TaskSubmissionDAO(em);
+			
+				Task task = taskService.get(taskId);
+				TaskSubmission submission = taskSubmissionDAO.get(submissionId);
+				if (task == null || submission == null) {
+					logger.warn("cannot fetch from db , task : " + task + ", submission : " + submission);
+				}
+				AppUser user = CacheUtils.getAppUser(task.getCreatedBy());
+				if (user.getUseGoogleDrive() && StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
+					moveTaskSubmissionFilesToUserGoogleDrive(task, submission, user, em);
+				} else {
+					logger.warn("User has not given google permission.");
+				}
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+
+		logger.info("exit afterTaskSubmissionSave");
+		renderResponseRaw(true, response);
+	}
 }

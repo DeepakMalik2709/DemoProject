@@ -339,7 +339,7 @@ public class PostTO {
 	public void setEventId(String eventId) {
 		this.eventId = eventId;
 	}
-	public boolean isPost(){
+	public boolean getIsPost(){
 		return true;
 	}
 }

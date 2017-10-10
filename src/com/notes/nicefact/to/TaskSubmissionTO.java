@@ -1,6 +1,7 @@
 package com.notes.nicefact.to;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.TaskSubmission;
@@ -12,28 +13,12 @@ public class TaskSubmissionTO {
 
 	Long id;
 	String comment;
-	String name;
-
-	String fileName;
-
-	String serverName;
-
-	String mimeType;
-
-	String size;
-
-	String icon;
-
-	long sizeBytes;
-
-	long downloadCount = 0;
-	boolean hasThumbnail;
-	String thumbnailLink;
-
-	String driveLink;
-
-	String embedLink;
-	boolean isDriveFile;
+	
+	String submitterName;
+	
+	String submitterEmail;
+	
+	List<FileTO> files = new ArrayList<>();
 
 	long createdTime;
 
@@ -47,6 +32,11 @@ public class TaskSubmissionTO {
 		this.taskId = submission.getTaskId() ;
 		this.id =  submission.getId();
 		this.comment = submission.getComment();
+		this.createdTime = submission.getCreatedTime().getTime();
+		this.updatedTime = submission.getUpdatedTime().getTime();
+		//TODO : populate files
+		/*
+		
 		this.name = submission.getCreatedByName();
 		this.fileName = submission.getName();
 		this.serverName = submission.getServerName();
@@ -59,9 +49,8 @@ public class TaskSubmissionTO {
 		this.thumbnailLink = submission.getThumbnail();
 		this.driveLink = submission.getDriveLink();
 		this.embedLink = submission.getEmbedLink();
-		isDriveFile = StringUtils.isNotBlank(this.driveLink);
-		this.createdTime = submission.getCreatedTime().getTime();
-		this.updatedTime = submission.getUpdatedTime().getTime();
+		isDriveFile = StringUtils.isNotBlank(this.driveLink);*/
+		
 	}
 
 	public TaskSubmissionTO() {
@@ -92,100 +81,28 @@ public class TaskSubmissionTO {
 		this.comment = comment;
 	}
 
-	public String getName() {
-		return name;
+	public String getSubmitterName() {
+		return submitterName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setSubmitterName(String submitterName) {
+		this.submitterName = submitterName;
 	}
 
-	public String getFileName() {
-		return fileName;
+	public String getSubmitterEmail() {
+		return submitterEmail;
 	}
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
+	public void setSubmitterEmail(String submitterEmail) {
+		this.submitterEmail = submitterEmail;
 	}
 
-	public String getServerName() {
-		return serverName;
+	public List<FileTO> getFiles() {
+		return files;
 	}
 
-	public void setServerName(String serverName) {
-		this.serverName = serverName;
-	}
-
-	public String getMimeType() {
-		return mimeType;
-	}
-
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
-	}
-
-	public String getSize() {
-		return size;
-	}
-
-	public void setSize(String size) {
-		this.size = size;
-	}
-
-	public String getIcon() {
-		return icon;
-	}
-
-	public void setIcon(String icon) {
-		this.icon = icon;
-	}
-
-	public long getSizeBytes() {
-		return sizeBytes;
-	}
-
-	public void setSizeBytes(long sizeBytes) {
-		this.sizeBytes = sizeBytes;
-	}
-
-	public long getDownloadCount() {
-		return downloadCount;
-	}
-
-	public void setDownloadCount(long downloadCount) {
-		this.downloadCount = downloadCount;
-	}
-
-	public boolean isHasThumbnail() {
-		return hasThumbnail;
-	}
-
-	public void setHasThumbnail(boolean hasThumbnail) {
-		this.hasThumbnail = hasThumbnail;
-	}
-
-	public String getDriveLink() {
-		return driveLink;
-	}
-
-	public void setDriveLink(String driveLink) {
-		this.driveLink = driveLink;
-	}
-
-	public String getEmbedLink() {
-		return embedLink;
-	}
-
-	public void setEmbedLink(String embedLink) {
-		this.embedLink = embedLink;
-	}
-
-	public boolean isDriveFile() {
-		return isDriveFile;
-	}
-
-	public void setDriveFile(boolean isDriveFile) {
-		this.isDriveFile = isDriveFile;
+	public void setFiles(List<FileTO> files) {
+		this.files = files;
 	}
 
 	public long getCreatedTime() {
@@ -203,6 +120,5 @@ public class TaskSubmissionTO {
 	public void setUpdatedTime(long updatedTime) {
 		this.updatedTime = updatedTime;
 	}
-	
 	
 }

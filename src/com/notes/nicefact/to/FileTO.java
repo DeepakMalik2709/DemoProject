@@ -31,7 +31,7 @@ public class FileTO {
 	
 	String embedLink;
 	boolean isDriveFile;
-	
+	public FileTO(){}
 	public FileTO(EventAttachment attach) {
 		super();
 		this.name = attach.getTitle();

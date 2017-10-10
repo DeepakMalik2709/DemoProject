@@ -3,7 +3,6 @@ import scrollMixin from '../../mixins/scroll';
 import authenticationMixin from '../../mixins/authentication';
 
 export default Ember.Route.extend(scrollMixin,authenticationMixin,{
-
 	posts : null,
     model(params) {
         return this.store.findRecord('group', params.groupId);
@@ -13,19 +12,21 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     isFetching :false,
     groupService: Ember.inject.service('group'),
     postService: Ember.inject.service('post'),
+    useGoogleDrive : false,
     init() {
 	    this._super(...arguments);
+	    this.contextService.fetchContext(result=>{
+			if(result && result.code==0){
+				 this.useGoogleDrive = Ember.get(result , "loginUser.useGoogleDrive")
+			}
+		});
 	  },
     setupController: function(controller, model) {
         this._super(controller, model);
-        this.set('posts', []);
-        this.set('tasks', []);
         this.hasMoreRecords = true;
         this.nextPageLink = null;
         this.isFetching =false;
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
-        this.controller.set("posts", this.posts);
-        this.controller.set("tasks", this.tasks);
         this.controller.set("feeds", []);
         this.controller.set('controllerRef', this)
         this.controller.set("noRecords", false);
@@ -68,12 +69,10 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    			var newFeeds = [];
 		    		if( result.items && result.items.length){
 		    			var thisPosts = result.items;
-		    			 this.controller.get("posts").pushObjects(thisPosts);
 		    			 newFeeds.pushObjects(thisPosts);
 		    		}
 		    		if( result.tasks && result.tasks.length){
 		    			var thisPosts = result.tasks;
-		    			this.controller.get("tasks").pushObjects(thisPosts);
 		    			newFeeds.pushObjects(thisPosts);
 		    		}
 		    		if(newFeeds.length == 0){
@@ -103,7 +102,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    			Ember.set(this, "isSaving", false);
 	    			Ember.set(post, "isSaving", false);
 	    			Ember.set(post, "showLoading", false);
-	    			var posts = this.controller.get("posts");
+	    			var posts = this.controller.get("feeds");
 	    			var index = posts.indexOf(post);
 	    			if(index > -1){
 	    				resp1.set('isEditing' , false)
@@ -120,7 +119,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
             let confirmation = confirm("Are you sure you want to delete post ?");
 
             if (confirmation) {
-            	var posts = this.controller.get("posts");
+            	var posts = this.controller.get("feeds");
     			var index = posts.indexOf(post);
     			posts.removeAt(index);
     			this.get("postService").deletePost(post.get("groupId"), post.get("id")).then((result)=>{
@@ -153,11 +152,16 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
         	this.initCreatePost();
         },
         showCreateTaskAction(){
-        	this.initCreateTask();
+        	if(this.useGoogleDrive){
+        		this.initCreateTask();
+        	}else{
+        		if(confirm("AllSchool needs access to Google Drive and Calendar to create Tasks. Would you like to grant permission now ?")){
+        			window.location.href= "/a/oauth/googleAllAuthorization";
+        		}
+        	}
         },
         saveTask(task){
     		if(!Ember.get(this, "isSaving") && task.comment){
-    			console.log(task.toJSON())
     			Ember.set(this, "isSaving", true);
     			Ember.set(task, "isSaving", true);
     			Ember.set(task, "showLoading", true);
@@ -165,7 +169,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    			Ember.set(this, "isSaving", false);
 	    			Ember.set(task, "isSaving", false);
 	    			Ember.set(task, "showLoading", false);
-	    			var tasks = this.controller.get("tasks");
+	    			var tasks = this.controller.get("feeds");
 	    			var index = tasks.indexOf(task);
 	    			if(index > -1){
 	    				resp1.set('isEditing' , false)
@@ -192,6 +196,18 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
   	    		Ember.set(this, "isSaving", false);
   		  }
   	},
-        
+	deleteTask(task){
+        let confirmation = confirm("Are you sure you want to delete task ?");
+
+        if (confirmation) {
+        	var posts = this.controller.get("feeds");
+			var index = posts.indexOf(post);
+			posts.removeAt(index);
+			this.get("taskService").deleteTask(post.get("groupId"), task.get("id")).then((result)=>{
+        		if(result.code == 0){
+	    		}
+	    	});
+        }
+	}, 
     }
 });

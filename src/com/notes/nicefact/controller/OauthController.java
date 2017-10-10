@@ -48,6 +48,7 @@ import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
 import com.notes.nicefact.util.EntityManagerHelper;
+import com.notes.nicefact.util.Utils;
 
 @Path("/oauth")
 public class OauthController {
@@ -249,7 +250,11 @@ public class OauthController {
 			} else {
 				appUserService.updatePublicDetails(user, userTo);
 			}
-			user.setAccessToken(accessToken);
+			if(StringUtils.isNotBlank(user.getRefreshToken())){
+				Utils.refreshToken(user);
+			}else{
+				user.setAccessToken(accessToken);
+			}
 			CacheUtils.addUserToCache(user);
 			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
 			

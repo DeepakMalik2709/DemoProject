@@ -58,6 +58,9 @@ public class CommentTO {
 		this.resposeStatus = resposeStatus;
 	}
 
+	public CommentTO() {
+		
+	}
 	public CommentTO(EventAttendee attendee) {
 		super();
 		this.attendeeId = attendee.getId();

@@ -18,6 +18,9 @@ export default DS.Model.extend({
 	  reponseMaybe: DS.attr('number'),
 	  totalAttendee: DS.attr('number'),
 	  isSaving : DS.attr('boolean'),
+	  isPost :  DS.attr( {
+		    defaultValue() { true }
+	  }),
 	  files: DS.attr( {
 		    defaultValue() { return []; }
 		  }),

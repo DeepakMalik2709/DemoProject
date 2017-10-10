@@ -47,7 +47,11 @@
  <div class="row">
 {{#each feeds as |post|}}
  <div class="row">
+ {{#if post.isTask}}
+ {{task-item item=post updateTask="saveTask" deleteTask="deleteTask" group=model }}
+ {{else if post.isPost}}
 {{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
+{{/if}}
 </div>   
 {{/each}}
 

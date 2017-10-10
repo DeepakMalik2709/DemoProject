@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.entity.Task;
+import com.notes.nicefact.entity.TaskSubmission;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.exception.NotFoundException;
@@ -64,6 +66,7 @@ import com.notes.nicefact.to.NotificationTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TagTO;
+import com.notes.nicefact.to.TaskSubmissionTO;
 import com.notes.nicefact.to.TaskTO;
 import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.CacheUtils;
@@ -938,9 +941,15 @@ public class SecureController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			PostService postService = new PostService(em);
+			TaskService taskService = new TaskService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
+			List<Object> feed = new ArrayList<>();
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
+			Collections.sort(postTos, new CreatedDateComparator());
+			List<TaskTO> taskTos = taskService.searchTasks(searchTO);
+			feed.addAll(postTos);
+			feed.addAll(taskTos);
 			try {
 				com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
 				// List the next 10 events from the primary calendar.
@@ -955,11 +964,11 @@ public class SecureController extends CommonController {
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 			}
-			if(postTos.isEmpty()){
+			if(feed.isEmpty()){
 				json.put(Constants.CODE, Constants.NO_RESULT);
 			}else{
-				Collections.sort(postTos, new CreatedDateComparator());
-				json.put(Constants.DATA_ITEMS, postTos);
+				
+				json.put(Constants.DATA_ITEMS, feed);
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 				json.put(Constants.CODE, Constants.RESPONSE_OK);
 				json.put(Constants.TOTAL, postTos.size());
@@ -1155,4 +1164,33 @@ public class SecureController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("markNotificationAsRead exit");
 	}
+	
+
+	@POST
+	@Path("task/submission")
+	public void taskSubmission(TaskSubmissionTO sumbmissionTO, @Context HttpServletRequest request, @Context HttpServletResponse response) {
+		logger.info("upsertGroupTask start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			TaskSubmission post = taskService.upsertTaskSubmission(sumbmissionTO, CurrentContext.getAppUser());
+			TaskSubmissionTO savedTO = new TaskSubmissionTO(post);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, savedTO);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e );
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("upsertGroupTask exit");
+	}
+	
+
 }

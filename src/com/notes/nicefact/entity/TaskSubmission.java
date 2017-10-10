@@ -1,12 +1,18 @@
 package com.notes.nicefact.entity;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 
 import com.notes.nicefact.to.TaskSubmissionTO;
 
 @Entity
-public class TaskSubmission  extends AbstractFile{
+public class TaskSubmission  extends CommonEntity{
 
 	private static final long serialVersionUID = 1L;
 	
@@ -15,20 +21,24 @@ public class TaskSubmission  extends AbstractFile{
 
 	private Long taskId ;
 	
+	private String submitterName;
+	
+	private String submitterEmail;
+	
+	private Date submitDate = new Date();
+	
+	@OneToMany(mappedBy="submission", cascade=CascadeType.ALL)
+	List<TaskSubmissionFile> files = new ArrayList<>();
+	
 	public TaskSubmission() {
 		super();
 	}
 
-	public TaskSubmission(TaskSubmissionTO file, String path) {
+	public TaskSubmission(TaskSubmissionTO submission) {
 		super();
-		this.name = file.getName();
-		this.serverName = file.getServerName();
-		this.mimeType = file.getMimeType();
-		this.size = file.getSize();
-		this.sizeBytes = file.getSizeBytes();
-		this.path = path;
-		this.comment = file.getComment();
-		this.taskId = file.getTaskId();
+		this.comment = submission.getComment();
+		this.taskId = submission.getTaskId();
+		
 	}
 
 	public Long getTaskId() {
@@ -45,6 +55,38 @@ public class TaskSubmission  extends AbstractFile{
 
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+
+	public List<TaskSubmissionFile> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<TaskSubmissionFile> files) {
+		this.files = files;
+	}
+
+	public String getSubmitterName() {
+		return submitterName;
+	}
+
+	public void setSubmitterName(String submitterName) {
+		this.submitterName = submitterName;
+	}
+
+	public String getSubmitterEmail() {
+		return submitterEmail;
+	}
+
+	public void setSubmitterEmail(String submitterEmail) {
+		this.submitterEmail = submitterEmail;
+	}
+
+	public Date getSubmitDate() {
+		return submitDate;
+	}
+
+	public void setSubmitDate(Date submitDate) {
+		this.submitDate = submitDate;
 	}
 	
 }

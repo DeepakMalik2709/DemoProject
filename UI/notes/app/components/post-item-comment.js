@@ -3,7 +3,6 @@ import postMixin from '../mixins/post';
 export default Ember.Component.extend(postMixin , {
 	postComment : '',
 	recipientList : null,
-	 postService: Ember.inject.service('post'),
 	 originalComment : null,
 	
     init() {

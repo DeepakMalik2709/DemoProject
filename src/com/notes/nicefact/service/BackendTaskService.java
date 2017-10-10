@@ -179,4 +179,13 @@ public class BackendTaskService extends CommonService<BackendTask> {
 		task.addToParamsMap("email", email);
 		saveAndTrigger(task);
 	}
+
+	public void saveTaskSubmissionTask(Long taskId, Long submissionId) {
+		BackendTask task = new BackendTask();
+		task.setPath("task/submission");
+		task.addToParamsMap("taskId", taskId);
+		task.addToParamsMap("submissionId", submissionId);
+		saveAndTrigger(task);
+		
+	}
 }

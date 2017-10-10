@@ -39,10 +39,13 @@ export default Ember.Route.extend({
         		}else{
         			showGoogleDriveMsgDate = true;
         		}
+        		
         		if(showGoogleDriveMsgDate){
-        			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar. Granting Google drive permission removes 10MB upload limit.")){
-        				window.location.href= "/a/oauth/googleAllAuthorization";
-        			}
+        			 Ember.run.later((function() {
+	        			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar. Granting Google drive permission removes 10MB upload limit.")){
+	        				window.location.href= "/a/oauth/googleAllAuthorization";
+	        			}
+        			 }), 2000);
         		}
         	}
         	
