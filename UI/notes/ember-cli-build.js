@@ -13,8 +13,8 @@ module.exports = function(defaults) {
   app.import('vendor/AdminLTE/css/ionicons.min.css');
   /*app.import('vendor/AdminLTE/css/morris/morris.css');
   app.import('vendor/AdminLTE/css/jvectormap/jquery-jvectormap-1.2.2.css');*/
+  app.import('vendor/underscore.min.js');
   
-
   app.import('vendor/AdminLTE/css/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css');
  
   

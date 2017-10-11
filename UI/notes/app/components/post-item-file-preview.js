@@ -7,9 +7,11 @@ export default Ember.Component.extend({
 		    this._super(...arguments);
 		    this.set("showPreview" , false);
 		    if(this.item.hasThumbnail){
-		    	this.item.thumbnailLink = "/a/secure/group/file/thumbnail?name=" + this.item.serverName ;
-		    }else{
-		    	this.item.thumbnailLink = "/img/no-preview-available.png"
+		    	var thumbnailLink = "/img/no-preview-available.png";
+			    if(this.item.hasThumbnail){
+			    	thumbnailLink = "/a/secure/group/file/thumbnail?name=" + this.item.serverName ;
+			    }
+		    	Ember.set(this.item , "thumbnailLink" ,thumbnailLink );
 		    }
 	 },
 	
