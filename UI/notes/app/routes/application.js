@@ -21,6 +21,14 @@ export default Ember.Route.extend({
             $('.row-offcanvas').removeClass("active relative");
         }
     }),
+    showGooglePermissionMessage : _.once(function(){
+        	setTimeout((function() {
+     			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar. Granting Google drive permission removes 10MB upload limit.")){
+     				window.location.href= "/a/oauth/googleAllAuthorization";
+     			}
+    			 }), 2000);
+
+    }),
     setupController: function(controller, model) {
         this._super(controller, model);
         controller.set("isLoggedIn", Ember.computed.notEmpty("model"));
@@ -41,11 +49,7 @@ export default Ember.Route.extend({
         		}
         		
         		if(showGoogleDriveMsgDate){
-        			 Ember.run.later((function() {
-	        			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar. Granting Google drive permission removes 10MB upload limit.")){
-	        				window.location.href= "/a/oauth/googleAllAuthorization";
-	        			}
-        			 }), 2000);
+        			this.showGooglePermissionMessage();
         		}
         	}
         	
@@ -93,7 +97,11 @@ export default Ember.Route.extend({
         
         notificationClick(notification){
         	if(notification.entityId){
-        		this.transitionTo('group.post', notification.entityId);
+        		if(notification.type == 'TASK'){
+        			this.transitionTo('group.task', notification.entityId);
+        		}else{
+        			this.transitionTo('group.post', notification.entityId);
+        		}
         	}else if(notification.groupId){
         		this.transitionTo('group.posts', notification.groupId);
         	}

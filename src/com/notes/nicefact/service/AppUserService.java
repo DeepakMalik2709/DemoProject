@@ -265,6 +265,9 @@ public class AppUserService extends CommonService<AppUser> {
 		} else if (!BCrypt.checkpw(password, appUser.getPassword())) {
 				throw new AppException("Please check username and password.");
 		}
+		if(StringUtils.isNotBlank(appUser.getRefreshToken())){
+			Utils.refreshToken(appUser);
+		}
 		CurrentContext.getCommonContext().setMessage(null);
 		return appUser;
 	}

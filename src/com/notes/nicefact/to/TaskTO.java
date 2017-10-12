@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Task;
 import com.notes.nicefact.entity.TaskFile;
+import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CurrentContext;
 
 /**
@@ -50,6 +52,10 @@ public class TaskTO {
 		super();
 		this.id = task.getId() ;
 		this.groupId = task.getGroupId();
+		if(groupId !=null && groupId > 0){
+			Group group = CacheUtils.getGroup(this.groupId);
+			this.groupName =  group.getName();
+		}
 		this.comment = task.getComment();
 		this.createdTime = task.getCreatedTime().getTime();
 		this.updatedTime = task.getUpdatedTime().getTime();

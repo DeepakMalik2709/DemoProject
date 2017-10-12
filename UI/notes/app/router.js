@@ -21,6 +21,7 @@ Router.map(function() {
         this.route('edit',{path : '/:groupId/edit'});
         this.route('create',{path : '/create'});
         this.route('post',{path : '/post/:postId'});
+        this.route('task',{path : '/task/:taskId'});
       });
   this.route('tag', function() {
       this.route('view',{path : '/view'});

@@ -88,7 +88,7 @@ public class SecureController extends CommonController {
 		AppUser user = CurrentContext.getAppUser();
 		if (null != user) {
 			if(StringUtils.isBlank(user.getRefreshTokenAccountEmail())){
-				if(null == user.getGoogleDriveMsgDate() ||  ((new Date().getTime() - user.getGoogleDriveMsgDate().getTime())   > (10*24*60*60*1000) )){
+				if(null == user.getGoogleDriveMsgDate() ||  ((new Date().getTime() - user.getGoogleDriveMsgDate().getTime())   > (1*24*60*60*1000) )){
 					EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 					AppUserService appUserService = new AppUserService(em);
 					AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
@@ -1192,5 +1192,48 @@ public class SecureController extends CommonController {
 		logger.info("upsertGroupTask exit");
 	}
 	
+	@GET
+	@Path("/task/{taskId}")
+	public void fetchTask(@PathParam("taskId") long taskId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("fetchTask start, taskId : " + taskId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			Task post = taskService.get(taskId);
+			AppUser user = CurrentContext.getAppUser();
+			if (null == post){
+				throw new NotFoundException("Task not found for id : " + taskId);
+			}
+			Group group = CacheUtils.getGroup(post.getGroupId());
+			if(group == null){
+				throw new NotFoundException("Task has been deleted");
+			}
+			if(!SHARING.PUBLIC.equals(group.getSharing())){
+				if (!user.getGroupIds().contains(post.getGroupId())) {
+					AppUserService appUserService = new AppUserService(em);
+					user = appUserService.getAppUserByEmail(user.getEmail());
+					if (!user.getGroupIds().contains(post.getGroupId())) {
+						throw new UnauthorizedException("Post not found");
+					}
+					request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
+				}
+			}
+			
+			TaskTO postTO = new TaskTO(post);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, postTO);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("fetchTask exit");
+	}
 
 }
