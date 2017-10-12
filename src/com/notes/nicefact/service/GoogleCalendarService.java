@@ -10,31 +10,21 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
-import org.json.JSONObject;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.api.client.extensions.java6.auth.oauth2.AbstractPromptReceiver;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.java6.auth.oauth2.VerificationCodeReceiver;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets.Details;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
-import com.notes.nicefact.controller.OauthController;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.google.GoogleAppUtils;
-import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
 
@@ -126,7 +116,7 @@ public class GoogleCalendarService {
     public static com.google.api.services.calendar.Calendar    getCalendarService() throws IOException {
      //   Credential credential = authorize(request);
     	AppUser user = CurrentContext.getAppUser();
-   
+    	if(user.getUseGoogleCalendar()){
     	List<Header> headers = new ArrayList<>();
 		headers.add(new BasicHeader("Authorization", "Bearer " + user.getAccessToken()));
 		/*String url = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
@@ -138,8 +128,9 @@ public class GoogleCalendarService {
                 HTTP_TRANSPORT, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
-
+    	}
     	/*HttpRequestInitializer httpRequestInitializer;
 		return new Calendar(HTTP_TRANSPORT,JSON_FACTORY,httpRequestInitializer);*/
+		return null;
     }
 }

@@ -953,12 +953,14 @@ public class SecureController extends CommonController {
 			try {
 				com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
 				// List the next 10 events from the primary calendar.
-				Events events = service.events().list("primary").execute();
-				List<Event> items = events.getItems();
-				AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-				if (items.size() > 0) {
-					for (Event event : items) {
-						postTos.add(new PostTO(event, user));
+				if(service!=null){
+					Events events = service.events().list("primary").execute();
+					List<Event> items = events.getItems();
+					AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+					if (items.size() > 0) {
+						for (Event event : items) {
+							postTos.add(new PostTO(event, user));
+						}
 					}
 				}
 			} catch (Exception e) {
