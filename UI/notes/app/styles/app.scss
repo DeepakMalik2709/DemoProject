@@ -3,7 +3,32 @@
 @import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic);
 
 @import url(http://fonts.googleapis.com/css?family=Kaushan+Script);
-
+ .disabled-process:hover .tooltip.top-tooltip, .tooltip.process-tip.active {
+    display: block;
+}
+ 
+.tooltip.top-tooltip {
+    top: auto;
+    left: 50%;
+    right: auto;
+    padding-bottom: 8px;
+    bottom: 100%;
+      margin-left: -78px;
+    width: 193px;
+}
+.tooltip {
+    display: none;
+    opacity: 1;
+        z-index: 1070;
+        }
+.top-tooltip .tooltip-arrow {
+    top: auto;
+    bottom: -5px;
+    left: 50%;
+    margin-left: -8px;
+    border: 8px solid transparent;
+    border-top-color: #282828;
+}          
 .file-list a{
 text-decoration:none;
 }
