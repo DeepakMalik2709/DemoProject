@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.Notification;
 import com.notes.nicefact.entity.NotificationRecipient;
 import com.notes.nicefact.enums.NotificationAction;
+import com.notes.nicefact.enums.NotificationType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationTO implements Serializable {
@@ -36,6 +37,7 @@ public class NotificationTO implements Serializable {
 		this.action = notificationRecipient.getAction().toString();
 		this.actionKey = notificationRecipient.getAction().getMessageKey();
 		this.isRead = notificationRecipient.getIsRead();
+		this.type = notification.getType();
 		
 		if(NotificationAction.GROUP_ADDED.equals(notificationRecipient.getAction())){
 			showGroupName = true;
@@ -47,14 +49,7 @@ public class NotificationTO implements Serializable {
 	}
 
 
-	public boolean getShowTitle() {
-		return showTitle;
-	}
-
-	public boolean getShowGroupName() {
-		return showGroupName;
-	}
-
+	NotificationType type;
 
 	private Long entityId;
 
@@ -89,7 +84,20 @@ public class NotificationTO implements Serializable {
 	boolean showGroupName = false;
 	
 	
+	public NotificationType getType() {
+		return type;
+	}
 
+	public void setType(NotificationType type) {
+		this.type = type;
+	}
+	public boolean getShowTitle() {
+		return showTitle;
+	}
+
+	public boolean getShowGroupName() {
+		return showGroupName;
+	}
 	public boolean getsShowTitle() {
 		return showTitle;
 	}

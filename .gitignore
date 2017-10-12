@@ -9,3 +9,6 @@
 /keys/notes.txt
 /WebContent/WEB-INF/classes
 
+/.settings/com.google.appengine.eclipse.core.prefs
+/.settings/com.google.gdt.eclipse.core.prefs
+/.settings/com.google.gwt.eclipse.core.prefs

@@ -17,6 +17,7 @@ export default DS.Store.extend(ajaxMixin ,{
 			 }else{
 				var url = "/rest/secure/groups/mine";
 				this.doGet(url).then((data ) =>{
+					this.myGroups=[];
 			    	  if(data.code ==0 && data.items){
 			    		  for(var m =0; m<data.items.length;m++){
 			    			  var record = data.items[m];
@@ -30,7 +31,6 @@ export default DS.Store.extend(ajaxMixin ,{
 				    				  }
 				    			  }
 				    		  }
-				    		  this.myGroups=[];
 				    		  this.myGroups.pushObject(record);
 			    		  }
 			    	  }

@@ -12,6 +12,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     isFetching :false,
     groupService: Ember.inject.service('group'),
     postService: Ember.inject.service('post'),
+    taskService: Ember.inject.service('task'),
     useGoogleDrive : false,
     init() {
 	    this._super(...arguments);
