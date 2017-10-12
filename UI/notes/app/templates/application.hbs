@@ -57,10 +57,13 @@
                       		</ul>
                            
                         </li>
-                         {{#nav-link-to 'calendar'  tagName="li"}}
-                                <i class="fa fa-calendar"></i> <span>Calendar</span>
-                                <small class="badge pull-right bg-red">3</small>
-                       {{/nav-link-to}}
+                         <li class="treeview">
+                                <div style="color: white;padding: 12px 15px 12px 15px;"  {{action "checkCalendarAauthentication" model on="click" on="touchEnd"}} >
+	                                <i class="fa fa-calendar"></i> <span>Calendar</span>
+	                                <small class="badge pull-right bg-red">3</small>
+                                </div>
+                                
+                    	 </li>
                         
                     </ul>
                 </section>
