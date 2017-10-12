@@ -30,8 +30,8 @@ import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
+import com.notes.nicefact.content.AllSchoolError;
 import com.notes.nicefact.entity.AppUser;
-import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.service.AppUserService;
@@ -100,16 +100,20 @@ public class CalendarController extends CommonController {
 			
 			
 			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
-			Event event = service.events().get(calendarId, eventId).execute(); 
-			for(EventAttendee evAtt :  event.getAttendees()){
-				if(evAtt.getEmail().equalsIgnoreCase(user.getEmail())){
-					evAtt.setResponseStatus(schedule.getAttendees().get(0).getResponseStatus());
-				}				
+			if(service!=null){
+				Event event = service.events().get(calendarId, eventId).execute(); 
+				for(EventAttendee evAtt :  event.getAttendees()){
+					if(evAtt.getEmail().equalsIgnoreCase(user.getEmail())){
+						evAtt.setResponseStatus(schedule.getAttendees().get(0).getResponseStatus());
+					}				
+				}
+				Event updatedEvent  = service.events().update(calendarId, event.getId(), event).execute();
+				json.put(Constants.CODE, Constants.OK);
+				json.put(Constants.DATA_ITEM, updatedEvent);
+			}else{
+				json.put(Constants.CODE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	);
+				json.put(Constants.MESSAGE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);	
 			}
-			Event updatedEvent  = service.events().update(calendarId, event.getId(), event).execute();
-			json.put(Constants.CODE, Constants.OK);
-			json.put(Constants.DATA_ITEM, updatedEvent);
-			
 		} catch (IOException e) {
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
 			json.put(Constants.MESSAGE, e.getMessage());	
@@ -126,8 +130,8 @@ public class CalendarController extends CommonController {
 		Map<String, Object> json = new HashMap<>();
 		try {
 			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
-			System.out.println("event : "+schedule);
-			
+			logger.info("schedule : "+schedule);
+			if(service !=null){
 			Event event = new Event().set("sendNotifications", true)
 			    .setSummary(schedule.getTitle())
 			    .setLocation(schedule.getLocation())
@@ -176,7 +180,10 @@ public class CalendarController extends CommonController {
 			System.out.printf("Event created: %s\n", event.getHtmlLink());
 			json.put(Constants.CODE, Constants.OK);
 			json.put(Constants.DATA_ITEM, event);
-			
+			}else{
+				json.put(Constants.CODE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	);
+				json.put(Constants.MESSAGE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);	
+			}
 		} catch (IOException e) {
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
 			json.put(Constants.MESSAGE, e.getMessage());	
@@ -203,36 +210,37 @@ public class CalendarController extends CommonController {
 		Map<String, Object> json = new HashMap<>();
 		try {
 			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
-
-			// List the next 10 events from the primary calendar.
-			Events events = service.events().list("primary").execute();
-			List<Event> items = events.getItems();
-			List<EventTO> eventTos = new ArrayList<EventTO>();
-
-			if (items.size() == 0) {
-				json.put(Constants.CODE, Constants.NO_RESULT);
-				System.out.println("No upcoming events found.");
-			} else {
-
-				System.out.println("Upcoming events");
-				for (Event event : items) {
-					DateTime start = event.getStart().getDateTime();
-					DateTime end = event.getEnd().getDateTime();
-					if (start == null) {
-						start = event.getStart().getDate();
+			if(service!=null){
+				// List the next 10 events from the primary calendar.
+				Events events = service.events().list("primary").execute();
+				List<Event> items = events.getItems();
+				List<EventTO> eventTos = new ArrayList<EventTO>();
+	
+				if (items.size() == 0) {
+					json.put(Constants.CODE, Constants.NO_RESULT);
+					System.out.println("No upcoming events found.");
+				} else {
+	
+					System.out.println("Upcoming events");
+					for (Event event : items) {
+						DateTime start = event.getStart().getDateTime();
+						DateTime end = event.getEnd().getDateTime();
+						if (start == null) {
+							start = event.getStart().getDate();
+						}
+						if (end == null) {
+							end = event.getEnd().getDate();
+						}
+						eventTos.add(new EventTO(event.getId(), event.getSummary(), start, end, "#112233", "#cc3344"));
+						System.out.printf("%s (%s)\n", event.getSummary(), start);
 					}
-					if (end == null) {
-						end = event.getEnd().getDate();
-					}
-					eventTos.add(new EventTO(event.getId(), event.getSummary(), start, end, "#112233", "#cc3344"));
-					System.out.printf("%s (%s)\n", event.getSummary(), start);
+					EventsTO eventsTo = new EventsTO("1", eventTos);
+					json.put(Constants.CODE, Constants.RESPONSE_OK);
+					json.put(Constants.DATA_ITEM, eventsTo);
 				}
-				EventsTO eventsTo = new EventsTO("1", eventTos);
-				json.put(Constants.CODE, Constants.RESPONSE_OK);
-				json.put(Constants.DATA_ITEM, eventsTo);
+	
+				json.put(Constants.TOTAL, items.size());
 			}
-
-			json.put(Constants.TOTAL, items.size());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);

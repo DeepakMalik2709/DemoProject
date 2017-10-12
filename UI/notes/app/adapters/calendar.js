@@ -22,9 +22,6 @@ export default DS.Adapter.extend(ajaxMixin ,{
 			    			  }
 			    		  }
 		    		  }
-		    		
-		    		  var calObject = {events:record.items};
-		    		  var rds = {evts : calObject};
 		    		  resolve(record);
 		    	  }else{
 		    		  reject(data);

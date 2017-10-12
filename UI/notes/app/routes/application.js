@@ -37,7 +37,7 @@ export default Ember.Route.extend({
         if(model){
         	if(!model.get('loginUser.refreshTokenAccountEmail')){
         		var showGoogleDriveMsgDate = false;
-        		var googleDriveMsgDate = model.get('loginUser.googleDriveMsgDate')
+        		var googleDriveMsgDate = model.get('loginUser.googleDriveMsgDate');
         		if(googleDriveMsgDate){
         			model.set('loginUser.googleDriveMsgDate', null);
         			var diff = new Date().getTime() - googleDriveMsgDate ;
@@ -72,7 +72,19 @@ export default Ember.Route.extend({
 
 
     actions: {
-
+    	checkCalendarAauthentication(model){
+    		var googleCalendarPermission = model.get('loginUser.useGoogleCalendar');
+    		if(!googleCalendarPermission){
+    			setTimeout(function() {
+         			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar. Granting Google drive permission removes 10MB upload limit.")){
+         				window.location.href= "/a/oauth/googleAllAuthorization";
+         			}
+        			 })
+    		}else{
+    			this.transitionTo('calendar');
+    		}
+    		
+    	},
         doNavbarSearch() {
             var searchTerm = this.get('controller.searchTerm')
             this.set('controller.searchTerm', '');
