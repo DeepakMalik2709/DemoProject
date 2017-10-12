@@ -41,7 +41,7 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 	public List<Long> fetchGroupMembersByEmail(String email) {
 		List<Long> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t.group_id from GroupMember t where  t.email = :email ");
+		Query query = pm.createQuery("select t.group.id from GroupMember t where  t.email = :email ");
 		query.setParameter("email", email);
 		try {
 			results = (List<Long>) query.getResultList();
