@@ -14,7 +14,9 @@ export default Ember.Component.extend(postMixin ,{
 		  this.set("recipientList" , []);
 	  },
     actions: {
-    
+    	downloadSubmissions(){
+    		console.log("download for " + this.item.id);
+    	},
         removeFile(itemToRemove) {
         	  var items = Ember.get(this.item, "files");
         	  items.removeObject(itemToRemove);
@@ -49,19 +51,54 @@ export default Ember.Component.extend(postMixin ,{
         	}
     	},
     	  editTask(){
-        	this.originalComment = Ember.get(this.item, "comment");
-        	this.originalFiles = Ember.copy(Ember.get(this.item,"files"));
+        	this.original  = JSON.stringify( this.item.toJSON());
         	Ember.set(this,"item.isEditing", true);
         	 this.$(".edit-post").html(this.originalComment);
         },
         cancelEditing(){
+        	this.original = JSON.parse(this.original);
+        	this.item.setProperties(this.original)
         	Ember.set(this,"item.isEditing", false);
-        	Ember.set(this.item, "comment", this.originalComment);
-        	Ember.set(this.item, "files", this.originalFiles);
+        	 this.cleanupPost(this.item);
         },
         
         deleteTask(){
     		this.sendAction("deleteTask", this.item);
+    	},
+        deletePost(){
+    		this.sendAction("deletePost", this.item);
+    	},
+    	saveComment(component ){
+    		if(!Ember.get(this, "isSaving") && this.postComment){
+    			Ember.set(this, "isSaving", true)
+    			
+    		var json = {
+    			comment : this.postComment,
+    			recipients :  this.recipientList,
+    			postId :  this.item.id
+    		}
+    		this.updateRecipients(json);
+    		this.get("postService").upsertPostComment(json).then((result)=>{
+    			Ember.set(this, "isSaving", false)
+    			if(result.code == 0){
+    				Ember.get(this.item,'comments').pushObject(result.item);
+    				component.resetCommentBox();
+    			}
+    		});
+			}
+    	},
+    	updateComment(updatedComment ){
+    		if(!Ember.get(updatedComment, "isSaving") && updatedComment.comment){
+    			Ember.set(updatedComment, "isSaving", true)
+	    		this.get("postService").upsertPostComment(updatedComment).then((result)=>{
+	    			Ember.set(updatedComment, "isSaving", false)
+	    			if(result.code == 0){
+	    				var commentsList = Ember.get(this.item,'comments');
+	    				var index = commentsList.indexOf(updatedComment);
+	    				commentsList.replace(index, 1, result.item);
+	    			}
+	    		});
+    		}
     	},
     	//end of actions
     },

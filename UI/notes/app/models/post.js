@@ -20,9 +20,10 @@ export default DS.Model.extend({
 	  isSaving : DS.attr('boolean'),
 	  isSubmitted : DS.attr('boolean'),
 	  canSubmit : DS.attr('boolean'),
-	  isPost :  DS.attr( {
-		    defaultValue() { true }
-	  }),
+	  title: DS.attr('string'),
+	  deadlineTime: DS.attr('number'),
+	  isTask : DS.attr('boolean'),
+	  isPost : DS.attr('boolean'),
 	  files: DS.attr( {
 		    defaultValue() { return []; }
 		  }),

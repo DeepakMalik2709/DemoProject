@@ -32,25 +32,11 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	        request.then((response) => {
 	        	   this.controller.set("myGroups" ,response );
 	        });   
-	       var hoursArray = [];
-	       for(var i = 0 ; i < 24; i++){
-	    	   hoursArray.push({label : (i) , id :i});
-	       }
-	       var minutesArray = [];
-	       for(var i = 0 ; i < 50; i = i+15){
-	    	   minutesArray.push({label : i , id :i});
-	       }
-	       this.controller.set("minutesArray", minutesArray);
-	       this.controller.set("hoursArray",hoursArray);
+	      
 	    },
 	   
 	    actions: {
-	    	addHour(hour) {
-	    		 this.controller.set("selectedHour", hour);
-	        },
-	        addMinutes(minutes) {
-	    		 this.controller.set("selectedMinutes", minutes);
-	        },
+	    
 	    	 saveTask(task){
 
 	    		 if(!Ember.get(task , "title")){
@@ -73,19 +59,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	     			for(var i =0 ;i < selectedGroups.length ;i++){
 	     				Ember.get(task,"groupIds").pushObject(selectedGroups[i].id);
 	     			}
-		        	var date = Ember.get(task,"deadlineTime");
-		        	if(date){
-		        		date = date.getTime();
-		        		var selectedHour = this.controller.get("selectedHour.id");
-		     			var selectedMinutes = this.controller.get("selectedMinutes.id");
-		     			if(selectedHour){
-		     				date += (selectedHour * 60 * 60000);
-		     			}
-		     			if(selectedMinutes){
-		     				date += selectedMinutes* 60000;
-		     			}
-		     			Ember.set(task, 'deadlineTime', date)
-		        	}
+
 	     			
 	 	    		task.save().then((resp1) => {
 	 	    			Ember.set(this, "isSaving", false);

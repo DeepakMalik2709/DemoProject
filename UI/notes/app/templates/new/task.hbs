@@ -32,20 +32,7 @@
                         <div class="form-group overflow-hide">
                        {{post-comment-box controllerRef=controllerRef className="post-description" placeholder="Task details"   recipientList=model.recipients value=model.comment autoCompleteList=myList disabled=model.isSaving}}
                        </div>  
-                                      <div class="form-group mtop">
-                                      <div class="col-md-5">
-                    		     {{bootstrap-datepicker autoclose=true placeholder="Click to add deadline" class="form-control" value=model.deadlineTime readonly=true}}
-                    		     </div>
-                    		     <div class="col-md-3">
-								{{select-box content=hoursArray 
-								className='form-control' didChangeAction='addHour' }} 
-                    		     </div>
-                    		      <div class="col-md-3">
-								{{select-box content=minutesArray 
-								className='form-control' didChangeAction='addMinutes' }} 
-                    		     </div>
-                    		     <div class="clearfix"></div>
-                       </div>  
+                       {{task-item-deadline item=model}} 
                     {{new-file-upload files=model.files item=model}}
                     
                                      <div class="form-group">

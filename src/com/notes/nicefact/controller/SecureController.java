@@ -726,7 +726,7 @@ public class SecureController extends CommonController {
 	@DELETE
 	@Path("/group/{groupId}/post/{postId}")
 	public void deleteGroupPost(@PathParam("groupId") long groupId, @PathParam("postId") long postId, @Context HttpServletResponse response) {
-		logger.info("deleteGroupPost start");
+		logger.info("deleteGroupPost start , postId : " + postId + ", groupId" + groupId);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -752,7 +752,7 @@ public class SecureController extends CommonController {
 	@DELETE
 	@Path("/post/{postId}/comment/{commentId}")
 	public void deleteGroupPostComment(@PathParam("postId") long postId, @PathParam("commentId") long commentId, @Context HttpServletResponse response) {
-		logger.info("deleteGroupPostComment start");
+		logger.info("deleteGroupPostComment start , postId : " + postId + " , commentId : " + commentId);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -777,7 +777,7 @@ public class SecureController extends CommonController {
 	@POST
 	@Path("/post/{postId}/react")
 	public void reactToPost(@PathParam("postId") long postId, @Context HttpServletResponse response) {
-		logger.info("reactToPost start");
+		logger.info("reactToPost start , postId : " + postId);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {

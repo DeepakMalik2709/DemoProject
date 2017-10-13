@@ -14,8 +14,9 @@
                     <h3 class="page-header">{{model.name}} - Posts 
                       {{#if model.isAdmin}}
 	                    <span class="pull-right">
-	                      <button type="button" class="btn btn-default {{if showCreatePost 'nodisplay'  'inlinedisplay' }}" {{action 'showCreatePostAction' }}>Create Post</button>
-	                        <button type="button" class="btn btn-default {{if showCreateTask 'nodisplay'  'inlinedisplay' }}" {{action 'showCreateTaskAction' }}>Create Task</button>
+	                    {{#link-to 'new.task'  tagName="button"  class="btn btn-default"}}
+	                 Create Task
+	                  {{/link-to}}
 	                        
 	                       {{#link-to 'group.view' model.id tagName="button"  class="btn btn-default"}}
 	                  Group Details
@@ -38,9 +39,6 @@
     {{post-item-form item=newPost buttonLabel='Save Post' savePost="savePost" cancelClicked="cancelCreatePost" controllerRef=controllerRef}}
   </div>
   
-    <div class="col-md-6 {{if showCreateTask 'inlinedisplay' 'nodisplay' }}">
-    {{task-item-form item=newTask buttonLabel='Save Task' saveTask="saveTask" cancelClicked="cancelCreateTask" controllerRef=controllerRef}}
-  </div>
   
     </div>
 <hr/>
@@ -48,7 +46,7 @@
 {{#each feeds as |post|}}
  <div class="row">
  {{#if post.isTask}}
- {{task-item item=post updateTask="saveTask" deleteTask="deleteTask" group=model }}
+ {{task-item item=post updateTask="saveTask" deletePost="deletePost" group=model }}
  {{else if post.isPost}}
 {{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
 {{/if}}

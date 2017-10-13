@@ -40,7 +40,6 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     },
     initCreateTab : function(){
     	this.controller.set("showCreatePost", false);
-    	this.controller.set("showCreateTask", false);
     },
     initCreatePost : function(){
     	 this.initCreateTab();
@@ -50,15 +49,6 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     		 groupId: group.id,
 	      }); 
     	  this.controller.set("newPost", newPost);
-    },
-    initCreateTask : function(){
-    	 this.initCreateTab();
-    	this.controller.set("showCreateTask", true);
-    	var group = this.controller.get("model");
-    	 const newTask = this.store.createRecord('task', {
-    		 groupId: group.id,
-	      }); 
-    	  this.controller.set("newTask", newTask);
     },
     fetchGroupPosts : function(){
     	if(this.hasMoreRecords && ! this.isFetching){
@@ -180,32 +170,5 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    		});
     		}
     	},
-    	cancelCreateTask(){
-  		  if (this.controller.get("newTask.comment")) {
-  			   let confirmation = confirm("Cancel task ?");
-  	            if (confirmation) {
-  	            	  	this.initCreatePost();
-  	    	    		this.component.resetCommentBox();
-  	    	    		Ember.set(this, "isSaving", false);
-  	            }
-  		  }else{
-  			  	this.initCreateTask();
-  	    		this.component.resetCommentBox();
-  	    		Ember.set(this, "isSaving", false);
-  		  }
-  	},
-	deleteTask(task){
-        let confirmation = confirm("Are you sure you want to delete task ?");
-
-        if (confirmation) {
-        	var posts = this.controller.get("feeds");
-			var index = posts.indexOf(post);
-			posts.removeAt(index);
-			this.get("taskService").deleteTask(post.get("groupId"), task.get("id")).then((result)=>{
-        		if(result.code == 0){
-	    		}
-	    	});
-        }
-	}, 
     }
 });

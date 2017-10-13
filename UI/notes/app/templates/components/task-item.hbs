@@ -12,16 +12,15 @@
 	                    </div>
 	                   <div class="title h5 col-md-3 col-sm-3 col-lg-3 pull-right text-muted time"> {{item.createdDisplayTime}}</div>
                    </div>
-                <div class="row {{if item.deadlineDisplayTime 'show' 'hide'}}">
-	                    <div class="title h5 col-sm-pull-2 task-deadline-time  text-muted time">
-	                       Deadline : {{item.deadlineDisplayTime}}
-	                    </div>
-                   </div>
                    <div class="row">
 		                 <footer class="comment__footer col-md-5 col-sm-5 col-lg-5"><menu class="comment-footer__menu">
 								{{#if canEdit}}
+								<li class="reply {{unless item.isEditing 'show' 'hide'}}" {{action "downloadSubmissions"}} data-role="reply-link"><a href="javascript:void(0);"
+									data-action="reply"> <span class="text">Download Submissions</span></a></li>
+							<li class="bullet {{unless item.isEditing 'show' 'hide'}}" aria-hidden="true">•</li>
 								<li class="reply {{unless item.isEditing 'show' 'hide'}}" {{action "editTask"}} data-role="reply-link"><a href="javascript:void(0);"
 									data-action="reply"> <span class="text">Edit</span></a></li>
+									
 									<li class="reply {{if item.isEditing 'show' 'hide'}}" {{action "cancelEditing"}} data-role="reply-link"><a href="javascript:void(0);"
 									data-action="reply"> <span class="text">Cancel Editing</span></a></li>
 								<li class="bullet" aria-hidden="true">•</li>
@@ -31,7 +30,7 @@
 									 </li>
 								{{/if}}
 								{{#if canDelete}}
-									<li class="reply {{unless item.isEditing 'show' 'hide'}}" data-role="reply-link" {{action "deleteTask"}}><a href="javascript:void(0);"
+									<li class="reply {{unless item.isEditing 'show' 'hide'}}" data-role="reply-link" {{action "deletePost"}}><a href="javascript:void(0);"
 									data-action="reply"> <span class="text">Delete</span></a></li>
 								{{/if}}
 								 <input accept="image/*" multiple class="file-upload" onchange={{action "uploadFile"}} type="file" style="width: 0px; height: 0px; overflow: hidden;"  >
@@ -39,8 +38,8 @@
 						</footer>
 					</div>
 					<div class="row">
-					  	<div class="col-md-8 col-sm-8 col-lg-8"> 
-					  	    <div class="task-title {{unless item.isEditing 'show' 'hide'}}">{{{item.title}}}</div>
+					  	<div class="col-md-12 col-sm-12 col-lg-12"> 
+					  	    <div class=" {{unless item.isEditing 'show' 'hide'}}"><span class="task-title">{{{item.title}}}</span> <small class="pull-right {{if item.deadlineDisplayTime 'show' 'hide'}}">Deadline : {{item.deadlineDisplayTime}}</small></div>
 			                <div class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</div>
 			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box schedule=item className="post-description edit-post"   save='updateTask' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
@@ -60,6 +59,16 @@
                 </div>
          </div> 
 
+       <div class="post-footer {{if item.isEditing 'hideBorder' ''}}">
+              <div class="input-group contenteditable-input-group" > 
+                    {{post-comment-box schedule=item className="" placeholder="Add a comment"  save='saveComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
+                </div>
+                <ul class="comments-list" style="padding-left: 1%;">                
+                {{#each item.comments as |comment|}}
+              {{post-item-comment item=comment update="updateComment" deleteComment="deleteComment" group=group}}
+                {{/each}}
+                </ul>
+         </div> 
         
      </div> 
     </div>
