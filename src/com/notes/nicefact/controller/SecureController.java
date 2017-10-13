@@ -46,10 +46,10 @@ import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.UnauthorizedException;
+import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
-import com.notes.nicefact.service.GoogleCalendarService;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
@@ -948,10 +948,10 @@ public class SecureController extends CommonController {
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
 			Collections.sort(postTos, new CreatedDateComparator());
 			List<TaskTO> taskTos = taskService.searchTasks(searchTO);
-			feed.addAll(postTos);
-			feed.addAll(taskTos);
+			
+			
 			try {
-				com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
+				com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 				// List the next 10 events from the primary calendar.
 				if(service!=null){
 					Events events = service.events().list("primary").execute();
@@ -962,10 +962,13 @@ public class SecureController extends CommonController {
 							postTos.add(new PostTO(event, user));
 						}
 					}
+					
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 			}
+			feed.addAll(postTos);
+			feed.addAll(taskTos);
 			if(feed.isEmpty()){
 				json.put(Constants.CODE, Constants.NO_RESULT);
 			}else{

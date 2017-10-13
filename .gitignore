@@ -8,6 +8,11 @@
 /keys/allschool1.pub
 /keys/notes.txt
 /WebContent/WEB-INF/classes
+/WebContent/js
+/WebContent/img
+/WebContent/html
+/WebContent/css
+/war
 
 /.settings/com.google.appengine.eclipse.core.prefs
 /.settings/com.google.gdt.eclipse.core.prefs

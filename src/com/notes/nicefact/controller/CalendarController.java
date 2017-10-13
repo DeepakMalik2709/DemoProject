@@ -34,6 +34,7 @@ import com.notes.nicefact.content.AllSchoolError;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.exception.AppException;
+import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.GoogleCalendarService;
 import com.notes.nicefact.service.GroupService;
@@ -99,7 +100,7 @@ public class CalendarController extends CommonController {
 		//	attendee.setId(user.getu);
 			
 			
-			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
+			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 			if(service!=null){
 				Event event = service.events().get(calendarId, eventId).execute(); 
 				for(EventAttendee evAtt :  event.getAttendees()){
@@ -129,7 +130,7 @@ public class CalendarController extends CommonController {
 	public void createEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
 		Map<String, Object> json = new HashMap<>();
 		try {
-			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
+			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 			logger.info("schedule : "+schedule);
 			if(service !=null){
 			Event event = new Event().set("sendNotifications", true)
@@ -209,7 +210,7 @@ public class CalendarController extends CommonController {
 		System.out.println("in google event ");
 		Map<String, Object> json = new HashMap<>();
 		try {
-			com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
+			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 			if(service!=null){
 				// List the next 10 events from the primary calendar.
 				Events events = service.events().list("primary").execute();

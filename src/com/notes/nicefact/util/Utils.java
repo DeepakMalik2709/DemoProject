@@ -59,6 +59,7 @@ import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
+import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.FileTO;
@@ -348,6 +349,7 @@ public class Utils {
 				if (null != jsonObject && jsonObject.has("access_token")) {
 					token = jsonObject.getString("access_token");
 					CurrentContext.getAppUser().setAccessToken(token);
+					GoogleAppUtils.getCredential().setAccessToken(token);
 				}
 
 			} catch (UnsupportedEncodingException e) {
@@ -479,6 +481,7 @@ public class Utils {
 					String newAccesstoken = json.getString("access_token");
 					logger.info("new access token : " + newAccesstoken);
 					user.setAccessToken(newAccesstoken);
+					GoogleAppUtils.getCredential().setAccessToken(newAccesstoken);
 					CacheUtils.addUserToCache(user);
 				}
 			} else if (null != response1.getEntity()) {
