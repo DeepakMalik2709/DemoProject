@@ -15,6 +15,9 @@ export default DS.Model.extend({
 	  isTask :  DS.attr( {
 		    defaultValue() { true }
 	  }),
+	  groupIds :DS.attr( {
+		    defaultValue() { return []; }
+	  }),
 	  files: DS.attr( {
 		    defaultValue() { return []; }
 		  }),

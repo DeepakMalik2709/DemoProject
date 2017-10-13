@@ -19,7 +19,6 @@ import com.notes.nicefact.entity.BackendTask.BackendTaskStatus;
 import com.notes.nicefact.entity.Notification;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
-import com.notes.nicefact.entity.Task;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.util.AppProperties;
 
@@ -88,7 +87,7 @@ public class BackendTaskService extends CommonService<BackendTask> {
 		}
 	}
 	
-	public void saveTaskTask(Task post) {
+	public void saveTaskTask(Post post) {
 		BackendTask task = new BackendTask();
 		task.setPath("task/afterSave");
 		task.addToParamsMap("taskId", post.getId());

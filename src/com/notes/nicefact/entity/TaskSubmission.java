@@ -19,7 +19,7 @@ public class TaskSubmission  extends CommonEntity{
 	@Column(columnDefinition = "TEXT")
 	String  comment;
 
-	private Long taskId ;
+	private Long postId;
 	
 	private String submitterName;
 	
@@ -37,16 +37,15 @@ public class TaskSubmission  extends CommonEntity{
 	public TaskSubmission(TaskSubmissionTO submission) {
 		super();
 		this.comment = submission.getComment();
-		this.taskId = submission.getTaskId();
+		this.postId = submission.getPostId();
 		
 	}
-
-	public Long getTaskId() {
-		return taskId;
+	public Long getPostId() {
+		return postId;
 	}
 
-	public void setTaskId(Long taskId) {
-		this.taskId = taskId;
+	public void setPostId(Long postId) {
+		this.postId = postId;
 	}
 
 	public String getComment() {

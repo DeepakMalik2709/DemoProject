@@ -32,6 +32,7 @@ Router.map(function() {
 
   this.route('new', function() {
     this.route('event');
+    this.route('task');
   });
 });
 

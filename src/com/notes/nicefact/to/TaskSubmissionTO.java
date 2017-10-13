@@ -9,7 +9,7 @@ import com.notes.nicefact.entity.TaskSubmission;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TaskSubmissionTO {
 
-	private Long taskId;
+	private Long postId;
 
 	Long id;
 	String comment;
@@ -29,7 +29,7 @@ public class TaskSubmissionTO {
 	
 	public TaskSubmissionTO(TaskSubmission submission) {
 		super();
-		this.taskId = submission.getTaskId() ;
+		this.postId = submission.getPostId() ;
 		this.id =  submission.getId();
 		this.comment = submission.getComment();
 		this.createdTime = submission.getCreatedTime().getTime();
@@ -57,12 +57,13 @@ public class TaskSubmissionTO {
 		super();
 	}
 
-	public Long getTaskId() {
-		return taskId;
+
+	public Long getPostId() {
+		return postId;
 	}
 
-	public void setTaskId(Long taskId) {
-		this.taskId = taskId;
+	public void setPostId(Long postId) {
+		this.postId = postId;
 	}
 
 	public Long getId() {

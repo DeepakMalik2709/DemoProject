@@ -40,7 +40,6 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.Tag;
-import com.notes.nicefact.entity.Task;
 import com.notes.nicefact.entity.TaskSubmission;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
@@ -67,7 +66,6 @@ import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TagTO;
 import com.notes.nicefact.to.TaskSubmissionTO;
-import com.notes.nicefact.to.TaskTO;
 import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
@@ -547,14 +545,14 @@ public class SecureController extends CommonController {
 	@POST
 	@Path("/group/task")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void upsertGroupTask(TaskTO postTo, @Context HttpServletResponse response) {
+	public void upsertGroupTask(PostTO postTo, @Context HttpServletResponse response) {
 		logger.info("upsertGroupTask start");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
-			TaskService taskService = new TaskService(em);
-			Task post = taskService.upsertTask(postTo, CurrentContext.getAppUser());
-			TaskTO savedTO = new TaskTO(post);
+			PostService postService = new PostService(em);
+			Post post = postService.upsertTask(postTo, CurrentContext.getAppUser());
+			PostTO savedTO = new PostTO(post);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEM, savedTO);
 		} catch (Exception e) {
@@ -637,13 +635,11 @@ public class SecureController extends CommonController {
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<PostTO> postTos = postService.search(searchTO);
-			List<TaskTO> taskTos = taskService.searchTasks(searchTO);
 			
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.TOTAL, postTos.size());
 			json.put(Constants.DATA_ITEMS, postTos);
-			json.put("tasks", taskTos);
-			if (!postTos.isEmpty() || !taskTos.isEmpty()) {
+			if (!postTos.isEmpty() ) {
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 			}
 		} catch (Exception e) {
@@ -947,9 +943,7 @@ public class SecureController extends CommonController {
 			List<Object> feed = new ArrayList<>();
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
 			Collections.sort(postTos, new CreatedDateComparator());
-			List<TaskTO> taskTos = taskService.searchTasks(searchTO);
 			feed.addAll(postTos);
-			feed.addAll(taskTos);
 			try {
 				com.google.api.services.calendar.Calendar service = GoogleCalendarService.getCalendarService();
 				// List the next 10 events from the primary calendar.
@@ -1192,48 +1186,4 @@ public class SecureController extends CommonController {
 		logger.info("upsertGroupTask exit");
 	}
 	
-	@GET
-	@Path("/task/{taskId}")
-	public void fetchTask(@PathParam("taskId") long taskId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
-		logger.info("fetchTask start, taskId : " + taskId);
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			TaskService taskService = new TaskService(em);
-			Task post = taskService.get(taskId);
-			AppUser user = CurrentContext.getAppUser();
-			if (null == post){
-				throw new NotFoundException("Task not found for id : " + taskId);
-			}
-			Group group = CacheUtils.getGroup(post.getGroupId());
-			if(group == null){
-				throw new NotFoundException("Task has been deleted");
-			}
-			if(!SHARING.PUBLIC.equals(group.getSharing())){
-				if (!user.getGroupIds().contains(post.getGroupId())) {
-					AppUserService appUserService = new AppUserService(em);
-					user = appUserService.getAppUserByEmail(user.getEmail());
-					if (!user.getGroupIds().contains(post.getGroupId())) {
-						throw new UnauthorizedException("Post not found");
-					}
-					request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-				}
-			}
-			
-			TaskTO postTO = new TaskTO(post);
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, postTO);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("fetchTask exit");
-	}
-
 }

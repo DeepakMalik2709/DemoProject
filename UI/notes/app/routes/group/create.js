@@ -30,7 +30,7 @@ export default Ember.Route.extend(authenticationMixin, {
         saveGroup(group) {
         	group.set("isSaving", true);
         	group.save().then((resp) => {
-        		this.get("groupService.myGroups").pushObject(resp.item); 
+        		this.get("groupService.myGroups").pushObject(resp); 
         		group.set("isSaving", false);
         		this.transitionTo('group.view', resp.id);
             });

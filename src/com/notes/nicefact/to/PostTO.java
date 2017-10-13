@@ -1,6 +1,7 @@
 package com.notes.nicefact.to;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,10 +11,12 @@ import com.google.api.services.calendar.model.EventAttendee;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Post;
+import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.util.CacheUtils;
+import com.notes.nicefact.util.CurrentContext;
 
 /**
  * @author JKB DTO to send / get Post state
@@ -43,19 +46,9 @@ public class PostTO {
 	
 	String updatedByEmail;
 	
-	String postType;
-	
 	String postPriv;
 
 	// List<GoogleDriveFileTO> files = new ArrayList<>() ;
-
-	public String getPostType() {
-		return postType;
-	}
-
-	public void setPostType(String postType) {
-		this.postType = postType;
-	}
 
 	List<PostRecipientTO> recipients = new ArrayList<>();
 	
@@ -73,10 +66,28 @@ public class PostTO {
 	int reponseNo=0;
 	int reponseMaybe=0;
 	int totalAttendee=0;
+	
+	int noOfSubmissions;
+
+	long deadlineTime;
+
+
+	Boolean isEdited = false;
+	
+	Boolean isSubmitted = false;
+	
+	Boolean canSubmit = true;
+
+	private String zipFilePath;
+
+	List<TaskSubmissionTO> submissions = new ArrayList<>();
+	String title;
+	
 	public PostTO() {}
 	public PostTO(Post post) {
 		this.id = post.getId();
 		this.groupId = post.getGroupId();
+		this.postType = post.getPostType();
 		if(groupId !=null && groupId > 0){
 			Group group = CacheUtils.getGroup(this.groupId);
 			this.groupName =  group.getName();
@@ -100,8 +111,21 @@ public class PostTO {
 			fileTO= new FileTO(file);
 			this.files.add(fileTO);
 		}
+		this.title = post.getTitle();
+		this.noOfSubmissions = post.getNoOfSubmissions();
+		if(null != post.getDeadline()){
+			this.deadlineTime = post.getDeadline().getTime();
+			this.canSubmit = this.deadlineTime > new Date().getTime();
+			
+		}
+		this.zipFilePath = post.getZipFilePath();
+		if(CurrentContext.getAppUser() !=null){
+			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
+		}
 	}
 
+	private POST_TYPE postType = POST_TYPE.SIMPLE;
+	
 	public PostTO(Event event, AppUser user) {
 		this.eventId =event.getId();
 		
@@ -109,7 +133,7 @@ public class PostTO {
 			Group group = CacheUtils.getGroup(this.groupId);
 			this.groupName =  group.getName();
 		}
-		this.postType = "schedule";
+		this.postType = POST_TYPE.SCHEDULE;
 		this.comment = event.getDescription()+" "+event.getStart()+"-"+event.getEnd();
 		this.createdByEmail = event.getCreator().getEmail();
 		this.createdByName = event.getCreator().getDisplayName();
@@ -149,6 +173,22 @@ public class PostTO {
 		}
 	}
 	
+	
+	
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public POST_TYPE getPostType() {
+		return postType;
+	}
+
+	public void setPostType(POST_TYPE postType) {
+		this.postType = postType;
+	}
+
 	public String getPostPriv() {
 		return postPriv;
 	}
@@ -340,6 +380,54 @@ public class PostTO {
 		this.eventId = eventId;
 	}
 	public boolean getIsPost(){
-		return true;
+		return null == this.postType ||  POST_TYPE.SIMPLE.equals(this.postType);
 	}
+	
+	public boolean getIsTask(){
+		return POST_TYPE.TASK.equals(this.postType);
+	}
+	
+	public boolean getIsSchedule(){
+		return POST_TYPE.SCHEDULE.equals(this.postType);
+	}
+	
+	public long getDeadlineTime() {
+		return deadlineTime;
+	}
+
+	public void setDeadlineTime(long deadlineTime) {
+		this.deadlineTime = deadlineTime;
+	}
+	public int getNoOfSubmissions() {
+		return noOfSubmissions;
+	}
+	public void setNoOfSubmissions(int noOfSubmissions) {
+		this.noOfSubmissions = noOfSubmissions;
+	}
+	public Boolean getIsEdited() {
+		return isEdited;
+	}
+	public void setIsEdited(Boolean isEdited) {
+		this.isEdited = isEdited;
+	}
+	public Boolean getIsSubmitted() {
+		return isSubmitted;
+	}
+	public void setIsSubmitted(Boolean isSubmitted) {
+		this.isSubmitted = isSubmitted;
+	}
+	public String getZipFilePath() {
+		return zipFilePath;
+	}
+	public void setZipFilePath(String zipFilePath) {
+		this.zipFilePath = zipFilePath;
+	}
+	public List<TaskSubmissionTO> getSubmissions() {
+		return submissions;
+	}
+	public void setSubmissions(List<TaskSubmissionTO> submissions) {
+		this.submissions = submissions;
+	}
+	
+	
 }

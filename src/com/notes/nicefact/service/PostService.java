@@ -29,6 +29,7 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostReaction;
+import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.ServiceException;
@@ -109,7 +110,7 @@ public class PostService extends CommonService<Post> {
 		return post;
 	}
 
-	private void updateAttachedFiles(Post post, PostTO postTo) {
+	void updateAttachedFiles(Post post, PostTO postTo) {
 		try {
 			String fileBasePath = AppProperties.getInstance().getGroupUploadsFolder() + post.getGroupId();
 			if (Files.notExists(Paths.get(fileBasePath))) {
@@ -318,6 +319,43 @@ public class PostService extends CommonService<Post> {
 		return files;
 	}
 
-	
+	public Post upsertTask(PostTO postTo, AppUser appUser) {
+		if (StringUtils.isBlank(postTo.getComment())) {
+			throw new ServiceException(" Task details cannot be empty");
+		}
+		if (postTo.getGroupId() == null) {
+			throw new ServiceException(" Group id cannot be null");
+		}
+		Post post = new Post(postTo);
+		post.setPostType(POST_TYPE.TASK);
+		Group group = CacheUtils.getGroup(postTo.getGroupId());
+		if (group.getAdmins().contains(appUser.getEmail())) {
+			if (group.getBlocked().contains(appUser.getEmail())) {
+				throw new UnauthorizedException("User has been blocked by group admin.");
+			}
+
+			if (null == postTo.getId() || postTo.getId() <= 0) {
+				updateAttachedFiles(post, postTo);
+				postDAO.upsert(post);
+				backendTaskService.saveTaskTask(post);
+
+			} else {
+				Post postDB = postDAO.get(postTo.getId());
+				if (postDB.getCreatedBy().equals(appUser.getEmail())) {
+					postDB.updateProps(post);
+					updateAttachedFiles(postDB, postTo);
+					postDAO.upsert(postDB);
+					backendTaskService.saveTaskTask(postDB);
+					return postDB;
+				} else {
+					throw new UnauthorizedException("You cannot edit this post.");
+				}
+			}
+
+		} else {
+			throw new UnauthorizedException("You cannot create task for this group.");
+		}
+		return post;
+	}
 
 }

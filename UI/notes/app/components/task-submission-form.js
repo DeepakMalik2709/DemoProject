@@ -10,7 +10,6 @@ export default Ember.Component.extend(postMixin , {
 	
     actions: {
     	saveTaskSubmission( ){
-    		console.log(444)
     		if(!Ember.get(this, "isSaving") && this.files.length){
     			Ember.set(this, "isSaving", true)
     		let json = {

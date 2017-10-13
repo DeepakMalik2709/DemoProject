@@ -72,10 +72,6 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 		    			var thisPosts = result.items;
 		    			 newFeeds.pushObjects(thisPosts);
 		    		}
-		    		if( result.tasks && result.tasks.length){
-		    			var thisPosts = result.tasks;
-		    			newFeeds.pushObjects(thisPosts);
-		    		}
 		    		if(newFeeds.length == 0){
 	    				this.hasMoreRecords = false;
 	    				if( this.controller.get("feeds").length == 0){
@@ -99,6 +95,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     			Ember.set(this, "isSaving", true);
     			Ember.set(post, "isSaving", true);
     			Ember.set(post, "showLoading", true);
+    			this.controller.set("noRecords", false);
 	    		post.save().then((resp1) => {
 	    			Ember.set(this, "isSaving", false);
 	    			Ember.set(post, "isSaving", false);
@@ -147,7 +144,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     		this.initCreatePost();
     	},
         error(reason){
-        	this.transitionTo('dashboard');
+        	this.transitionTo('home');
         },
         showCreatePostAction(){
         	this.initCreatePost();
