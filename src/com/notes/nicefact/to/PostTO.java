@@ -31,7 +31,7 @@ public class PostTO {
 	Long groupId;
 	String groupName;
 	String comment;
-
+	List<Long> groupIds = new ArrayList<>();
 	List<TagTO> tags = new ArrayList<>();
 	
 	long createdTime;
@@ -427,6 +427,18 @@ public class PostTO {
 	}
 	public void setSubmissions(List<TaskSubmissionTO> submissions) {
 		this.submissions = submissions;
+	}
+	public List<Long> getGroupIds() {
+		return groupIds;
+	}
+	public void setGroupIds(List<Long> groupIds) {
+		this.groupIds = groupIds;
+	}
+	public Boolean getCanSubmit() {
+		return canSubmit;
+	}
+	public void setCanSubmit(Boolean canSubmit) {
+		this.canSubmit = canSubmit;
 	}
 	
 	

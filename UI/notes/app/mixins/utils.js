@@ -25,6 +25,9 @@ export default Ember.Mixin.create({
 		if(item.updatedTime){
 			Ember.set(item, "updatedDisplayTime", this.getTimeDifference(Ember.get(item, 'updatedTime')));
 		}
+		if(item.deadlineTime){
+			Ember.set(item, "deadlineDisplayTime", this.getFullTime(Ember.get(item, 'deadlineTime')));
+		}
     },
 	   getTimeDifference(time) {
         var diff = (new Date().getTime() - time) / 1000;
@@ -52,12 +55,14 @@ export default Ember.Mixin.create({
             }
 
         } else {
-            msg = moment(time).format("Do MMM YYYY hh:mm a");
+            msg = this.getFullTime(time);
         //    console.log( time, new Date(time), msg)
         }
         return msg;
     },
-    
+    getFullTime(time){
+    	return moment(time).format("Do MMM YYYY hh:mm a");
+    },
     keyCodes : {
 			COMMA: 44,
 			COMMA2: 188,

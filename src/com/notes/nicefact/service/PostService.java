@@ -141,7 +141,7 @@ public class PostService extends CommonService<Post> {
 					serverFilePath = fileBasePath + fileTO.getServerName();
 					tempFilePath = AppProperties.getInstance().getTempUploadsFolder() + fileTO.getServerName();
 					if (Files.exists(Paths.get(tempFilePath))) {
-						Files.move(Paths.get(tempFilePath), Paths.get(serverFilePath), StandardCopyOption.REPLACE_EXISTING);
+						Files.copy(Paths.get(tempFilePath), Paths.get(serverFilePath));
 						PostFile postFile = new PostFile(fileTO, serverFilePath);
 						postFile.setPost(post);
 						post.getFiles().add(postFile);
@@ -319,43 +319,50 @@ public class PostService extends CommonService<Post> {
 		return files;
 	}
 
-	public Post upsertTask(PostTO postTo, AppUser appUser) {
-		if (StringUtils.isBlank(postTo.getComment())) {
+	public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
+		if (StringUtils.isBlank(postTo.getComment()) && postTo.getFiles().isEmpty()) {
 			throw new ServiceException(" Task details cannot be empty");
 		}
-		if (postTo.getGroupId() == null) {
+		if (postTo.getGroupId() == null && postTo.getGroupIds().isEmpty()) {
 			throw new ServiceException(" Group id cannot be null");
 		}
-		Post post = new Post(postTo);
-		post.setPostType(POST_TYPE.TASK);
-		Group group = CacheUtils.getGroup(postTo.getGroupId());
-		if (group.getAdmins().contains(appUser.getEmail())) {
-			if (group.getBlocked().contains(appUser.getEmail())) {
-				throw new UnauthorizedException("User has been blocked by group admin.");
-			}
+		List<Post> posts = new ArrayList<>();
+		if (postTo.getGroupIds().isEmpty()) {
+			postTo.getGroupIds().add(postTo.getGroupId());
+		}
+		for (Long groupId : postTo.getGroupIds()) {
+			Post post = new Post(postTo);
+			post.setGroupId(groupId);
+			post.setPostType(POST_TYPE.TASK);
+			Group group = CacheUtils.getGroup(groupId);
+			if (group.getAdmins().contains(appUser.getEmail())) {
+				if (group.getBlocked().contains(appUser.getEmail())) {
+					throw new UnauthorizedException("User has been blocked by group admin.");
+				}
 
-			if (null == postTo.getId() || postTo.getId() <= 0) {
-				updateAttachedFiles(post, postTo);
-				postDAO.upsert(post);
-				backendTaskService.saveTaskTask(post);
+				if (null == postTo.getId() || postTo.getId() <= 0) {
+					updateAttachedFiles(post, postTo);
+					postDAO.upsert(post);
+					backendTaskService.saveTaskTask(post);
+					posts.add(post);
+				} else {
+					Post postDB = postDAO.get(postTo.getId());
+					if (postDB.getCreatedBy().equals(appUser.getEmail())) {
+						postDB.updateProps(post);
+						updateAttachedFiles(postDB, postTo);
+						postDAO.upsert(postDB);
+						backendTaskService.saveTaskTask(postDB);
+						posts.add(postDB);
+					} else {
+						throw new UnauthorizedException("You cannot edit this post.");
+					}
+				}
 
 			} else {
-				Post postDB = postDAO.get(postTo.getId());
-				if (postDB.getCreatedBy().equals(appUser.getEmail())) {
-					postDB.updateProps(post);
-					updateAttachedFiles(postDB, postTo);
-					postDAO.upsert(postDB);
-					backendTaskService.saveTaskTask(postDB);
-					return postDB;
-				} else {
-					throw new UnauthorizedException("You cannot edit this post.");
-				}
+				throw new UnauthorizedException("You cannot create task for this group.");
 			}
-
-		} else {
-			throw new UnauthorizedException("You cannot create task for this group.");
 		}
-		return post;
+		return posts;
 	}
 
 }

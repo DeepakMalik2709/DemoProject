@@ -6,16 +6,19 @@ export default Ember.Component.extend(postMixin , {
 	    this._super(...arguments);
 	    this.set("files" , []);
 	    this.set("postComment" , "");
+	    this.set("showTaskSubmitOptions" , false);
 	  },
 	
     actions: {
     	saveTaskSubmission( ){
     		if(!Ember.get(this, "isSaving") && this.files.length){
     			Ember.set(this, "isSaving", true)
+    			
+    			console.log(this.task.id);
     		let json = {
     			comment : this.postComment,
     			files :  this.files,
-    			taskId :  this.task.id,
+    			postId :  this.task.id,
     		}
     			console.log(11 , json);
     		this.get("taskService").saveTaskSubmission(json).then((result)=>{
@@ -62,5 +65,8 @@ export default Ember.Component.extend(postMixin , {
   		    	});
         	}
         },
+        showTaskSubmitOptionsClick(){
+   		 this.set("showTaskSubmitOptions" , true);
+   	}
     }
 });

@@ -3,10 +3,27 @@
 @import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic);
 
 @import url(http://fonts.googleapis.com/css?family=Kaushan+Script);
- .disabled-process:hover .tooltip.top-tooltip, .tooltip.process-tip.active {
+
+.width40 {
+	    width: 40%;
+}
+.disabled-process:hover .tooltip.top-tooltip, .tooltip.process-tip.active {
     display: block;
 }
- 
+.task-title{
+    font-size: 16px;
+    font-weight: 500;
+}
+.task-deadline-time{
+	    margin-left: 17px;
+}
+[contenteditable=true]:empty {
+    color: rgba(85, 85, 85, 0.55);
+}
+
+ .overflow-hide{
+     overflow: hidden;
+     }
  .mtop{
  margin-top : 15px;}
 .tooltip.top-tooltip {

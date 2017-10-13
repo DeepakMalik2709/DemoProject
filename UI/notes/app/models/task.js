@@ -4,6 +4,7 @@ export default DS.Model.extend({
 	  comment: DS.attr('string'),
 	  groupId : DS.attr('number'),
 	  groupName: DS.attr('string'),
+	  title: DS.attr('string'),
 	  createdByEmail: DS.attr('string'),
 	  createdTime: DS.attr('number'),
 	  updatedTime: DS.attr('number'),
@@ -12,6 +13,8 @@ export default DS.Model.extend({
 	  createdByName: DS.attr('string'),
 	  updatedByEmail: DS.attr('string'),
 	  isSaving : DS.attr('boolean'),
+	  isSubmitted : DS.attr('boolean'),
+	  canSubmit : DS.attr('boolean'),
 	  isTask :  DS.attr( {
 		    defaultValue() { true }
 	  }),
@@ -28,10 +31,4 @@ export default DS.Model.extend({
 	    defaultValue() { return []; }
 	  }),
 	numberOfComments: DS.attr('number'),
-	  isValid: Ember.computed('comment', 'isSaving', function() {
-		  if(this.get('isSaving')){
-			  return false;
-		  }
-		    return !( typeof this.get('comment') == 'undefined' || this.get('comment').length < 3 );
-	  }),
 });

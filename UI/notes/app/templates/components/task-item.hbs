@@ -12,6 +12,11 @@
 	                    </div>
 	                   <div class="title h5 col-md-3 col-sm-3 col-lg-3 pull-right text-muted time"> {{item.createdDisplayTime}}</div>
                    </div>
+                <div class="row {{if item.deadlineDisplayTime 'show' 'hide'}}">
+	                    <div class="title h5 col-sm-pull-2 task-deadline-time  text-muted time">
+	                       Deadline : {{item.deadlineDisplayTime}}
+	                    </div>
+                   </div>
                    <div class="row">
 		                 <footer class="comment__footer col-md-5 col-sm-5 col-lg-5"><menu class="comment-footer__menu">
 								{{#if canEdit}}
@@ -35,6 +40,7 @@
 					</div>
 					<div class="row">
 					  	<div class="col-md-8 col-sm-8 col-lg-8"> 
+					  	    <div class="task-title {{unless item.isEditing 'show' 'hide'}}">{{{item.title}}}</div>
 			                <div class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</div>
 			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box schedule=item className="post-description edit-post"   save='updateTask' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
@@ -47,28 +53,13 @@
 						        </ol>
 			       			</div>
 			                <div   class="stats {{unless item.isEditing 'show' 'hide'}}">
-			                    <a href="javascript:void(0);" class="btn btn-default stat-item" disabled={{disableReactButton}} {{action "reactToPost"}}>
-			                        <i class="fa fa-thumbs-up icon"></i>{{item.numberOfReactions}}
-			                    </a>
+			                     {{task-submission-form  className=""   save='saveTaskSubmission' cancelClicked='cancelTaskSubmission' task=item   }}
 			           	 	</div>
 			       	 	</div>
 					</div>
                 </div>
          </div> 
-            <div class="post-footer {{if item.isEditing 'hideBorder' ''}}">
-         {{#if item.isSubmitted}}
-   <div class="text-info"> You have submitted this task.</div>
-    {{else}}
-              <div class="input-group contenteditable-input-group " > 
-                   
-                    {{task-submission-form  className=""   save='saveTaskSubmission' cancelClicked='cancelTaskSubmission' task=item   }}
-                </div>
-                
 
-
-         
-         	{{/if}}
-         	</div> 
         
      </div> 
     </div>

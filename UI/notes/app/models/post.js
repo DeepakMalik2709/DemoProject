@@ -18,6 +18,8 @@ export default DS.Model.extend({
 	  reponseMaybe: DS.attr('number'),
 	  totalAttendee: DS.attr('number'),
 	  isSaving : DS.attr('boolean'),
+	  isSubmitted : DS.attr('boolean'),
+	  canSubmit : DS.attr('boolean'),
 	  isPost :  DS.attr( {
 		    defaultValue() { true }
 	  }),
@@ -45,5 +47,11 @@ export default DS.Model.extend({
 			  return false;
 		  }
 		    return !( typeof this.get('comment') == 'undefined' || this.get('comment').length < 3 );
+	  }),
+	 showSubmissionDiv : Ember.computed('isSubmitted', 'canSubmit', function() {
+		  if(this.get('canSubmit') && !this.get('isSubmitted')){
+			  return true;
+		  }
+		    return false;
 	  }),
 });

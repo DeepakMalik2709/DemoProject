@@ -21,6 +21,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 		  },
 	    setupController: function(controller, model) {
 	        this._super(controller, model);
+	        this.controller.set("selectedGroups", []);
 	        this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
 	       	if(false == this.useGoogleDrive){
         		if(confirm("AllSchool needs access to Google Drive and Calendar to create Tasks. Would you like to grant permission now ?")){
@@ -31,61 +32,71 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	        request.then((response) => {
 	        	   this.controller.set("myGroups" ,response );
 	        });   
-	       
+	       var hoursArray = [];
+	       for(var i = 0 ; i < 24; i++){
+	    	   hoursArray.push({label : (i) , id :i});
+	       }
+	       var minutesArray = [];
+	       for(var i = 0 ; i < 50; i = i+15){
+	    	   minutesArray.push({label : i , id :i});
+	       }
+	       this.controller.set("minutesArray", minutesArray);
+	       this.controller.set("hoursArray",hoursArray);
 	    },
 	   
 	    actions: {
-	    	  
+	    	addHour(hour) {
+	    		 this.controller.set("selectedHour", hour);
+	        },
+	        addMinutes(minutes) {
+	    		 this.controller.set("selectedMinutes", minutes);
+	        },
 	    	 saveTask(task){
-	     		if(!Ember.get(this, "isSaving") && task.comment){
+
+	    		 if(!Ember.get(task , "title")){
+	    			 alert("please give your task a title.")
+	    		 }
+	    				 
+	    		 if(!Ember.get(task , "comment") && !Ember.get(task, "files").length){
+	    			 alert("Please upload or type task description.")
+	    			 return;
+	    		 }
+	    		var selectedGroups =  this.controller.get("selectedGroups");
+	    		 if(! selectedGroups.length){
+	    			 alert("Please select group to post task.")
+	    			 return;
+	    		 }
+	     		if(!Ember.get(this, "isSaving") ){
 	     			Ember.set(this, "isSaving", true);
 	     			Ember.set(task, "isSaving", true);
 	     			Ember.set(task, "showLoading", true);
+	     			for(var i =0 ;i < selectedGroups.length ;i++){
+	     				Ember.get(task,"groupIds").pushObject(selectedGroups[i].id);
+	     			}
+		        	var date = Ember.get(task,"deadlineTime");
+		        	if(date){
+		        		date = date.getTime();
+		        		var selectedHour = this.controller.get("selectedHour.id");
+		     			var selectedMinutes = this.controller.get("selectedMinutes.id");
+		     			if(selectedHour){
+		     				date += (selectedHour * 60 * 60000);
+		     			}
+		     			if(selectedMinutes){
+		     				date += selectedMinutes* 60000;
+		     			}
+		     			Ember.set(task, 'deadlineTime', date)
+		        	}
+	     			
 	 	    		task.save().then((resp1) => {
 	 	    			Ember.set(this, "isSaving", false);
 	 	    			Ember.set(task, "isSaving", false);
 	 	    			Ember.set(task, "showLoading", false);
-	 	    			var tasks = this.controller.get("feeds");
-	 	    			var index = tasks.indexOf(task);
-	 	    			if(index > -1){
-	 	    				resp1.set('isEditing' , false)
-	 	    				tasks.replace(index, 1, resp1);
-	 	    			}else{
-	 	    				this.initCreateTask();
-	 	    				Ember.run.later(()=>{this.component.resetCommentBox();} , 10)
-	 	    				tasks.unshiftObject(resp1);
-	 	    			}
+	 	    			alert("Task posted.")
+	 	    			console.log(resp1)
+	 	    			this.transitionTo('group.posts',  Ember.get(resp1,"groupId"));
+	 	    			
 	 	    		});
 	     		}
-	     	},
-	     	cancelCreateTask(){
-	   		  if (this.controller.get("newTask.comment")) {
-	   			   let confirmation = confirm("Cancel task ?");
-	   	            if (confirmation) {
-	   	            	  	this.initCreatePost();
-	   	    	    		this.component.resetCommentBox();
-	   	    	    		Ember.set(this, "isSaving", false);
-	   	            }
-	   		  }else{
-	   			  	this.initCreateTask();
-	   	    		this.component.resetCommentBox();
-	   	    		Ember.set(this, "isSaving", false);
-	   		  }
-	   	},
-	 	deleteTask(task){
-	         let confirmation = confirm("Are you sure you want to delete task ?");
-
-	         if (confirmation) {
-	         	var posts = this.controller.get("feeds");
-	 			var index = posts.indexOf(post);
-	 			posts.removeAt(index);
-	 			this.get("taskService").deleteTask(post.get("groupId"), task.get("id")).then((result)=>{
-	         		if(result.code == 0){
-	 	    		}
-	 	    	});
-	         }
-	 	}, 
-
-     
+	     	}
 	    }
 });

@@ -8,12 +8,6 @@ export default DS.Adapter.extend(ajaxMixin ,{
 		      this.doGet(`/rest/secure/task/${id}`).then((data)=> {
 		    	  if(data.code ==0){
 		    		  var record = data.item;
-		    		  var newJson = {
-		    				  id: record.id,
-		    			        type: 'tag',
-		    			        attributes : record,
-		    		  }
-		    		 // resolve(newJson);
 		    		  resolve(record);
 		    	  }else{
 		    		  reject(data);
@@ -36,7 +30,7 @@ export default DS.Adapter.extend(ajaxMixin ,{
 			    return new Ember.RSVP.Promise((resolve, reject) =>{
 			    	var url = '/rest/secure/group/task';
 			    	this.doPost(url , json).then(function(data) {
-			    	  Ember.run(null, resolve, data.item);
+			    	  Ember.run(null, resolve, data.items[0]);
 			      }, function(jqXHR) {
 			        jqXHR.then = null; // tame jQuery's ill mannered promises
 			        Ember.run(null, reject, jqXHR);

@@ -551,10 +551,14 @@ public class SecureController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			PostService postService = new PostService(em);
-			Post post = postService.upsertTask(postTo, CurrentContext.getAppUser());
-			PostTO savedTO = new PostTO(post);
+			 List<Post> posts = postService.upsertTask(postTo, CurrentContext.getAppUser());
+			 List<PostTO> savedTOs = new ArrayList<>();
+			 for(Post post : posts){
+				 PostTO savedTO = new PostTO(post);
+				 savedTOs.add(savedTO);
+			 }
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, savedTO);
+			json.put(Constants.DATA_ITEMS, savedTOs);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e );
 
