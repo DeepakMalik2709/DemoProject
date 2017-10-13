@@ -40,7 +40,6 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     },
     initCreateTab : function(){
     	this.controller.set("showCreatePost", false);
-    	this.controller.set("showCreateTask", false);
     },
     initCreatePost : function(){
     	 this.initCreateTab();
@@ -50,15 +49,6 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     		 groupId: group.id,
 	      }); 
     	  this.controller.set("newPost", newPost);
-    },
-    initCreateTask : function(){
-    	 this.initCreateTab();
-    	this.controller.set("showCreateTask", true);
-    	var group = this.controller.get("model");
-    	 const newTask = this.store.createRecord('task', {
-    		 groupId: group.id,
-	      }); 
-    	  this.controller.set("newTask", newTask);
     },
     fetchGroupPosts : function(){
     	if(this.hasMoreRecords && ! this.isFetching){
@@ -71,10 +61,6 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 		    		if( result.items && result.items.length){
 		    			var thisPosts = result.items;
 		    			 newFeeds.pushObjects(thisPosts);
-		    		}
-		    		if( result.tasks && result.tasks.length){
-		    			var thisPosts = result.tasks;
-		    			newFeeds.pushObjects(thisPosts);
 		    		}
 		    		if(newFeeds.length == 0){
 	    				this.hasMoreRecords = false;
@@ -99,6 +85,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     			Ember.set(this, "isSaving", true);
     			Ember.set(post, "isSaving", true);
     			Ember.set(post, "showLoading", true);
+    			this.controller.set("noRecords", false);
 	    		post.save().then((resp1) => {
 	    			Ember.set(this, "isSaving", false);
 	    			Ember.set(post, "isSaving", false);
@@ -147,7 +134,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     		this.initCreatePost();
     	},
         error(reason){
-        	this.transitionTo('dashboard');
+        	this.transitionTo('home');
         },
         showCreatePostAction(){
         	this.initCreatePost();
@@ -183,32 +170,5 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    		});
     		}
     	},
-    	cancelCreateTask(){
-  		  if (this.controller.get("newTask.comment")) {
-  			   let confirmation = confirm("Cancel task ?");
-  	            if (confirmation) {
-  	            	  	this.initCreatePost();
-  	    	    		this.component.resetCommentBox();
-  	    	    		Ember.set(this, "isSaving", false);
-  	            }
-  		  }else{
-  			  	this.initCreateTask();
-  	    		this.component.resetCommentBox();
-  	    		Ember.set(this, "isSaving", false);
-  		  }
-  	},
-	deleteTask(task){
-        let confirmation = confirm("Are you sure you want to delete task ?");
-
-        if (confirmation) {
-        	var posts = this.controller.get("feeds");
-			var index = posts.indexOf(post);
-			posts.removeAt(index);
-			this.get("taskService").deleteTask(post.get("groupId"), task.get("id")).then((result)=>{
-        		if(result.code == 0){
-	    		}
-	    	});
-        }
-	}, 
     }
 });

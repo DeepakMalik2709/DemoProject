@@ -18,9 +18,12 @@ export default DS.Model.extend({
 	  reponseMaybe: DS.attr('number'),
 	  totalAttendee: DS.attr('number'),
 	  isSaving : DS.attr('boolean'),
-	  isPost :  DS.attr( {
-		    defaultValue() { true }
-	  }),
+	  isSubmitted : DS.attr('boolean'),
+	  canSubmit : DS.attr('boolean'),
+	  title: DS.attr('string'),
+	  deadlineTime: DS.attr('number'),
+	  isTask : DS.attr('boolean'),
+	  isPost : DS.attr('boolean'),
 	  files: DS.attr( {
 		    defaultValue() { return []; }
 		  }),
@@ -45,5 +48,11 @@ export default DS.Model.extend({
 			  return false;
 		  }
 		    return !( typeof this.get('comment') == 'undefined' || this.get('comment').length < 3 );
+	  }),
+	 showSubmissionDiv : Ember.computed('isSubmitted', 'canSubmit', function() {
+		  if(this.get('canSubmit') && !this.get('isSubmitted')){
+			  return true;
+		  }
+		    return false;
 	  }),
 });

@@ -9,6 +9,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin , {
     nextPageLink : null,
     groupService: Ember.inject.service('group'),
     postService: Ember.inject.service('post'),
+    taskService: Ember.inject.service('task'),
     init() {
 	    this._super(...arguments);
 	  },
@@ -103,5 +104,40 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin , {
         error(reason){
         	this.transitionTo('dashboard');
         },
+        saveTask(task){
+    		if(!Ember.get(this, "isSaving") && task.comment){
+    			Ember.set(this, "isSaving", true);
+    			Ember.set(task, "isSaving", true);
+    			Ember.set(task, "showLoading", true);
+	    		task.save().then((resp1) => {
+	    			Ember.set(this, "isSaving", false);
+	    			Ember.set(task, "isSaving", false);
+	    			Ember.set(task, "showLoading", false);
+	    			var tasks = this.controller.get("feeds");
+	    			var index = tasks.indexOf(task);
+	    			if(index > -1){
+	    				resp1.set('isEditing' , false)
+	    				tasks.replace(index, 1, resp1);
+	    			}else{
+	    				this.initCreateTask();
+	    				Ember.run.later(()=>{this.component.resetCommentBox();} , 10)
+	    				tasks.unshiftObject(resp1);
+	    			}
+	    		});
+    		}
+    	},
+    	deleteTask(task){
+            let confirmation = confirm("Are you sure you want to delete task ?");
+
+            if (confirmation) {
+            	var posts = this.controller.get("feeds");
+    			var index = posts.indexOf(post);
+    			posts.removeAt(index);
+    			this.get("taskService").deleteTask(post.get("groupId"), task.get("id")).then((result)=>{
+            		if(result.code == 0){
+    	    		}
+    	    	});
+            }
+    	}, 
     }
 });

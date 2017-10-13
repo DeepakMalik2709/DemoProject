@@ -1,6 +1,7 @@
 package com.notes.nicefact.entity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,6 +29,14 @@ import com.notes.nicefact.util.CacheUtils;
 public class Post extends AbstractComment {
 
 	private static final long serialVersionUID = 1L;
+	
+	public enum POST_TYPE{
+		SIMPLE, SCHEDULE, TASK
+	}
+	
+	public enum TASK_TYPE{
+		CLASS_ASSIGNMENT
+	}
 
 	// company key of person creating post
 	@Basic
@@ -61,6 +70,24 @@ public class Post extends AbstractComment {
 	@Enumerated(EnumType.STRING)
 	private SHARING sharing = SHARING.GROUP;
 
+	@Enumerated(EnumType.STRING)
+	private POST_TYPE postType = POST_TYPE.SIMPLE;
+	
+int noOfSubmissions;
+	
+	@Basic
+	Date deadline;
+	
+	@ElementCollection(fetch = FetchType.LAZY)
+	Set<String> submitters = new HashSet<>();
+	
+	private String zipFilePath;
+	
+	String googleDriveFolderId;
+	
+	String title;
+	
+	
 	public Post() {
 		super();
 	}
@@ -91,12 +118,19 @@ public class Post extends AbstractComment {
 		if(null != this.getGroupId()){
 			this.sharing = SHARING.GROUP;
 		}
+		if(post.getDeadlineTime()  >0){
+			this.deadline = new Date(post.getDeadlineTime());
+		}
+		this.title = post.getTitle();
 	}
 
 	public void updateProps(Post post) {
 		this.tags = post.getTags();
 		this.comment = post.getComment();
 		this.isEdited=true;
+		if(post.getDeadline()  !=null){
+			this.deadline = new Date(post.getDeadline().getTime());
+		}
 	}
 
 	public Long getCompanyId() {
@@ -134,6 +168,12 @@ public class Post extends AbstractComment {
 
 	public void setFiles(List<PostFile> files) {
 		this.files = files;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public Long getGroupId() {
@@ -207,6 +247,57 @@ public class Post extends AbstractComment {
 			emails.add(receipient.getEmail());
 		}
 		return emails;
+	}
+
+	public POST_TYPE getPostType() {
+		return postType;
+	}
+
+	public void setPostType(POST_TYPE postType) {
+		this.postType = postType;
+	}
+
+	public int getNoOfSubmissions() {
+		return noOfSubmissions;
+	}
+
+	public void setNoOfSubmissions(int noOfSubmissions) {
+		this.noOfSubmissions = noOfSubmissions;
+	}
+
+	public Date getDeadline() {
+		return deadline;
+	}
+
+	public void setDeadline(Date deadline) {
+		this.deadline = deadline;
+	}
+
+	public Set<String> getSubmitters() {
+		if(null == submitters){
+			submitters = new HashSet<>();
+		}
+		return submitters;
+	}
+
+	public void setSubmitters(Set<String> submitters) {
+		this.submitters = submitters;
+	}
+
+	public String getZipFilePath() {
+		return zipFilePath;
+	}
+
+	public void setZipFilePath(String zipFilePath) {
+		this.zipFilePath = zipFilePath;
+	}
+
+	public String getGoogleDriveFolderId() {
+		return googleDriveFolderId;
+	}
+
+	public void setGoogleDriveFolderId(String googleDriveFolderId) {
+		this.googleDriveFolderId = googleDriveFolderId;
 	}
 
 	@PrePersist

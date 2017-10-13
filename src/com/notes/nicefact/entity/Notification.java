@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 
+import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.enums.NotificationType;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.util.CacheUtils;
@@ -70,23 +71,6 @@ public class Notification extends CommonEntity{
 
 	public Notification(){}
 	
-	public Notification(Task post, AppUser user){
-		this(user);
-		entityId = post.getId();
-		groupId = post.getGroupId();
-		if(null != groupId){
-			Group group = CacheUtils.getGroup(groupId);
-			groupName = group.getName();
-		}
-		
-		this.type = NotificationType.TASK;
-		this.title = stripEmailFromComments(post.getComment());
-		if(this.title.length() > 150){
-			this.title = this.title.substring(0, 150);
-		}
-		
-	}
-	
 	/* user is person generating notification , i.e. logged in user*/
 	public Notification(AppUser user){
 		sender =  user.getEmail();
@@ -114,7 +98,12 @@ public class Notification extends CommonEntity{
 		}
 		
 		sharing = post.getSharing();
-		this.type = NotificationType.POST;
+		if(POST_TYPE.TASK.equals(post.getPostType())){
+			this.type = NotificationType.TASK;
+		}else{
+			this.type = NotificationType.POST;
+		}
+		
 		this.title = stripEmailFromComments(post.getComment());
 		if(this.title.length() > 150){
 			this.title = this.title.substring(0, 150);

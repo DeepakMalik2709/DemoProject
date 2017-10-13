@@ -52,7 +52,9 @@ public class GroupService extends CommonService<Group> {
 
 	public Group get(Long id) {
 		Group group = super.get(id);
-		populateTagsInGroup(group);
+		if(null != group){
+			populateTagsInGroup(group);
+		}
 		return group;
 	}
 

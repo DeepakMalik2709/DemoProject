@@ -14,7 +14,11 @@
  <div class="row">
 {{#each posts as |post|}}
 	 <div class="col-md-12 col-lg-12  col-sm-12">
-	{{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
+	{{#if post.isTask}}
+ {{task-item item=post updateTask="saveTask" deletePost="deletePost" group=model }}
+ {{else if post.isPost}}
+{{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
+{{/if}}
 	</div>   
 {{/each}}
 

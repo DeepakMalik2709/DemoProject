@@ -1,0 +1,14 @@
+  <div class="form-group mtop">
+                                      <div class="col-md-5">
+                    		     {{bootstrap-datepicker autoclose=true placeholder="Click to add deadline" changeDate='addDate' class="form-control" value=dateValue readonly=true}}
+                    		     </div>
+                    		     <div class="col-md-3">
+								{{select-box content=hoursArray 
+								className='form-control' didChangeAction='addHour' }} 
+                    		     </div>
+                    		      <div class="col-md-3">
+								{{select-box content=minutesArray 
+								className='form-control' didChangeAction='addMinutes' }} 
+                    		     </div>
+                    		     <div class="clearfix"></div>
+                       </div> 

@@ -109,9 +109,7 @@ export default Ember.Route.extend({
         
         notificationClick(notification){
         	if(notification.entityId){
-        		if(notification.type == 'TASK'){
-        			this.transitionTo('group.task', notification.entityId);
-        		}else{
+        		if(notification.type == 'TASK' || notification.type == 'POST'){
         			this.transitionTo('group.post', notification.entityId);
         		}
         	}else if(notification.groupId){

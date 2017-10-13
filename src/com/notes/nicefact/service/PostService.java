@@ -29,6 +29,7 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostReaction;
+import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.ServiceException;
@@ -109,7 +110,7 @@ public class PostService extends CommonService<Post> {
 		return post;
 	}
 
-	private void updateAttachedFiles(Post post, PostTO postTo) {
+	void updateAttachedFiles(Post post, PostTO postTo) {
 		try {
 			String fileBasePath = AppProperties.getInstance().getGroupUploadsFolder() + post.getGroupId();
 			if (Files.notExists(Paths.get(fileBasePath))) {
@@ -140,7 +141,7 @@ public class PostService extends CommonService<Post> {
 					serverFilePath = fileBasePath + fileTO.getServerName();
 					tempFilePath = AppProperties.getInstance().getTempUploadsFolder() + fileTO.getServerName();
 					if (Files.exists(Paths.get(tempFilePath))) {
-						Files.move(Paths.get(tempFilePath), Paths.get(serverFilePath), StandardCopyOption.REPLACE_EXISTING);
+						Files.copy(Paths.get(tempFilePath), Paths.get(serverFilePath));
 						PostFile postFile = new PostFile(fileTO, serverFilePath);
 						postFile.setPost(post);
 						post.getFiles().add(postFile);
@@ -318,6 +319,50 @@ public class PostService extends CommonService<Post> {
 		return files;
 	}
 
-	
+	public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
+		if (StringUtils.isBlank(postTo.getComment()) && postTo.getFiles().isEmpty()) {
+			throw new ServiceException(" Task details cannot be empty");
+		}
+		if (postTo.getGroupId() == null && postTo.getGroupIds().isEmpty()) {
+			throw new ServiceException(" Group id cannot be null");
+		}
+		List<Post> posts = new ArrayList<>();
+		if (postTo.getGroupIds().isEmpty()) {
+			postTo.getGroupIds().add(postTo.getGroupId());
+		}
+		for (Long groupId : postTo.getGroupIds()) {
+			Post post = new Post(postTo);
+			post.setGroupId(groupId);
+			post.setPostType(POST_TYPE.TASK);
+			Group group = CacheUtils.getGroup(groupId);
+			if (group.getAdmins().contains(appUser.getEmail())) {
+				if (group.getBlocked().contains(appUser.getEmail())) {
+					throw new UnauthorizedException("User has been blocked by group admin.");
+				}
+
+				if (null == postTo.getId() || postTo.getId() <= 0) {
+					updateAttachedFiles(post, postTo);
+					postDAO.upsert(post);
+					backendTaskService.saveTaskTask(post);
+					posts.add(post);
+				} else {
+					Post postDB = postDAO.get(postTo.getId());
+					if (postDB.getCreatedBy().equals(appUser.getEmail())) {
+						postDB.updateProps(post);
+						updateAttachedFiles(postDB, postTo);
+						postDAO.upsert(postDB);
+						backendTaskService.saveTaskTask(postDB);
+						posts.add(postDB);
+					} else {
+						throw new UnauthorizedException("You cannot edit this post.");
+					}
+				}
+
+			} else {
+				throw new UnauthorizedException("You cannot create task for this group.");
+			}
+		}
+		return posts;
+	}
 
 }

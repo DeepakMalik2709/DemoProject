@@ -29,8 +29,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 
-import com.notes.nicefact.entity.AbstractFile.UPLOAD_TYPE;
 import com.notes.nicefact.dao.TaskSubmissionDAO;
+import com.notes.nicefact.entity.AbstractFile;
+import com.notes.nicefact.entity.AbstractFile.UPLOAD_TYPE;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.BackendTask;
 import com.notes.nicefact.entity.BackendTask.BackendTaskStatus;
@@ -43,8 +44,6 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostRecipient;
-import com.notes.nicefact.entity.Task;
-import com.notes.nicefact.entity.TaskFile;
 import com.notes.nicefact.entity.TaskSubmission;
 import com.notes.nicefact.entity.TaskSubmissionFile;
 import com.notes.nicefact.entity.Tutorial;
@@ -127,21 +126,21 @@ public class BackendTaskController extends CommonController {
 						} catch (IOException e) {
 							logger.error("could not delete : " + postFile.getPath() + " , " + e.getMessage(), e);
 						}
-						getGroupPostFilesThumbnailFromDriveFile(driveFile, postFile, user, commonService);
+						getGroupPostFilesThumbnailFromDriveFile(driveFile, post.getGroupId(), postFile, user, commonService);
 					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 			} else if (StringUtils.isBlank(postFile.getThumbnail())) {
 				driveFile = driveService.getFileFields(postFile.getGoogleDriveId(), "thumbnailLink", user);
-				getGroupPostFilesThumbnailFromDriveFile(driveFile, postFile, user, commonService);
+				getGroupPostFilesThumbnailFromDriveFile(driveFile,post.getGroupId(), postFile, user, commonService);
 			}else {
 				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
 			}
 		}
 	}
 	
-	void getGroupPostFilesThumbnailFromDriveFile(GoogleDriveFile driveFile, PostFile postFile, AppUser user, CommonEntityService commonService ) {
+	void getGroupPostFilesThumbnailFromDriveFile(GoogleDriveFile driveFile, long groupId, AbstractFile postFile, AppUser user, CommonEntityService commonService ) {
 		if (null != driveFile && StringUtils.isNotBlank(driveFile.getThumbnailLink())) {
 			GoogleDriveService driveService = GoogleDriveService.getInstance();
 			try {
@@ -152,7 +151,7 @@ public class BackendTaskController extends CommonController {
 					 * udpate database
 					 */
 					byte[] thumbnailBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
-					FileTO fileTo = Utils.writeGroupPostFileThumbnail(thumbnailBytes, postFile.getPost().getGroupId(), postFile.getName());
+					FileTO fileTo = Utils.writeGroupPostFileThumbnail(thumbnailBytes,groupId, postFile.getName());
 					postFile.setThumbnail(fileTo.getServerName());
 					commonService.upsert(postFile);
 				} 
@@ -1051,7 +1050,7 @@ public class BackendTaskController extends CommonController {
 		try {
 			TaskService taskService = new TaskService(em);
 			NotificationService notificationService = new NotificationService(em);
-			Task post = taskService.get(taskId);
+			Post post = taskService.get(taskId);
 			AppUser sender = CacheUtils.getAppUser(post.getCreatedBy());
 			AppUser user;
 			NotificationRecipient notificationRecipient;
@@ -1104,13 +1103,13 @@ public class BackendTaskController extends CommonController {
 		renderResponseRaw(true, response);
 	}
 	
-	private void moveTaskFilesToUserGoogleDrive(Task task, AppUser user, EntityManager em) {
+	private void moveTaskFilesToUserGoogleDrive(Post task, AppUser user, EntityManager em) {
 		CommonEntityService commonService = new CommonEntityService(em);
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
-		List<TaskFile> files = task.getFiles();
+		List<PostFile> files = task.getFiles();
 		GoogleDriveFile driveFile;
 		for (int index = 0 ; index < files.size(); index++) {
-			TaskFile postFile = files.get(index);
+			PostFile postFile = files.get(index);
 			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
 				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
 				try {
@@ -1132,40 +1131,20 @@ public class BackendTaskController extends CommonController {
 						} catch (IOException e) {
 							logger.error("could not delete : " + postFile.getPath() + " , " + e.getMessage(), e);
 						}
-						getGroupPostFilesThumbnailFromDriveFile(driveFile, postFile, user, commonService);
+						getGroupPostFilesThumbnailFromDriveFile(driveFile, task.getGroupId(), postFile, user, commonService);
 					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 			} else if (StringUtils.isBlank(postFile.getThumbnail())) {
 				driveFile = driveService.getFileFields(postFile.getGoogleDriveId(), "thumbnailLink", user);
-				getGroupPostFilesThumbnailFromDriveFile(driveFile, postFile, user, commonService);
+				getGroupPostFilesThumbnailFromDriveFile(driveFile, task.getGroupId(), postFile, user, commonService);
 			}else {
 				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
 			}
 		}
 	}
 	
-	void getGroupPostFilesThumbnailFromDriveFile(GoogleDriveFile driveFile, TaskFile postFile, AppUser user, CommonEntityService commonService ) {
-		if (null != driveFile && StringUtils.isNotBlank(driveFile.getThumbnailLink())) {
-			GoogleDriveService driveService = GoogleDriveService.getInstance();
-			try {
-				HttpResponse httpResponse = driveService.doGet(driveFile.getThumbnailLink(), null, user);
-				if (null != httpResponse && httpResponse.getStatusLine().getStatusCode() == 200 && httpResponse.getEntity() != null) {
-					/*
-					 * save thumbnail file in local storage and
-					 * udpate database
-					 */
-					byte[] thumbnailBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
-					FileTO fileTo = Utils.writeGroupPostFileThumbnail(thumbnailBytes, postFile.getTask().getGroupId(), postFile.getName());
-					postFile.setThumbnail(fileTo.getServerName());
-					commonService.upsert(postFile);
-				} 
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-	}
 	
 	@POST
 	@Path("task/addThumbnail")
@@ -1174,7 +1153,7 @@ public class BackendTaskController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			TaskService taskService = new TaskService(em);
-			Task post = taskService.get(taskId);
+			Post post = taskService.get(taskId);
 			AppUser user = CacheUtils.getAppUser(post.getCreatedBy());
 			if (user.getUseGoogleDrive() && StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
 				moveTaskFilesToUserGoogleDrive(post, user, em);
@@ -1192,7 +1171,7 @@ public class BackendTaskController extends CommonController {
 		renderResponseRaw(true, response);
 	}
 
-	private void moveTaskSubmissionFilesToUserGoogleDrive(Task task, TaskSubmission submission , AppUser user, EntityManager em) {
+	private void moveTaskSubmissionFilesToUserGoogleDrive(Post task, TaskSubmission submission , AppUser user, EntityManager em) {
 		CommonEntityService commonService = new CommonEntityService(em);
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
 		List<TaskSubmissionFile> files = submission.getFiles();
@@ -1219,21 +1198,21 @@ public class BackendTaskController extends CommonController {
 						} catch (IOException e) {
 							logger.error("could not delete : " + postFile.getPath() + " , " + e.getMessage(), e);
 						}
-						getGroupPostFilesThumbnailFromDriveFile(driveFile,task, postFile, user, commonService);
+						getGroupPostFilesThumbnailFromDriveFile(driveFile,task.getGroupId(), postFile, user, commonService);
 					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 			} else if (StringUtils.isBlank(postFile.getThumbnail())) {
 				driveFile = driveService.getFileFields(postFile.getGoogleDriveId(), "thumbnailLink", user);
-				getGroupPostFilesThumbnailFromDriveFile(driveFile, task, postFile, user, commonService);
+				getGroupPostFilesThumbnailFromDriveFile(driveFile, task.getGroupId(), postFile, user, commonService);
 			}else {
 				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
 			}
 		}
 	}
 	
-	private void makeTaskGoogleDriveFolder(Task task ,  AppUser user, EntityManager em) {
+	private void makeTaskGoogleDriveFolder(Post task ,  AppUser user, EntityManager em) {
 		Group group = CacheUtils.getGroup(task.getGroupId());
 		String name = group.getName() + "-task-" + task.getId();
 		GoogleDriveService googleDriveService = GoogleDriveService.getInstance();
@@ -1252,27 +1231,6 @@ public class BackendTaskController extends CommonController {
 		
 	}
 
-	void getGroupPostFilesThumbnailFromDriveFile(GoogleDriveFile driveFile,Task task, TaskSubmissionFile postFile, AppUser user, CommonEntityService commonService ) {
-		if (null != driveFile && StringUtils.isNotBlank(driveFile.getThumbnailLink())) {
-			GoogleDriveService driveService = GoogleDriveService.getInstance();
-			try {
-				HttpResponse httpResponse = driveService.doGet(driveFile.getThumbnailLink(), null, user);
-				if (null != httpResponse && httpResponse.getStatusLine().getStatusCode() == 200 && httpResponse.getEntity() != null) {
-					/*
-					 * save thumbnail file in local storage and
-					 * udpate database
-					 */
-					byte[] thumbnailBytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
-					FileTO fileTo = Utils.writeGroupPostFileThumbnail(thumbnailBytes, task.getGroupId(), postFile.getName());
-					postFile.setThumbnail(fileTo.getServerName());
-					commonService.upsert(postFile);
-				} 
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-	}
-	
 	@POST
 	@Path("task/submission")
 	public void afterTaskSubmissionSave(@QueryParam("taskId") Long taskId, @QueryParam("submissionId") Long submissionId, @Context HttpServletResponse response) throws IOException, InterruptedException {
@@ -1282,7 +1240,7 @@ public class BackendTaskController extends CommonController {
 			TaskService taskService = new TaskService(em);
 			TaskSubmissionDAO taskSubmissionDAO = new TaskSubmissionDAO(em);
 			
-				Task task = taskService.get(taskId);
+				Post task = taskService.get(taskId);
 				TaskSubmission submission = taskSubmissionDAO.get(submissionId);
 				if (task == null || submission == null) {
 					logger.warn("cannot fetch from db , task : " + task + ", submission : " + submission);
