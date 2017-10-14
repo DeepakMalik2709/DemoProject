@@ -23,7 +23,7 @@ public class TaskSubmissionDAO extends CommonDAOImpl<TaskSubmission> {
 
 		List<TaskSubmission> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t from TaskSubmission t where  t.postId == :taskId ");
+		Query query = pm.createQuery("select t from TaskSubmission t where  t.postId = :taskId ");
 		query.setParameter("taskId", taskId);
 		try {
 			results = (List<TaskSubmission>) query.getResultList();

@@ -660,5 +660,9 @@ public class Utils {
 			
 		return color;
 	}
+	
+	public static String getTaskFolderPath(Post task) {	
+		return AppProperties.getInstance().getGroupUploadsFolder() + task.getGroupId() +  File.separator + task.getId();
+	}
 
 }

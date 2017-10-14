@@ -29,9 +29,9 @@ public class LibraryService {
 		if (postFile == null) {
 			throw new AllSchoolException(AllSchoolError.FILE_NOT_AVAILABLE_CODE,AllSchoolError.FILE_NOT_AVAILABLE_MESSAGE); 			
 		}		
-		InputStream inStream = driveService.downloadFile(postFile,user);
-		if(inStream!=null){
-			driveFile = driveService.uploadInputStreamFile(postFile,user,inStream);
+		byte[] bytes = driveService.downloadFile(postFile,user);
+		if(bytes!=null){
+			driveFile = driveService.uploadInputStreamFile(postFile,user,bytes);
 		}else{
 			throw new AllSchoolException(AllSchoolError.FILE_NOT_AVAILABLE_CODE,AllSchoolError.FILE_NOT_AVAILABLE_MESSAGE); 
 		}

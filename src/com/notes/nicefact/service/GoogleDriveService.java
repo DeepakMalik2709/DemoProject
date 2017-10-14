@@ -766,31 +766,30 @@ public class GoogleDriveService {
 		return file;
 	}
 	
-	public InputStream downloadFile(AbstractFile file, AppUser user) {
-			logger.info("download File  start");
-			InputStream inStream =null;
-			String url = Constants.DRIVE_FILE_DOWNLOAD_URL+file.getGoogleDriveId() + "?alt=media";
-			try {
+	public byte[] downloadFile(AbstractFile file, AppUser user) {
+		logger.info("download File  start");
+		byte[] fileBytes = null;
+		String url = Constants.DRIVE_FILE_DOWNLOAD_URL + file.getGoogleDriveId() + "?alt=media";
+		try {
 			List<Header> headers = new ArrayList<>();
 			headers.add(new BasicHeader(Constants.CONTENT_TYPE, file.getMimeType()));
-		
+
 			HttpResponse response = doGet(url, headers, user);
-			if(response.getEntity()!=null){				
-					inStream = response.getEntity().getContent();				
+			if (response.getEntity() != null) {
+				InputStream inStream = response.getEntity().getContent();
+				fileBytes = IOUtils.toByteArray(inStream);
 			}
-			} catch (UnsupportedOperationException e) {
-				logger.error(e.getMessage(), e);
-				e.printStackTrace();
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-				e.printStackTrace();
-			}
-			logger.info("downloadFile  end");
-			return inStream;
+		} catch (UnsupportedOperationException e) {
+			logger.error(e.getMessage(), e);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+		logger.info("downloadFile  end");
+		return fileBytes;
 
 	}
 
-	public GoogleDriveFile uploadInputStreamFile(PostFile postFile,	AppUser user, InputStream inStream) {
+	public GoogleDriveFile uploadInputStreamFile(PostFile postFile,	AppUser user, byte[] bytes) {
 		logger.info("upload Input Stream File  start");
 		GoogleDriveFile driveFile= null;
 		JSONObject response=null;
@@ -800,12 +799,7 @@ public class GoogleDriveService {
 		List<Header> headers = new ArrayList<>();
 		headers.add(new BasicHeader(Constants.CONTENT_TYPE, newfile.getMimeType()));
 		
-		try {
-			response = doJsonPost(url, headers,IOUtils.toByteArray(inStream), user);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			
-		}
+		response = doJsonPost(url, headers, bytes , user);
 		if (null != response) {
 			logger.info(response);
 			driveFile = new GoogleDriveFile(response);

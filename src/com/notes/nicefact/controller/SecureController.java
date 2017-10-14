@@ -843,7 +843,10 @@ public class SecureController extends CommonController {
 			} else {
 				postFile.incrementDownloadCount();
 				commonEntityService.upsert(postFile);
-				postService.downloadFile(postFile,user);
+				byte[] fileBytes = Utils.readFileBytes(postFile.getPath());
+				if (null !=fileBytes) {
+					downloadFile(fileBytes, postFile.getName(), postFile.getMimeType(), response);
+				}
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -1171,7 +1174,7 @@ feed.addAll(postTos);			try {
 	@POST
 	@Path("task/submission")
 	public void taskSubmission(TaskSubmissionTO sumbmissionTO, @Context HttpServletRequest request, @Context HttpServletResponse response) {
-		logger.info("upsertGroupTask start");
+		logger.info("taskSubmission start");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -1191,13 +1194,13 @@ feed.addAll(postTos);			try {
 			}
 		}
 		renderResponseJson(json, response);
-		logger.info("upsertGroupTask exit");
+		logger.info("taskSubmission exit");
 	}
 	
 	@GET
-	@Path("task/{taskId}/download")
-	public void taskSubmission(@PathParam("taskId") long taskId, @Context HttpServletRequest request, @Context HttpServletResponse response) {
-		logger.info("upsertGroupTask start");
+	@Path("task/{taskId}/submissions/download")
+	public void downlaodTaskSubmission(@PathParam("taskId") long taskId, @Context HttpServletRequest request, @Context HttpServletResponse response) {
+		logger.info("downlaodTaskSubmission start");
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			TaskService taskService = new TaskService(em);
@@ -1208,6 +1211,7 @@ feed.addAll(postTos);			try {
 					downloadFile(fileBytes, "submissions.zip", "application/zip", response);
 				}
 			}
+			return;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e );
 
@@ -1216,7 +1220,8 @@ feed.addAll(postTos);			try {
 				em.close();
 			}
 		}
-		logger.info("upsertGroupTask exit");
+		renderResponseRaw("downloaing failed", response);
+		logger.info("downlaodTaskSubmission exit");
 	}
 	
 }

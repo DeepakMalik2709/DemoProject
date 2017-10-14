@@ -16,6 +16,7 @@ export default Ember.Component.extend(postMixin ,{
     actions: {
     	downloadSubmissions(){
     		console.log("download for " + this.item.id);
+    		window.open("/rest/secure/task/" + this.item.id +"/submissions/download");
     	},
         removeFile(itemToRemove) {
         	  var items = Ember.get(this.item, "files");
@@ -53,9 +54,6 @@ export default Ember.Component.extend(postMixin ,{
    	 	editClicked() {
     		this.sendAction("editTask", this.item);
         },        
-        deleteTask(){
-    		this.sendAction("deleteTask", this.item);
-    	},
         deletePost(){
     		this.sendAction("deletePost", this.item);
     	},

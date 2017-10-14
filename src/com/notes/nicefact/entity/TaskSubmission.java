@@ -21,10 +21,6 @@ public class TaskSubmission  extends CommonEntity{
 
 	private Long postId;
 	
-	private String submitterName;
-	
-	private String submitterEmail;
-	
 	private Date submitDate = new Date();
 	
 	@OneToMany(mappedBy="submission", cascade=CascadeType.ALL)
@@ -64,21 +60,6 @@ public class TaskSubmission  extends CommonEntity{
 		this.files = files;
 	}
 
-	public String getSubmitterName() {
-		return submitterName;
-	}
-
-	public void setSubmitterName(String submitterName) {
-		this.submitterName = submitterName;
-	}
-
-	public String getSubmitterEmail() {
-		return submitterEmail;
-	}
-
-	public void setSubmitterEmail(String submitterEmail) {
-		this.submitterEmail = submitterEmail;
-	}
 
 	public Date getSubmitDate() {
 		return submitDate;
