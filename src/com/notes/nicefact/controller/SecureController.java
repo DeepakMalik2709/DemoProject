@@ -965,7 +965,6 @@ feed.addAll(postTos);			try {
 				logger.error(e.getMessage());
 			}
 			feed.addAll(postTos);
-			feed.addAll(taskTos);
 			if(feed.isEmpty()){
 				json.put(Constants.CODE, Constants.NO_RESULT);
 			}else{
