@@ -1,9 +1,9 @@
 package com.notes.nicefact.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -14,67 +14,45 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
-import com.google.api.services.drive.model.File;
-import com.notes.nicefact.content.AllSchoolError;
+import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.service.LibraryService;
+import com.notes.nicefact.to.FileTO;
+import com.notes.nicefact.to.GoogleDriveFile;
 import com.notes.nicefact.util.Constants;
+import com.notes.nicefact.util.EntityManagerHelper;
 
 @Path("/library")
 public class LibraryController extends CommonController {
 
 	private final static Logger logger = Logger.getLogger(LibraryController.class.getName());
-	LibraryService libService = new LibraryService();
+	
 	
 	@POST
-	@Path("/moveFileToFolder")
+	@Path("/addToLibrary")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void moveFileToFolder(com.notes.nicefact.entity.Book book, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+	public void addToLibrary(FileTO fileTO, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+		logger.info("deleteGroupPost start");
 		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
-			logger.info("schedule : "+book);
-			File file =	libService.moveFileToFolder(book.getFileId(),book.getFolderId());				
-			if(file !=null){			
-				json.put(Constants.CODE, Constants.OK);
-				json.put(Constants.MESSAGE,"Successfully added to your library.");
-			}else{
-				json.put(Constants.CODE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	);
-				json.put(Constants.MESSAGE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);	
-			}
-		} catch (IOException e) {
+			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+			LibraryService libService = new LibraryService(em);				
+			GoogleDriveFile driveFile = libService.addToLibrary(fileTO.getServerName(),user);			
+			json.put(Constants.DATA_ITEM, driveFile);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());	
-			e.printStackTrace();
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
 		}
 		renderResponseJson(json, response);
-		logger.info("getPostGroupOrder exit");
+		logger.info("uploadPostFile exit");
 	    
-	}
-	
-	@POST
-	@Path("/copyFile")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void copyFile(com.notes.nicefact.entity.Book book, @Context HttpServletResponse response,@Context HttpServletRequest request) {
-		Map<String, Object> json = new HashMap<>();
-		try {
-			File file =	libService.copyFile(book.getFileId(),book.getFolderId());			
-			logger.info("schedule : "+book);			
-			if(file !=null){
-				json.put(Constants.CODE, Constants.OK);
-				json.put(Constants.MESSAGE,"Successfully added to your library.");
-			}else{
-				json.put(Constants.CODE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	);
-				json.put(Constants.MESSAGE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);	
-			}
-		} catch (IOException e) {
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());	
-			e.printStackTrace();
-		}
-		renderResponseJson(json, response);
-		logger.info("getPostGroupOrder exit");
-	    
-	}
-	
-	
+	}	
 	
 }

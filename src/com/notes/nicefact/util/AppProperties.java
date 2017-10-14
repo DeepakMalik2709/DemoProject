@@ -74,6 +74,7 @@ public class AppProperties {
 	private static final String DRIVE_USER_UPLOAD_FOLDER_NAME = "drive.user.upload.folder.name";
 	private static final String DRIVE_USER_UPLOAD_FOLDER_NAME_DEV = "drive.user.upload.folder.name.dev";
 	private static final String DRIVE_USER_UPLOAD_FOLDER_NAME_SANDBOX = "drive.user.upload.folder.name.sandbox";
+	private static final String DRIVE_USER_UPLOAD_LIBRARY_FOLDER_NAME = "drive.user.upload.library.folder.name";
 
 	public String getDriveUserUploadFolderName() {
 		if (isSandbox()) {
@@ -82,6 +83,10 @@ public class AppProperties {
 			return props.getProperty(DRIVE_USER_UPLOAD_FOLDER_NAME);
 		}
 		return props.getProperty(DRIVE_USER_UPLOAD_FOLDER_NAME_DEV);
+	}
+	
+	public String getPropertyValue(String propertyName) {
+		return props.getProperty(propertyName);
 	}
 	
 	public String getGoogleClientId() {
@@ -222,5 +227,9 @@ public class AppProperties {
 	
 	public String getDriveThumbnailFolderId() {
 		return props.getProperty(DRIVE_THUMBNAIL_FOLDER_ID);
+	}
+
+	public String getDriveUserUploadLibraryFolderName() {
+		return props.getProperty(DRIVE_USER_UPLOAD_LIBRARY_FOLDER_NAME);
 	}
 }

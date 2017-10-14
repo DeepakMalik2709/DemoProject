@@ -3,10 +3,17 @@ import DS from 'ember-data';
 import ajaxMixin from '../mixins/ajax';
 
 export default DS.Store.extend(ajaxMixin ,{
-		init() {
-		    this._super(...arguments);
-		  },
-		  
+	init() {
+	    this._super(...arguments);
+	  },
+	 addToLibrary: function(item){
+		 return  new Ember.RSVP.Promise((resolve, reject) =>{
+				var url = "/rest/library/addToLibrary";
+				this.doPost(url , item ).then((data ) =>{
+					  resolve(data);
+			      });
+		 });
+	  },
 	 upsertPostComment: function(json) {
 		 return  new Ember.RSVP.Promise((resolve, reject) =>{
 				var url = "/rest/secure/group/post/comment";

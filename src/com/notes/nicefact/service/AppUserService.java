@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import com.notes.nicefact.dao.AppUserDAO;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.exception.EmailAlreadyExistsException;
 import com.notes.nicefact.to.AppUserTO;
@@ -336,5 +337,6 @@ public class AppUserService extends CommonService<AppUser> {
 		}
 		return user;
 	}
+
 	
 }

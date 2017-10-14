@@ -231,8 +231,9 @@ public class CalendarController extends CommonController {
 						}
 						if (end == null) {
 							end = event.getEnd().getDate();
-						}
-						eventTos.add(new EventTO(event.getId(), event.getSummary(), start, end, "#112233", "#cc3344"));
+						}						
+						
+						eventTos.add(new EventTO(event.getId(), event.getSummary(), start, end, Utils.getRandomColor(),Utils.getRandomColor()));
 						System.out.printf("%s (%s)\n", event.getSummary(), start);
 					}
 					EventsTO eventsTo = new EventsTO("1", eventTos);

@@ -1,6 +1,7 @@
 package com.notes.nicefact.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -319,7 +320,12 @@ public class PostService extends CommonService<Post> {
 		return files;
 	}
 
-	public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
+	public void downloadFile(PostFile postFile, AppUser user) {
+		GoogleDriveService driveService = GoogleDriveService.getInstance();
+		InputStream iStrem = driveService.downloadFile(postFile, user);
+	}
+
+public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
 		if (StringUtils.isBlank(postTo.getComment()) && postTo.getFiles().isEmpty()) {
 			throw new ServiceException(" Task details cannot be empty");
 		}

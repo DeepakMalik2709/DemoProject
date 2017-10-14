@@ -60,7 +60,6 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.google.GoogleAppUtils;
-import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.TutorialTO;
@@ -182,7 +181,7 @@ public class Utils {
 		return mimeType;
 	}
 
-	private static String getFileNameFromHeader(final String header) {
+	public static String getFileNameFromHeader(final String header) {
 		String filename = "temp";
 		if (header.contains("Content-Disposition")) {
 			filename = header.substring(header.indexOf("filename=") + 10);
@@ -648,6 +647,18 @@ public class Utils {
 			appUser.setSendCommentOnCommentEmail(appUserTO.getSendCommentOnCommentEmail());
 		}
 
+	}
+
+	public static String getRandomColor() {			
+		String letters = "0123456789ABCDEF";
+		String color = "#";
+		Random rand = new Random();
+			  for (int i = 0; i < 6; i++) {
+				  
+			    color += letters.charAt(rand.nextInt(16));
+			  }
+			
+		return color;
 	}
 
 }

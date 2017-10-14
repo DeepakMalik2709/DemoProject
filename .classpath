@@ -14,6 +14,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/allSchool"/>
-	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/drive/google-api-services-drive-v3-rev86-1.23.0.jar" sourcepath="WebContent/WEB-INF/lib/drive/google-api-services-drive-v3-rev86-1.23.0-sources.jar"/>
 	<classpathentry kind="output" path="WebContent/WEB-INF/classes"/>
 </classpath>
