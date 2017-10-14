@@ -15,7 +15,6 @@ export default Ember.Component.extend(postMixin ,{
 	  },
     actions: {
     	downloadSubmissions(){
-    		console.log("download for " + this.item.id);
     		window.open("/rest/secure/task/" + this.item.id +"/submissions/download");
     	},
         removeFile(itemToRemove) {
