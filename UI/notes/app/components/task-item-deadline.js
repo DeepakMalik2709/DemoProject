@@ -14,6 +14,29 @@ export default Ember.Component.extend({
 		       this.set("minutesArray", minutesArray);
 		       this.set("hoursArray",hoursArray);
 		       this.set("dateValue",0);
+		      var deadlineTime = Ember.get(this.item, 'deadlineTime');
+		      if(deadlineTime){
+		    	  var now = moment(deadlineTime);
+		    	  var selectedHour = hoursArray.filterBy("id", now.hour())[0];
+		    	  if(selectedHour){
+			    	  Ember.set(selectedHour, 'selected', true)
+			      }
+		    	  
+		    	  var selectedMinutes = minutesArray.filterBy("id", now.minutes())[0];
+		    	  if(selectedMinutes){
+			    	  Ember.set(selectedMinutes, 'selected', true)
+			      }
+		    	  
+		    	  var dateValue = moment({
+		    		    year: now.year(),
+		    		    month: now.month(),
+		    		    day: now.date()
+		    		});
+		    	  this.set("dateValue",dateValue.toDate());
+		      }else{
+		    	  this.set("dateValue",0);
+		      }
+		      
 		  },
 		  recalculate : function(){
 	        	var date = Ember.get(this,"dateValue");

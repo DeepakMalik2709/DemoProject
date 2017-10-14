@@ -21,7 +21,8 @@ Router.map(function() {
         this.route('edit',{path : '/:groupId/edit'});
         this.route('create',{path : '/create'});
         this.route('post',{path : '/post/:postId'});
-        this.route('task',{path : '/task/:taskId'});
+        this.route('task.create',{path : '/task/create'});
+        this.route('task.edit',{path : '/task/edit/:taskId'});
       });
   this.route('tag', function() {
       this.route('view',{path : '/view'});
@@ -32,7 +33,6 @@ Router.map(function() {
 
   this.route('new', function() {
     this.route('event');
-    this.route('task');
   });
 });
 

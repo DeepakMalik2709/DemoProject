@@ -36,7 +36,7 @@ public class ServiceFilter implements Filter {
 
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 
-		boolean bypassLogin = true;
+		boolean bypassLogin = false;
 		HttpServletRequest request = ((HttpServletRequest) req);
 		HttpServletResponse response = ((HttpServletResponse) resp);
 		String url = request.getRequestURI();
