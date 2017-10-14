@@ -3,8 +3,11 @@ package com.notes.nicefact.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -14,8 +17,10 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
+import com.notes.nicefact.comparator.TaskSubmissionComparator;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.dao.PostDAO;
+import com.notes.nicefact.dao.TaskSubmissionDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.TaskSubmission;
@@ -32,12 +37,14 @@ public class TaskService extends CommonService<Post> {
 	BackendTaskService backendTaskService;
 	NotificationService notificationService;
 	CommonEntityService commonEntityService;
+	TaskSubmissionDAO taskSubmissionDAO ;
 
 	public TaskService(EntityManager em) {
 		postDAO = new PostDAO(em);
 		backendTaskService = new BackendTaskService(em);
 		notificationService = new NotificationService(em);
 		commonEntityService = new CommonEntityService(em);
+		taskSubmissionDAO = new TaskSubmissionDAO(em);
 	}
 
 	@Override
@@ -103,13 +110,13 @@ public class TaskService extends CommonService<Post> {
 			submission = new TaskSubmission(sumbmissionTO);
 			submission.setSubmitterEmail(appUser.getEmail());
 			submission.setSubmitterName(appUser.getDisplayName());
-			commonEntityService.upsert(submission);
+			taskSubmissionDAO.upsert(submission);
 			List<TaskSubmissionFile> files = updateAttachedFiles(submission, sumbmissionTO, task.getGroupId());
 			if (!files.isEmpty()) {
 				for (TaskSubmissionFile taskSubmissionFile : files) {
 					commonEntityService.upsert(taskSubmissionFile);
 				}
-				commonEntityService.upsert(submission);
+				taskSubmissionDAO.upsert(submission);
 			}
 			backendTaskService.saveTaskSubmissionTask(task.getId(), submission.getId());
 		} else {
@@ -118,4 +125,46 @@ public class TaskService extends CommonService<Post> {
 		logger.info("upsertTaskSubmission exit");
 		return submission;
 	}
+
+	public String getTaskSubmissionDownloadPath(long taskId) {
+		String zipPath = null;
+		Post task = get(taskId);
+		if (null != task) {
+			if (task.getZipFileDate() != null && task.getDeadline() != null && task.getZipFileDate().getTime() > task.getDeadline().getTime()) {
+				// use previously generated zip file
+			} else {
+				List<TaskSubmission> list = taskSubmissionDAO.getTAskSubmissionsForByTaskId(taskId);
+				Collections.sort(list, new TaskSubmissionComparator());
+				TaskSubmission lastSubmission = list.get(list.size() - 1);
+				if (task.getZipFileDate() != null && task.getZipFileDate().getTime() > lastSubmission.getCreatedTime().getTime()) {
+					// use previously generated zip file
+				} else {
+					task = generateTaskSubmissionZip(task, list);
+
+				}
+
+			}
+			zipPath = task.getZipFilePath();
+		}
+		return zipPath;
+	}
+
+	private Post generateTaskSubmissionZip(Post task, List<TaskSubmission> list) {
+		try{
+			GoogleDriveService driveService =  GoogleDriveService.getInstance();
+		String basePathStr = AppProperties.getInstance().getTempUploadsFolder() + task.getId() + new Date().getTime();
+		Path basePath = Paths.get(basePathStr);
+		if(Files.notExists(basePath)){
+			Files.createDirectories(basePath);
+		}
+		for (TaskSubmission submission : list) {
+			
+			
+		}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return task;
+	}
+
 }

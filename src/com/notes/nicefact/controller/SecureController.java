@@ -1193,4 +1193,29 @@ feed.addAll(postTos);			try {
 		logger.info("upsertGroupTask exit");
 	}
 	
+	@GET
+	@Path("task/{taskId}/download")
+	public void taskSubmission(@PathParam("taskId") long taskId, @Context HttpServletRequest request, @Context HttpServletResponse response) {
+		logger.info("upsertGroupTask start");
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			String path = taskService.getTaskSubmissionDownloadPath(taskId);
+			if(path != null){
+				byte[] fileBytes = Utils.readFileBytes(path);
+				if (null !=fileBytes) {
+					downloadFile(fileBytes, "submissions.zip", "application/zip", response);
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e );
+
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		logger.info("upsertGroupTask exit");
+	}
+	
 }

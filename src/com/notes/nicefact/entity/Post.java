@@ -83,6 +83,10 @@ int noOfSubmissions;
 	
 	private String zipFilePath;
 	
+	
+	@Basic
+	Date zipFileDate;
+	
 	String googleDriveFolderId;
 	
 	String title;
@@ -299,6 +303,14 @@ int noOfSubmissions;
 
 	public void setGoogleDriveFolderId(String googleDriveFolderId) {
 		this.googleDriveFolderId = googleDriveFolderId;
+	}
+
+	public Date getZipFileDate() {
+		return zipFileDate;
+	}
+
+	public void setZipFileDate(Date zipFileDate) {
+		this.zipFileDate = zipFileDate;
 	}
 
 	@PrePersist

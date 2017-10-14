@@ -67,6 +67,9 @@ export default Ember.Component.extend(postMixin , {
         },
         showTaskSubmitOptionsClick(){
    		 this.set("showTaskSubmitOptions" , true);
-   	}
+   	},
+        showFileUpload(){
+        	this.$('.file-upload-task').click();
+        }
     }
 });
