@@ -92,21 +92,25 @@ public class Notification extends CommonEntity{
 		this(user);
 		entityId = post.getId();
 		groupId = post.getGroupId();
-		if(null != groupId){
+		if (null != groupId) {
 			Group group = CacheUtils.getGroup(groupId);
 			groupName = group.getName();
 		}
-		
+
 		sharing = post.getSharing();
-		if(POST_TYPE.TASK.equals(post.getPostType())){
+		if (POST_TYPE.TASK.equals(post.getPostType())) {
 			this.type = NotificationType.TASK;
-		}else{
+		} else {
 			this.type = NotificationType.POST;
 		}
-		
-		this.title = stripEmailFromComments(post.getComment());
-		if(this.title.length() > 150){
-			this.title = this.title.substring(0, 150);
+		if (StringUtils.isBlank(post.getTitle())) {
+
+			this.title = stripEmailFromComments(post.getComment());
+			if (this.title.length() > 150) {
+				this.title = this.title.substring(0, 150);
+			}
+		} else {
+			this.title = post.getTitle();
 		}
 	}
 

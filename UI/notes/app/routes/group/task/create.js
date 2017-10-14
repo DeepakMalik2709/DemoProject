@@ -1,13 +1,12 @@
 import Ember from 'ember';
-import scrollMixin from '../../mixins/scroll';
-import authenticationMixin from '../../mixins/authentication';
+import authenticationMixin from '../../../mixins/authentication';
 
-export default Ember.Route.extend(scrollMixin,authenticationMixin,{
+export default Ember.Route.extend(authenticationMixin,{
 		groupService: Ember.inject.service('group'),
 		contextService: Ember.inject.service('context'),
 		postService: Ember.inject.service('post'),
 		model() {
-			 return this.store.createRecord('task');
+			 return this.store.createRecord('post');
 	    },
 	    taskService: Ember.inject.service('task'),
 	    useGoogleDrive : false,
@@ -19,8 +18,14 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 				}
 			});
 		  },
+		    renderTemplate() {
+		        this.render('group/task/upsert');
+		    },
 	    setupController: function(controller, model) {
 	        this._super(controller, model);
+	       
+	        this.controller.set("pageTitle", 'Create task');
+	        this.controller.set("saveButtonLabel", 'Save');
 	        this.controller.set("selectedGroups", []);
 	        this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
 	       	if(false == this.useGoogleDrive){
@@ -30,7 +35,13 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
         	}
 	        let request = this.get('groupService').fetchMyGroups();
 	        request.then((response) => {
-	        	   this.controller.set("myGroups" ,response );
+	        	var adminGroups = response.filterBy("isAdmin", true) ;
+	        	if(adminGroups.length){
+	        		this.controller.set("myGroups" ,adminGroups);
+	        	}else{
+	        		alert("You can only post tasks to groups where you are admin");
+	        	}
+	        	   
 	        });   
 	      
 	    },
@@ -60,8 +71,8 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	     				Ember.get(task,"groupIds").pushObject(selectedGroups[i].id);
 	     			}
 
-	     			
-	 	    		task.save().then((resp1) => {
+	     			const adapter = this.store.adapterFor('post');
+	     			adapter.saveTask(task).then((resp1) => {
 	 	    			Ember.set(this, "isSaving", false);
 	 	    			Ember.set(task, "isSaving", false);
 	 	    			Ember.set(task, "showLoading", false);

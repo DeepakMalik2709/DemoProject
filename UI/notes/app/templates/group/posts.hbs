@@ -14,7 +14,7 @@
                     <h3 class="page-header">{{model.name}} - Posts 
                       {{#if model.isAdmin}}
 	                    <span class="pull-right">
-	                    {{#link-to 'new.task'  tagName="button"  class="btn btn-default"}}
+	                    {{#link-to 'group.task.create'  tagName="button"  class="btn btn-default"}}
 	                 Create Task
 	                  {{/link-to}}
 	                        
@@ -46,7 +46,7 @@
 {{#each feeds as |post|}}
  <div class="row">
  {{#if post.isTask}}
- {{task-item item=post updateTask="saveTask" deletePost="deletePost" group=model }}
+ {{task-item item=post editTask="editTask" deletePost="deletePost" group=model }}
  {{else if post.isPost}}
 {{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
 {{/if}}

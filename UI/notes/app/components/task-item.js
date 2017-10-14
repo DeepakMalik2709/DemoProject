@@ -50,18 +50,9 @@ export default Ember.Component.extend(postMixin ,{
 	    		this.sendAction("updateTask", this.item);
         	}
     	},
-    	  editTask(){
-        	this.original  = JSON.stringify( this.item.toJSON());
-        	Ember.set(this,"item.isEditing", true);
-        	 this.$(".edit-post").html(this.originalComment);
-        },
-        cancelEditing(){
-        	this.original = JSON.parse(this.original);
-        	this.item.setProperties(this.original)
-        	Ember.set(this,"item.isEditing", false);
-        	 this.cleanupPost(this.item);
-        },
-        
+   	 	editClicked() {
+    		this.sendAction("editTask", this.item);
+        },        
         deleteTask(){
     		this.sendAction("deleteTask", this.item);
     	},

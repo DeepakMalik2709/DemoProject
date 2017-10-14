@@ -38,7 +38,9 @@ export default DS.Model.extend({
 	  }),
 	numberOfComments: DS.attr('number'),
 	numberOfReactions: DS.attr('number'),
-
+	  groupIds :DS.attr( {
+		    defaultValue() { return []; }
+	  }),
 	tags: DS.attr( {
 		    defaultValue() { return []; }
 	  }),
