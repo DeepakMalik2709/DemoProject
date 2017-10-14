@@ -78,6 +78,7 @@ public class Constants {
 	public static final String NO_PREVIEW_IMAGE = "/img/no-preview-available.png";
 	
 	public static final String DRIVE_FILE_UPLOAD_URL = "https://www.googleapis.com/upload/drive/v2/files";
+	public static final String DRIVE_FILE_DOWNLOAD_URL = "https://www.googleapis.com/drive/v3/files/";
 	
 	public static final String DRVIE_FETCH_FIELDS = "parents,shared,alternateLink,createdDate,description,downloadUrl,editable,embedLink,exportLinks,fileSize,iconLink,id,labels,lastModifyingUser,lastModifyingUserName,lastViewedByMeDate,mimeType,modifiedByMeDate,modifiedDate,ownerNames,owners,selfLink,thumbnailLink,title,userPermission,webContentLink,writersCanShare";
 	public static final String THUMBNAIL_FOLDER = "thumbnails/";

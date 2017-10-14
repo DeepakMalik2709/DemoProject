@@ -1,6 +1,7 @@
 package com.notes.nicefact.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ import org.json.JSONObject;
 
 import com.notes.nicefact.entity.AbstractFile;
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.PostFile;
+import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GoogleDriveFile;
 import com.notes.nicefact.to.GoogleFilePermission;
 import com.notes.nicefact.util.Constants;
@@ -195,7 +198,7 @@ public class GoogleDriveService {
 		HttpResponse resp = doGet(url, headers, user);
 		if (null == resp) {
 			logger.error(user.getEmail() + ", " + url + " , null response");
-		} else {
+		}else{
 			return getJsonFromResponse(resp);
 		}
 		return null;
@@ -761,5 +764,53 @@ public class GoogleDriveService {
 		logger.info("updatefile metadata exit");
 		
 		return file;
+	}
+	
+	public InputStream downloadFile(AbstractFile file, AppUser user) {
+			logger.info("download File  start");
+			InputStream inStream =null;
+			String url = Constants.DRIVE_FILE_DOWNLOAD_URL+file.getGoogleDriveId() + "?alt=media";
+			try {
+			List<Header> headers = new ArrayList<>();
+			headers.add(new BasicHeader(Constants.CONTENT_TYPE, file.getMimeType()));
+		
+			HttpResponse response = doGet(url, headers, user);
+			if(response.getEntity()!=null){				
+					inStream = response.getEntity().getContent();				
+			}
+			} catch (UnsupportedOperationException e) {
+				logger.error(e.getMessage(), e);
+				e.printStackTrace();
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+				e.printStackTrace();
+			}
+			logger.info("downloadFile  end");
+			return inStream;
+
+	}
+
+	public GoogleDriveFile uploadInputStreamFile(PostFile postFile,	AppUser user, InputStream inStream) {
+		logger.info("upload Input Stream File  start");
+		GoogleDriveFile driveFile= null;
+		JSONObject response=null;
+		FileTO fileTO =new FileTO(postFile.getName(), postFile.getServerName(), postFile.getMimeType(), postFile.getSizeBytes());		
+		PostFile newfile  = new PostFile(fileTO,postFile.getPath());		
+		String url = Constants.DRIVE_FILE_UPLOAD_URL + "?uploadType=media";
+		List<Header> headers = new ArrayList<>();
+		headers.add(new BasicHeader(Constants.CONTENT_TYPE, newfile.getMimeType()));
+		
+		try {
+			response = doJsonPost(url, headers,IOUtils.toByteArray(inStream), user);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+			
+		}
+		if (null != response) {
+			logger.info(response);
+			driveFile = new GoogleDriveFile(response);
+		}
+		logger.info("upload Input Stream File  end");
+		return driveFile;
 	}
 }

@@ -1,10 +1,22 @@
-  <a rel="popover" href="javascript:void(0)"  class="pointer" {{action "hovered" on="mouseEnter"}}>{{item.name}}&nbsp;({{item.size}}) </a>
-  <a class="{{if item.isDriveFile 'hide' 'show-inline' }}" target="blank" href="/a/secure/group/download?name={{item.serverName}}" download> <i class="fa fa-download" aria-hidden="true"></i></a>
-   <a class="{{if item.isDriveFile   'show-inline' 'hide'}}" target="blank" href="{{item.driveLink}}" > <i  class="fa fa-external-link" aria-hidden="true"></i></a>
+ <div class="btn bg-navy btn-social" style="padding: 10px;"> 
+    <a rel="popover" href="javascript:void(0)" style="padding: 10px;
+    color: white;" class="pointer span" {{action "hovered" on="mouseEnter"}}>{{item.name}}&nbsp;({{item.size}}) </a>
+  </div>
   
+    <a class="{{if item.isDriveFile 'hide' 'show-inline' }}  btn bg-aqua btn-social"  data-toggle="tooltip" title="Download" style="float: right;margin-left: 2px;border-right: 1px solid rgba(255, 255, 255, 0.3);color: white;" target="blank" href="/a/secure/group/download?name={{item.serverName}}" download> <i class="fa fa-lg fa-download" aria-hidden="true"></i></a>
+   <a class="{{if item.isDriveFile   'show-inline' 'hide'}}  btn bg-aqua btn-social"  data-toggle="tooltip" title="Open in browser" style="float: right;margin-left: 2px;border-right: 1px solid rgba(255, 255, 255, 0.3);color: white;" target="blank" href="{{item.driveLink}}" > <i  class="fa fa-lg fa-external-link" aria-hidden="true"></i></a>
+ 
+      <a class="{{if item.isDriveFile 'show-inline' 'hide' }} btn bg-aqua btn-social" data-toggle="tooltip" title="Download" style="float: right;margin-left: 2px;border-right: 1px solid rgba(255, 255, 255, 0.3);color: white;" target="blank" href="/a/secure/group/download?name={{item.serverName}}" download> <i class="fa fa-lg fa-download" aria-hidden="true"></i></a>
+ 
+  <button class="{{if item.isDriveFile  'show-inline' 'hide'}} btn bg-aqua btn-social" style="float: right;"  {{action "addToLibrary" item}}
+   data-toggle="tooltip" title="add to library" disabled={{if item.showLoading true}}> <i  class="fa fa-lg fa-book" aria-hidden="true"></i></button>
+ 
+  
+   <span class="{{if item.showLoading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
+   
         &nbsp;<span  {{action 'removeFile' file}} class="glyphicon glyphicon-remove pointer {{if isEditing 'inlineblock' 'hide'}}" aria-hidden="true"></span>
                      <div class="popover-box" class=" {{if showPreview 'show' 'hide' }}">
-                                        <div class="popover fade top in" role="tooltip" >
+                                        <div class="popover fade left in"  >
                                             <div class="arrow" ></div>
                                             <div class="popover-content">
                                                 <div class="popup-file-preview">

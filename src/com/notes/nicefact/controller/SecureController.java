@@ -50,7 +50,9 @@ import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
+import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.service.GroupService;
+import com.notes.nicefact.service.LibraryService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.TagService;
@@ -830,8 +832,10 @@ public class SecureController extends CommonController {
 		logger.info("downloadGroupFile start");
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
-
+			AppUser user = (AppUser) req.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 			PostService postService = new PostService(em);
+			LibraryService libService = new LibraryService(em);
+		
 			CommonEntityService commonEntityService = new CommonEntityService(em);
 			PostFile postFile = postService.getByServerName(serverName);
 			if (postFile == null) {
@@ -839,10 +843,7 @@ public class SecureController extends CommonController {
 			} else {
 				postFile.incrementDownloadCount();
 				commonEntityService.upsert(postFile);
-				byte[] fileBytes = Utils.readFileBytes(postFile.getPath());
-				if (null !=fileBytes) {
-					downloadFile(fileBytes, postFile.getName(), postFile.getMimeType(), response);
-				}
+				postService.downloadFile(postFile,user);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

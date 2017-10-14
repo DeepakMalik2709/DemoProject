@@ -342,4 +342,5 @@ public class PostTO {
 	public boolean getIsPost(){
 		return true;
 	}
+
 }

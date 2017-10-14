@@ -1,6 +1,7 @@
 package com.notes.nicefact.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -316,6 +317,11 @@ public class PostService extends CommonService<Post> {
 	public List<PostFile> getDrivePostFilesWithoutThumbnail(int offset) {
 		List<PostFile> files = postDAO.getDrivePostFilesWithoutThumbnail(offset);
 		return files;
+	}
+
+	public void downloadFile(PostFile postFile, AppUser user) {
+		GoogleDriveService driveService = GoogleDriveService.getInstance();
+		InputStream iStrem = driveService.downloadFile(postFile, user);
 	}
 
 	

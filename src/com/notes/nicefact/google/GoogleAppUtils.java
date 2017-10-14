@@ -9,7 +9,6 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
-import com.google.api.services.drive.Drive;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CurrentContext;
@@ -22,7 +21,6 @@ public class GoogleAppUtils {
  
 	private static  GoogleCredential credential;
 	 
-	private static Drive driveService;
 	private static Calendar calendarService;
 
     static {
@@ -48,24 +46,12 @@ public class GoogleAppUtils {
 	     return credential;
     }    
     
-    public static com.google.api.services.drive.Drive    getDriveService() throws IOException {
-    	AppUser user = CurrentContext.getAppUser();
-    	if(user.getUseGoogleDrive()){    	
-    		if(driveService==null){
-    			driveService = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-                .setApplicationName(AppProperties.getInstance().getAppName())
-                .build();
-    		}
-    		return driveService;
-    	}
-		return null;
-    }
     
     public static com.google.api.services.calendar.Calendar    getCalendarService() throws IOException {
     	AppUser user = CurrentContext.getAppUser();
     	if(user.getUseGoogleCalendar()){  	
     		if(calendarService==null){
-    			calendarService = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+    			calendarService = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredential())
                 .setApplicationName(AppProperties.getInstance().getAppName())
                 .build();
     		}

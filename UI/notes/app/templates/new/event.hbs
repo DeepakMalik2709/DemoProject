@@ -30,13 +30,15 @@
                         </div> 
                         <div class="form-group">                                               
                             {{input type="text" value=model.location class="form-control" placeholder="Enter schedule  location" }}
-                        </div>     
+                        </div>    
                         <div class="form-group">
-                    		      {{input type="text" value=startDate class="form-control" placeholder="Enter start date" }}
-                       </div>  
+                    		    
+                       {{bootstrap-datepicker autoclose=true placeholder="Enter start date" class="form-control" value=startDate}}
+     
+                       </div> 
                          <div class="form-group">
-                    		      {{input type="text" value=endDate class="form-control" placeholder="Enter end date" }}
-                        </div>  
+                    	  {{bootstrap-datepicker autoclose=true placeholder="Enter end date" class="form-control" value=endDate}}
+     				   </div>  
                          <div class="form-group">
                          
 	                        {{#power-select-multiple selected=attendees  options=myGroups  
@@ -46,15 +48,22 @@
 							{{/power-select-multiple}}
 					  </div>                   
                         <div class="form-group">
-                            <label for="exampleInputFile">Attachment</label>
-                            <input type="file" id="exampleInputFile">
-                            <p class="help-block">Schedule information more.</p>
+                             <button type="button"   onclick="$('#file-upload2').click();" class="btn btn-default"  disabled={{if item.showLoading true}}>Attach Files</button>
+                            <p class="help-block">Schedule attachment.</p>
                         </div>
+                         <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
+					        <ol >
+					        {{#each model.files as |file|}}
+					        <li>
+					        {{file.name}}&nbsp;({{file.size}})
+					         &nbsp;<span  {{action 'removeFile' file}} class="glyphicon glyphicon-remove pointer" aria-hidden="true"></span>
+					        </li>
+					        {{/each}}
+					        </ol>
+					        </div>
 						 <div class="form-group">
-	                            <label for="exampleInputFile">Schedule desc</label> <small>Write something about schedule</small>
-		                         <form>
-		                            {{ textarea value=model.description class="materialize-textarea ckeditor"  style="width: 100%;" }}        
-	                              </form>                              
+	                            <label for="exampleInputFile">Schedule desc</label> <small>Write something about schedule</small>                              
+	                          {{textarea type="text" value=model.description class="form-control" placeholder="Description"}}                              
 	                    </div><!-- ./row -->
 	                     <div class="form-group">
 		                     <div class="checkbox">
