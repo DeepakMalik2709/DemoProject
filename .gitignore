@@ -13,8 +13,8 @@
 /WebContent/img
 /WebContent/html
 /WebContent/css
-/WebContent/analytics
-/WebContent/*
+/WebContent/analytics.js
+/WebContent/.classpath
 /war
 
 /.settings/com.google.appengine.eclipse.core.prefs
