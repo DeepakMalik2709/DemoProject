@@ -1,47 +1,45 @@
 package com.notes.nicefact.service;
 
 import java.io.IOException;
+import java.io.InputStream;
+
+import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
-import com.google.api.services.drive.model.File;
-import com.notes.nicefact.controller.LibraryController;
-import com.notes.nicefact.google.GoogleAppUtils;
+import com.notes.nicefact.content.AllSchoolError;
+import com.notes.nicefact.content.AllSchoolException;
+import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.PostFile;
+import com.notes.nicefact.to.GoogleDriveFile;
 
 public class LibraryService {
-	private final static Logger logger = Logger.getLogger(LibraryController.class.getName());
-	
-	public File moveFileToFolder(String fileId, String folderId) throws IOException {
-		File file =null;
-		com.google.api.services.drive.Drive service = GoogleAppUtils.getDriveService();
-		logger.info("fileId : "+fileId+" folderId : "+folderId);
-		if(service !=null){
-			file = service.files().get(fileId).setFields("parents").execute();
-			StringBuilder previousParents = new StringBuilder();
-			for (String parent : file.getParents()) {
-			  previousParents.append(parent);
-			  previousParents.append(',');
-			}
-			file = service.files().update(fileId, null)
-			    .setAddParents(folderId)
-			    .setRemoveParents(previousParents.toString())
-			    .setFields("id, parents").execute();
+	private final static Logger logger = Logger.getLogger(LibraryService.class.getName());
+	BackendTaskService backendTaskService ;
+	PostService postService;
+	public LibraryService(EntityManager em) {
+		backendTaskService = new BackendTaskService(em);
+		postService = new PostService(em);
+	}
+
+	public GoogleDriveFile addToLibrary(String serverName, AppUser user) throws IOException, AllSchoolException {
+		GoogleDriveFile driveFile = null;
+		GoogleDriveService driveService = GoogleDriveService.getInstance();
+		PostFile postFile = postService.getByServerName(serverName);
+		if (postFile == null) {
+			throw new AllSchoolException(AllSchoolError.FILE_NOT_AVAILABLE_CODE,AllSchoolError.FILE_NOT_AVAILABLE_MESSAGE); 			
+		}		
+		InputStream inStream = driveService.downloadFile(postFile,user);
+		if(inStream!=null){
+			driveFile = driveService.uploadInputStreamFile(postFile,user,inStream);
+		}else{
+			throw new AllSchoolException(AllSchoolError.FILE_NOT_AVAILABLE_CODE,AllSchoolError.FILE_NOT_AVAILABLE_MESSAGE); 
 		}
-		return file;
+		
+		return driveFile;
 		
 	}
 
-	public File copyFile(String originFileId, String copyTitle) throws IOException {
-		File file =null;
-		com.google.api.services.drive.Drive service = GoogleAppUtils.getDriveService();
-		logger.info("originFileId : "+originFileId+" copyTitle : "+copyTitle);
-		if(service !=null){
-		File copiedFile = new File();
-		copiedFile.setName(copyTitle);
-		file = service.files().copy(originFileId, copiedFile).execute();
-		}
-	   return file;
-	}
 	
-
+	
 }
