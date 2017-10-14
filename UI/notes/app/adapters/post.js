@@ -69,5 +69,21 @@ export default DS.Adapter.extend(ajaxMixin ,{
 			        Ember.run(null, reject, jqXHR);
 			      });
 			    });
-			  }
+			  },
+			  saveTask :  function( snapshot) {
+				    var json = this.serialize(snapshot, { includeId: true });
+				    return new Ember.RSVP.Promise((resolve, reject) =>{
+				    	var url = '/rest/secure/group/task';
+				    	this.doPost(url , json).then(function(data) {
+				    		if(data.code == 0){
+				    			Ember.run(null, resolve, data.items[0]);
+				    		}else{
+				    			  Ember.run(null, reject, jqXHR);
+				    		}
+				      }, function(jqXHR) {
+				        jqXHR.then = null; // tame jQuery's ill mannered promises
+				        Ember.run(null, reject, jqXHR);
+				      });
+				    });
+				  },
 });

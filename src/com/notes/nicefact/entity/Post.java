@@ -131,6 +131,7 @@ int noOfSubmissions;
 		if(post.getDeadline()  !=null){
 			this.deadline = new Date(post.getDeadline().getTime());
 		}
+		this.title = post.getTitle();
 	}
 
 	public Long getCompanyId() {
