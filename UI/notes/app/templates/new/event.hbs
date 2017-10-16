@@ -28,6 +28,11 @@
                                                  
                             {{input type="text" value=model.title class="form-control" placeholder="Enter schedule  title" }}
                         </div> 
+                        <div class="form-group">
+                            {{input value=model.title placeholder="title"}}
+                            
+  {{#validation-error-field submitted=submitted className="red" field="title" model=model validation=titleValidation}}invalid name{{/validation-error-field}}    
+   </div>
                         <div class="form-group">                                               
                             {{input type="text" value=model.location class="form-control" placeholder="Enter schedule  location" }}
                         </div>    
@@ -61,6 +66,7 @@
 		                            </label>
 	                        </div>
                          </div>
+                         {{#validation-error-field submitted=submitted field="title" model=model validation=nameValidation}}invalid name{{/validation-error-field}}
 	                    <div class="box-footer">
 	                        <button type="submit" class="btn btn-primary" {{action 'saveEvent' model}}>{{buttonLabel}}</button>
 	                     

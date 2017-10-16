@@ -36,13 +36,16 @@ public class GoogleAppUtils {
   
     public static Credential getCredential() throws IOException {
     	if(credential==null){
-    		AppUser user = CurrentContext.getAppUser();
+    		 AppUser user = CurrentContext.getAppUser();
     		AppProperties	appProperties=	AppProperties.getInstance();
     		 credential = new GoogleCredential.Builder()
 	            .setTransport(HTTP_TRANSPORT)
 	            .setJsonFactory(JSON_FACTORY)
 	            .setClientSecrets(appProperties.getGoogleClientId(),appProperties.getGoogleClientSecret() ).build();
+    		 if(user!=null && credential.getAccessToken()==null){
+    		
     		 credential.setAccessToken(user.getAccessToken());
+    		 }
     	}
 	    
 	     return credential;

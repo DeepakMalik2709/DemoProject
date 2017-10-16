@@ -2,8 +2,6 @@ package com.notes.nicefact.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,35 +13,24 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventAttendee;
-import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
-import com.notes.nicefact.content.AllSchoolError;
+import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.entity.AppUser;
-import com.notes.nicefact.entity.Tutorial;
-import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.google.GoogleAppUtils;
-import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.GoogleCalendarService;
-import com.notes.nicefact.service.GroupService;
-import com.notes.nicefact.service.TutorialService;
-import com.notes.nicefact.to.AppUserTO;
+import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
 import com.notes.nicefact.to.SearchTO;
-import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.Utils;
@@ -58,107 +45,67 @@ public class CalendarController extends CommonController {
 	@Path("/updateEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void updateEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+		logger.info("reactToschedule start , postId : ");
 		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
-			String calendarId = "primary";
-			String eventId = schedule.getId();
-			
+			ScheduleService scheduleService = new ScheduleService(em);
 			AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-		//	attendee.setId(user.getu);
-			
-			
-			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-			if(service!=null){
-				Event event = service.events().get(calendarId, eventId).execute(); 
-				for(EventAttendee evAtt :  event.getAttendees()){
-					if(evAtt.getEmail().equalsIgnoreCase(user.getEmail())){
-						evAtt.setResponseStatus(schedule.getAttendees().get(0).getResponseStatus());
-					}				
-				}
-				Event updatedEvent  = service.events().update(calendarId, event.getId(), event).execute();
-				json.put(Constants.CODE, Constants.OK);
-				json.put(Constants.DATA_ITEM, updatedEvent);
-			}else{
-				json.put(Constants.CODE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	);
-				json.put(Constants.MESSAGE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);	
-			}
-		} catch (IOException e) {
+			Event updatedEvent = scheduleService.updateEvent(schedule,user);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, updatedEvent);
+		} catch (AllSchoolException e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, e.getErrorCode());
+			json.put(Constants.MESSAGE, e.getErrorMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());	
-			e.printStackTrace();
+			json.put(Constants.MESSAGE, e.getMessage());
+		}finally {
+			if (em.isOpen()) {
+				em.close();
+			}
 		}
 		renderResponseJson(json, response);
-		logger.info("getPostGroupOrder exit");
+		logger.info("reactToschedule exit");
 	}
 
 	@POST
 	@Path("/insertEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void createEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+		logger.info("createEvent start , postId : ");
 		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
-			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-			logger.info("schedule : "+schedule);
-			if(service !=null){
-			Event event = new Event().set("sendNotifications", true)
-			    .setSummary(schedule.getTitle())
-			    .setLocation(schedule.getLocation())
-			    .setDescription(schedule.getDescription());
-			if(schedule.getStart() ==null){
-				schedule.setStart(new Date());
-			}
-			DateTime startDateTime = new DateTime(schedule.getStart());
-			EventDateTime start = new EventDateTime()
-			    .setDateTime(startDateTime)
-			    .setTimeZone("America/Los_Angeles");
-			event.setStart(start);
-			if(schedule.getEnd() ==null){
-				schedule.setEnd(new Date());
-			}
-			DateTime endDateTime = new DateTime(schedule.getEnd());
-			EventDateTime end = new EventDateTime()
-			    .setDateTime(endDateTime)
-			    .setTimeZone("America/Los_Angeles");
-			event.setEnd(end);
-			
-			String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
-			event.setRecurrence(Arrays.asList(recurrence));
-			List<EventAttendee> attendees = null;
-			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-			GroupService groupService = new GroupService(em);
-			
+			ScheduleService scheduleService = new ScheduleService(em);
+			AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_100);
 			if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
-				attendees =groupService.fetchMemberEmailFromGroup(schedule.getGroups(),searchTO);
+				schedule.setAttendees(scheduleService.getGroupService().fetchMemberEmailFromGroup(schedule.getGroups(),searchTO));
 			}
-			
-			event.setAttendees(attendees);
-			
-			EventReminder[] reminderOverrides = new EventReminder[] {
-			    new EventReminder().setMethod("email").setMinutes(24 * 60),
-			    new EventReminder().setMethod("popup").setMinutes(10),
-			};
-			Event.Reminders reminders = new Event.Reminders()
-			    .setUseDefault(false)
-			    .setOverrides(Arrays.asList(reminderOverrides));
-			event.setReminders(reminders);
-			
-			String calendarId = "primary";
-			event = service.events().insert(calendarId, event).execute();
-			System.out.printf("Event created: %s\n", event.getHtmlLink());
-			json.put(Constants.CODE, Constants.OK);
-			json.put(Constants.DATA_ITEM, event);
-			}else{
-				json.put(Constants.CODE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	);
-				json.put(Constants.MESSAGE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);	
-			}
-		} catch (IOException e) {
+			Event createdEvent = scheduleService.createEvent(schedule,user);
+		
+		}  catch (AllSchoolException e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, e.getErrorCode());
+			json.put(Constants.MESSAGE, e.getErrorMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());	
-			e.printStackTrace();
+			json.put(Constants.MESSAGE, e.getMessage());
+		}finally {
+			if (em.isOpen()) {
+				em.close();
+			}
 		}
 		renderResponseJson(json, response);
-		logger.info("getPostGroupOrder exit");
+		logger.info("createEvent exit");
 	    
 	}
 	
