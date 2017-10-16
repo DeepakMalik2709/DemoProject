@@ -44,6 +44,13 @@ $(function(){
 			  }
 		  }
 		  sideBarAnimator();
+		  
+		  $(document).on("sidebarUpdated", function(){
+			  setTimeout(function(){
+				  $(".sidebar .treeview").tree();
+			  },500)
+			 
+		  });
 		
 		  /* 
 	     * Make sure that the sidebar is streched full height
@@ -135,7 +142,7 @@ $(function(){
 
 	            /* Add margins to submenu elements to give it a tree look */
 	            menu.find("li > a").each(function() {
-	                var pad = parseInt($(this).css("margin-left")) + 10;
+	                var pad = /*parseInt($(this).css("margin-left"))*/ + 10;
 
 	                $(this).css({"margin-left": pad + "px"});
 	            });

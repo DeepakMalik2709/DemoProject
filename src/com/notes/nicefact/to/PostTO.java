@@ -76,7 +76,7 @@ public class PostTO {
 	
 	Boolean isSubmitted = false;
 	
-	Boolean canSubmit = true;
+	Boolean canSubmit = false;
 
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
 	String title;
@@ -114,7 +114,8 @@ public class PostTO {
 		if(null != post.getDeadline()){
 			this.deadlineTime = post.getDeadline().getTime();
 			this.canSubmit = this.deadlineTime > new Date().getTime();
-			
+		}else{
+			this.canSubmit = true;
 		}
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());

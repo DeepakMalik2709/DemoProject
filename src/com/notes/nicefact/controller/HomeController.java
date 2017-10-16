@@ -36,6 +36,7 @@ import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TutorialTO;
+import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CommonContext;
 import com.notes.nicefact.util.Constants;
@@ -120,7 +121,7 @@ public class HomeController extends CommonController {
 	@GET
 	@Path("/login")
 	public Viewable loginPage(@QueryParam("redirect")final String redirect,  @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
-		if(CurrentContext.getAppUser() == null){
+		if(CurrentContext.getAppUser() == null || !AppProperties.getInstance().isProduction()){
 			CurrentContext.getCommonContext().setRedirectUrl(redirect);
 			return new Viewable("/jsp/login.jsp", null);
 		}else{

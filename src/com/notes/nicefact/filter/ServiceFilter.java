@@ -22,6 +22,7 @@ import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CommonContext;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
+import com.notes.nicefact.util.Utils;
 
 import flexjson.JSONSerializer;
 
@@ -48,6 +49,7 @@ public class ServiceFilter implements Filter {
 			logger.info("url : " + url + " , user : " + user);
 			if (user == null && bypassLogin && !AppProperties.getInstance().isProduction()) {
 				user = CacheUtils.getAppUser("jitender@nicefact.co.in");
+				Utils.refreshToken(user);
 				request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
 			}
 

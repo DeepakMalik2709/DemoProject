@@ -49,7 +49,6 @@ import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
-import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.LibraryService;
 import com.notes.nicefact.service.NotificationService;
@@ -637,11 +636,11 @@ public class SecureController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			PostService postService = new PostService(em);
-			TaskService taskService = new TaskService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<PostTO> postTos = postService.search(searchTO);
 			
+			Collections.sort(postTos, new CreatedDateComparator());
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.TOTAL, postTos.size());
 			json.put(Constants.DATA_ITEMS, postTos);
@@ -945,16 +944,15 @@ public class SecureController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			PostService postService = new PostService(em);
-			TaskService taskService = new TaskService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<Object> feed = new ArrayList<>();
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
-			Collections.sort(postTos, new CreatedDateComparator());
-feed.addAll(postTos);			try {
+			feed.addAll(postTos);
+			try {
 				com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 				// List the next 10 events from the primary calendar.
-				if(service!=null){
+				if (service != null) {
 					Events events = service.events().list("primary").execute();
 					List<Event> items = events.getItems();
 					AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
@@ -963,16 +961,17 @@ feed.addAll(postTos);			try {
 							postTos.add(new PostTO(event, user));
 						}
 					}
-					
+
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 			}
+			Collections.sort(postTos, new CreatedDateComparator());
 			feed.addAll(postTos);
-			if(feed.isEmpty()){
+			if (feed.isEmpty()) {
 				json.put(Constants.CODE, Constants.NO_RESULT);
-			}else{
-				
+			} else {
+
 				json.put(Constants.DATA_ITEMS, feed);
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 				json.put(Constants.CODE, Constants.RESPONSE_OK);

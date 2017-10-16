@@ -56,9 +56,7 @@ export default Ember.Route.extend({
 	        let request = this.get('groupService').fetchMyGroups();
 	        request.then((response) => {
 	        	   controller.set("myGroups" ,response );
-	        	   Ember.run.later((function() {
-	        		   $(".sidebar .treeview").tree();
-	        		 }), 2000);
+	        	   $.event.trigger( "sidebarUpdated");
 	        });
 	        this.contextService.fetchNotifications().then((response) => {
 	        		if(response && response.length){
