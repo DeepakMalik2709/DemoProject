@@ -460,38 +460,41 @@ public class Utils {
 
 	public static void refreshToken(AppUser user) {
 		logger.info("enter refreshToken");
-		HttpClient client = HttpClients.createDefault();
-		String url = Constants.GOOGLE_OAUTH_TOKEN_URL;
-		HttpPost request1 = new HttpPost(url);
-		request1.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs.add(new BasicNameValuePair("grant_type", "refresh_token"));
-		nameValuePairs.add(new BasicNameValuePair("client_id", AppProperties.getInstance().getGoogleClientId()));
-		nameValuePairs.add(new BasicNameValuePair("client_secret", AppProperties.getInstance().getGoogleClientSecret()));
-		nameValuePairs.add(new BasicNameValuePair("refresh_token", user.getRefreshToken()));
-		try {
-			request1.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			HttpResponse response1 = client.execute(request1);
-			if (response1.getStatusLine().getStatusCode() == 200) {
-				byte[] bytes = IOUtils.toByteArray(response1.getEntity().getContent());
-				JSONObject json = new JSONObject(new String(bytes, Constants.UTF_8));
-				if (json.has("access_token")) {
-					String newAccesstoken = json.getString("access_token");
-					logger.info("new access token : " + newAccesstoken);
-					user.setAccessToken(newAccesstoken);
-					GoogleAppUtils.getCredential().setAccessToken(newAccesstoken);
-					CacheUtils.addUserToCache(user);
+		if (StringUtils.isBlank(user.getRefreshToken())) {
+			logger.warn(" refresh token is null for : " + user.getEmail());
+		}else{
+			HttpClient client = HttpClients.createDefault();
+			String url = Constants.GOOGLE_OAUTH_TOKEN_URL;
+			HttpPost request1 = new HttpPost(url);
+			request1.addHeader("Content-Type", "application/x-www-form-urlencoded");
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+			nameValuePairs.add(new BasicNameValuePair("grant_type", "refresh_token"));
+			nameValuePairs.add(new BasicNameValuePair("client_id", AppProperties.getInstance().getGoogleClientId()));
+			nameValuePairs.add(new BasicNameValuePair("client_secret", AppProperties.getInstance().getGoogleClientSecret()));
+			nameValuePairs.add(new BasicNameValuePair("refresh_token", user.getRefreshToken()));
+			try {
+				request1.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				HttpResponse response1 = client.execute(request1);
+				if (response1.getStatusLine().getStatusCode() == 200) {
+					byte[] bytes = IOUtils.toByteArray(response1.getEntity().getContent());
+					JSONObject json = new JSONObject(new String(bytes, Constants.UTF_8));
+					if (json.has("access_token")) {
+						String newAccesstoken = json.getString("access_token");
+						logger.info("new access token : " + newAccesstoken);
+						user.setAccessToken(newAccesstoken);
+						GoogleAppUtils.getCredential().setAccessToken(newAccesstoken);
+						CacheUtils.addUserToCache(user);
+					}
+				} else if (null != response1.getEntity()) {
+					byte[] bytes = IOUtils.toByteArray(response1.getEntity().getContent());
+					String msg = new String(bytes, Constants.UTF_8);
+					logger.error(msg);
 				}
-			} else if (null != response1.getEntity()) {
-				byte[] bytes = IOUtils.toByteArray(response1.getEntity().getContent());
-				String msg = new String(bytes, Constants.UTF_8);
-				logger.error(msg);
+			} catch (IOException | JSONException e) {
+				logger.error("error : " + e.getMessage(), e);
 			}
-		} catch (IOException | JSONException e) {
-			logger.error("error : " + e.getMessage(), e);
+			request1.releaseConnection();
 		}
-		request1.releaseConnection();
 		logger.info("exit refreshToken");
 
 	}
@@ -659,6 +662,10 @@ public class Utils {
 			  }
 			
 		return color;
+	}
+	
+	public static String getTaskFolderPath(Post task) {	
+		return AppProperties.getInstance().getGroupUploadsFolder() + task.getGroupId() +  File.separator + task.getId();
 	}
 
 }

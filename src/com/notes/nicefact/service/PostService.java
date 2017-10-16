@@ -320,10 +320,6 @@ public class PostService extends CommonService<Post> {
 		return files;
 	}
 
-	public void downloadFile(PostFile postFile, AppUser user) {
-		GoogleDriveService driveService = GoogleDriveService.getInstance();
-		InputStream iStrem = driveService.downloadFile(postFile, user);
-	}
 
 public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
 		if (StringUtils.isBlank(postTo.getComment()) && postTo.getFiles().isEmpty()) {

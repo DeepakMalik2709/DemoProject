@@ -32,9 +32,30 @@ p {
 	padding-top:7px;
 	padding-bottom:7px;
 }
+
+.login-form-container{
+border-left:1px solid #ccc;
+height:160px
+}
+
+
+
+@media screen and (min-width: 992px) {
 .middlePage {
 	width: 680px;
     height: 500px;
+ }
+ }
+ @media screen and (max-width: 500px) {
+	.middlePage {
+		    max-width: 280px;
+	 }
+	 
+	 .login-form-container{
+		margin-top:10px;
+	}
+ }
+.middlePage {
     position: absolute;
     top:0;
     bottom: 0;
@@ -84,7 +105,7 @@ padding-bottom:10px;
 
 </div>
 
-    <div class="col-md-7" style="border-left:1px solid #ccc;height:160px">
+    <div class="col-md-7 login-form-container" style="">
 <form class="form-horizontal"  method="POST" >
 <fieldset>
 

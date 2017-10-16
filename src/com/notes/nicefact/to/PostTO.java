@@ -76,9 +76,7 @@ public class PostTO {
 	
 	Boolean isSubmitted = false;
 	
-	Boolean canSubmit = true;
-
-	private String zipFilePath;
+	Boolean canSubmit = false;
 
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
 	String title;
@@ -116,9 +114,9 @@ public class PostTO {
 		if(null != post.getDeadline()){
 			this.deadlineTime = post.getDeadline().getTime();
 			this.canSubmit = this.deadlineTime > new Date().getTime();
-			
+		}else{
+			this.canSubmit = true;
 		}
-		this.zipFilePath = post.getZipFilePath();
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
 		}
@@ -415,12 +413,6 @@ public class PostTO {
 	}
 	public void setIsSubmitted(Boolean isSubmitted) {
 		this.isSubmitted = isSubmitted;
-	}
-	public String getZipFilePath() {
-		return zipFilePath;
-	}
-	public void setZipFilePath(String zipFilePath) {
-		this.zipFilePath = zipFilePath;
 	}
 	public List<TaskSubmissionTO> getSubmissions() {
 		return submissions;

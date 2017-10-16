@@ -34,6 +34,7 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 		try {
 			results = (List<GroupMember>) query.getResultList();
 		} catch (NoResultException nre) {
+			logger.warn(nre.getMessage());
 		}
 		return results;
 	}

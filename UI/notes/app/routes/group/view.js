@@ -182,7 +182,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
 	        	Ember.set(member, "isLoading" ,true);
 	        	this.get('groupService').deleteMember(model , member ).then((result)=>{
 	        		if (result.code == 0 ){
-	        			model.members.removeObject(member);
+	        			model.get("members").removeObject(member);
 	        		}
 	        	});
 	        }

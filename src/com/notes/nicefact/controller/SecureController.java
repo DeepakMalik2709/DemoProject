@@ -49,7 +49,6 @@ import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
-import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.LibraryService;
 import com.notes.nicefact.service.NotificationService;
@@ -637,11 +636,11 @@ public class SecureController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			PostService postService = new PostService(em);
-			TaskService taskService = new TaskService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<PostTO> postTos = postService.search(searchTO);
 			
+			Collections.sort(postTos, new CreatedDateComparator());
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.TOTAL, postTos.size());
 			json.put(Constants.DATA_ITEMS, postTos);
@@ -843,7 +842,10 @@ public class SecureController extends CommonController {
 			} else {
 				postFile.incrementDownloadCount();
 				commonEntityService.upsert(postFile);
-				postService.downloadFile(postFile,user);
+				byte[] fileBytes = Utils.readFileBytes(postFile.getPath());
+				if (null !=fileBytes) {
+					downloadFile(fileBytes, postFile.getName(), postFile.getMimeType(), response);
+				}
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -942,16 +944,15 @@ public class SecureController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			PostService postService = new PostService(em);
-			TaskService taskService = new TaskService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<Object> feed = new ArrayList<>();
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
-			Collections.sort(postTos, new CreatedDateComparator());
-feed.addAll(postTos);			try {
+			feed.addAll(postTos);
+			try {
 				com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 				// List the next 10 events from the primary calendar.
-				if(service!=null){
+				if (service != null) {
 					Events events = service.events().list("primary").execute();
 					List<Event> items = events.getItems();
 					AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
@@ -960,16 +961,17 @@ feed.addAll(postTos);			try {
 							postTos.add(new PostTO(event, user));
 						}
 					}
-					
+
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 			}
+			Collections.sort(postTos, new CreatedDateComparator());
 			feed.addAll(postTos);
-			if(feed.isEmpty()){
+			if (feed.isEmpty()) {
 				json.put(Constants.CODE, Constants.NO_RESULT);
-			}else{
-				
+			} else {
+
 				json.put(Constants.DATA_ITEMS, feed);
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 				json.put(Constants.CODE, Constants.RESPONSE_OK);
@@ -1171,7 +1173,7 @@ feed.addAll(postTos);			try {
 	@POST
 	@Path("task/submission")
 	public void taskSubmission(TaskSubmissionTO sumbmissionTO, @Context HttpServletRequest request, @Context HttpServletResponse response) {
-		logger.info("upsertGroupTask start");
+		logger.info("taskSubmission start");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -1191,7 +1193,34 @@ feed.addAll(postTos);			try {
 			}
 		}
 		renderResponseJson(json, response);
-		logger.info("upsertGroupTask exit");
+		logger.info("taskSubmission exit");
+	}
+	
+	@GET
+	@Path("task/{taskId}/submissions/download")
+	public void downlaodTaskSubmission(@PathParam("taskId") long taskId, @Context HttpServletRequest request, @Context HttpServletResponse response) {
+		logger.info("downlaodTaskSubmission start");
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			String path = taskService.getTaskSubmissionDownloadPath(taskId);
+			if(path != null){
+				byte[] fileBytes = Utils.readFileBytes(path);
+				if (null !=fileBytes) {
+					downloadFile(fileBytes, "submissions.zip", "application/zip", response);
+				}
+			}
+			return;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e );
+
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseRaw("downloaing failed", response);
+		logger.info("downlaodTaskSubmission exit");
 	}
 	
 }

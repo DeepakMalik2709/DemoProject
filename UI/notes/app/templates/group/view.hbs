@@ -1,13 +1,13 @@
-  <div class="row">
-                <div class="col-lg-12">
-                    <h1 class="page-header">Group - {{model.name}}</h1>
-                      {{#if model.isAdmin}}
-                    <span class="pull-right"> <button type="button"  data-toggle="modal" {{action 'showMembers' model}} class="btn btn-default">Members</button></span>
-                    {{/if}}
-                </div>
-                <!-- /.col-lg-12 -->
-            </div>
-            <!-- /.row -->
+ <section class="content-header">
+    <h1>
+       {{model.name}} - <small>Group</small> 
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/home"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Posts</li>
+    </ol>
+</section>
+ 
             
             <div class="col-sm-9" >
 <form class="form-horizontal" name="deviceForm">
@@ -56,20 +56,18 @@
     </div>
   </div>
          {{#if model.isAdmin}}
-  <div class="form-group" ng-show="appState.loginUser && appState.loginUser.email == model.createdBy">
-  
-     <div class=" col-sm-4 ">
+  <div class="form-group" >
+     <div class=" col-sm-6 ">
+      <button  {{action 'showMembers' model}} class="btn btn-default" >Members</button>
     <button  {{action 'showAddMemberModal' model }} class="btn btn-default" >Add members</button>
     </div>
     
-   <div class=" col-sm-4 ">
+   <div class=" col-sm-6 ">
     {{#link-to 'group.edit' model.id tagName="button" class="btn btn-default"}}Edit
       {{/link-to}}
+       <button type="button"  data-toggle="modal" {{action 'confirmAndDeleteGroup' model}} class="btn btn-default">Delete</button>
     </div>
     
-     <div class="col-sm-4">
-      <button type="button"  data-toggle="modal" {{action 'confirmAndDeleteGroup' model}} class="btn btn-default">Delete</button>
-    </div>
   </div>
   {{/if}}
 </form>

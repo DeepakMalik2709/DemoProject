@@ -139,5 +139,8 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin , {
     	    	});
             }
     	}, 
+        editTask(task){
+       	 this.transitionTo('group.task.edit', task.id);
+    	},
     }
 });

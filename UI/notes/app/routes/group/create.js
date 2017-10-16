@@ -31,6 +31,7 @@ export default Ember.Route.extend(authenticationMixin, {
         	group.set("isSaving", true);
         	group.save().then((resp) => {
         		this.get("groupService.myGroups").pushObject(resp); 
+        		$.event.trigger( "sidebarUpdated");
         		group.set("isSaving", false);
         		this.transitionTo('group.view', resp.id);
             });

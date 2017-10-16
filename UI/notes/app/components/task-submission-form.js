@@ -14,19 +14,18 @@ export default Ember.Component.extend(postMixin , {
     		if(!Ember.get(this, "isSaving") && this.files.length){
     			Ember.set(this, "isSaving", true)
     			
-    			console.log(this.task.id);
     		let json = {
-    			comment : this.postComment,
     			files :  this.files,
     			postId :  this.task.id,
     		}
-    			console.log(11 , json);
     		this.get("taskService").saveTaskSubmission(json).then((result)=>{
     			Ember.set(this, "isSaving", false)
     			if(result.code == 0){
     				Ember.set(this.task , "isSubmitted" , true);
     				alert("Your submission has been saved");
     				//Ember.get(this.item,'comments').pushObject(result.item);
+    			}else if(result.message){
+    				alert(result.message);
     			}
     		});
     		}
@@ -67,6 +66,9 @@ export default Ember.Component.extend(postMixin , {
         },
         showTaskSubmitOptionsClick(){
    		 this.set("showTaskSubmitOptions" , true);
-   	}
+   	},
+        showFileUpload(){
+        	this.$('.file-upload-task').click();
+        }
     }
 });
