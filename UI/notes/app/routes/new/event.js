@@ -7,8 +7,10 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 		startDate:new Date(),
 		endDate:new Date(),
 		groupService: Ember.inject.service('group'),
+		useGoogleCalendar : false,
 	    init() {
 		    this._super(...arguments);
+		    this.useGoogleDrive = Ember.get(this.get("contextService").fetchContext().get("loginUser"), "useGoogleCalendar");
 		  },
 		model() {
 			 return this.store.createRecord('new.event');
@@ -30,9 +32,9 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    },
 	   
 	    actions: {
-	    	 
 	        saveEvent(event) {
 	        	event.groups=[];
+	        	 Ember.set(this.item, "showLoading", true);
 	        	event.start = new Date(this.controller.get('startDate'));
 	        	event.end = new Date(this.controller.get('endDate'));
 	        	this.controller.get('attendees').forEach(function(item) {
@@ -42,6 +44,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	        	console.log( event.toJSON());
 
 	        	event.save().then(() => this.transitionTo('calendar'));
+	        	 Ember.set(this.item, "showLoading", false);
 	        	
 	        },
 	        willTransition(transition) {

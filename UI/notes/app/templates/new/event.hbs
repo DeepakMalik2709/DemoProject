@@ -48,18 +48,7 @@
 							{{/power-select-multiple}}
 					  </div>                   
                         <div class="form-group">
-                             <button type="button"   onclick="$('#file-upload2').click();" class="btn btn-default"  disabled={{if item.showLoading true}}>Attach Files</button>
-                            <p class="help-block">Schedule attachment.</p>
-                        </div>
-                         <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
-					        <ol >
-					        {{#each model.files as |file|}}
-					        <li>
-					        {{file.name}}&nbsp;({{file.size}})
-					         &nbsp;<span  {{action 'removeFile' file}} class="glyphicon glyphicon-remove pointer" aria-hidden="true"></span>
-					        </li>
-					        {{/each}}
-					        </ol>
+                            {{new-file-upload files=model.files item=model}}
 					        </div>
 						 <div class="form-group">
 	                            <label for="exampleInputFile">Schedule desc</label> <small>Write something about schedule</small>                              
@@ -74,6 +63,11 @@
                          </div>
 	                    <div class="box-footer">
 	                        <button type="submit" class="btn btn-primary" {{action 'saveEvent' model}}>{{buttonLabel}}</button>
+	                     
+	                        
+	                      <button type="button" class="btn btn-default" {{action 'cancelClicked' item}}>Cancel</button>
+			              
+			            
 	                    </div>
                    </div><!-- /.box-body -->
                 </form>

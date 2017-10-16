@@ -53,40 +53,7 @@ public class CalendarController extends CommonController {
 
 	private final static Logger logger = Logger.getLogger(CalendarController.class.getName());
 
-	@POST
-	@Path("/register")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void registerUser(AppUserTO appUserTO, @Context HttpServletResponse response) {
-		logger.info("getPostGroupOrder start");
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			AppUserService appUserService = new AppUserService(em);
-			if (StringUtils.isBlank(appUserTO.getPassword())) {
-				throw new AppException("Password is required field");
-			} else if (StringUtils.isBlank(appUserTO.getEmail())) {
-				throw new AppException("Email is required field");
-			} else if (!Utils.isValidEmailAddress(appUserTO.getEmail())) {
-				throw new AppException(appUserTO.getEmail() + " is not a valid email");
-			}
-			AppUserTO userTo = new AppUserTO(appUserService.registerNewUser(appUserTO));
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, userTo);
-
-		} catch (Exception e) {
-			logger.error( e.getMessage(), e);
-			
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		}finally{
-			if(em.isOpen()){
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("getPostGroupOrder exit");
-	}
-	
+		
 	@POST
 	@Path("/updateEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -251,66 +218,6 @@ public class CalendarController extends CommonController {
 		renderResponseJson(json, response);
 	}
 		
-	@GET
-	@Path("/{id}")
-	public void  fetchTutorial(@PathParam("id")  long id, @Context HttpServletResponse response){
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		logger.info("fetchTutorial start");
-		Map<String, Object> json = new HashMap<>();
-		try {
-			TutorialService notesService = new TutorialService(em);
-			Tutorial tutorial = notesService.get(id);
-			if (null == tutorial) {
-				json.put(Constants.CODE, Constants.NO_RESULT);
-			}else{
-				TutorialTO savedTO = new TutorialTO(tutorial);
-				json.put(Constants.CODE, Constants.RESPONSE_OK);
-				json.put(Constants.DATA_ITEM, savedTO);
-			}
-			
-		} catch (Exception e) {
-			logger.error( e.getMessage(), e);
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		}finally{
-			if(em.isOpen()){
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("fetchTutorial exit");
-	}
 	
-	@GET
-	@Path("/search")
-	public void  searchTutorial(@QueryParam("q") String searchTerm, @QueryParam("offset") int offset,@Context HttpServletRequest request,   @Context HttpServletResponse response){
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		logger.info("searchTutorial start");
-		Map<String, Object> json = new HashMap<>();
-		try {
-			TutorialService notesService = new TutorialService(em);
-			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
-			List<Tutorial> tutorials =  notesService.search(searchTO);
-			List<TutorialTO> tutorialTos = Utils.adaptTutorialTO(tutorials);
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.TOTAL, tutorialTos.size());
-			json.put(Constants.DATA_ITEMS, tutorialTos);
-			if(!tutorialTos.isEmpty()){
-				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
-			}
-			
-		} catch (Exception e) {
-			logger.error( e.getMessage(), e);
-			
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		}finally{
-			if(em.isOpen()){
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("searchTutorial exit");
-	}	
 	
 }

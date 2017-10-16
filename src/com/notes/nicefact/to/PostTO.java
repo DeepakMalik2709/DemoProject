@@ -132,7 +132,7 @@ public class PostTO {
 			this.groupName =  group.getName();
 		}
 		this.postType = POST_TYPE.SCHEDULE;
-		this.comment = event.getDescription()+" "+event.getStart()+"-"+event.getEnd();
+		this.comment = event.getSummary()+" " + event.getDescription()+" "+event.getStart().getDateTime()+"-"+event.getEnd().getDateTime();
 		this.createdByEmail = event.getCreator().getEmail();
 		this.createdByName = event.getCreator().getDisplayName();
 		this.updatedByEmail =  event.getCreator().getEmail();
@@ -156,9 +156,13 @@ public class PostTO {
 						this.reponseMaybe++;
 					}else if(ScheduleAttendeeResponseType.DECLINED.toString().equalsIgnoreCase(attendee.getResponseStatus())){
 						this.reponseNo++;
-					}					
-				commentTO = new CommentTO(attendee);
-				this.comments.add(commentTO);
+					}			
+					if(attendee.getComment()!=null){
+						commentTO = new CommentTO(attendee);
+						this.comments.add(commentTO);
+					}
+				
+				
 			}
 		}
 		
