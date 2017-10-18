@@ -102,7 +102,7 @@ public class OauthController {
 					appUserService.upsert(user);
 					CacheUtils.addUserToCache(user);
 					request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-					backendTaskService.createGoogleDriveFolderForUserTask(user);
+					/*backendTaskService.createGoogleDriveFolderForUserTask(user);*/
 				}
 
 			} else {

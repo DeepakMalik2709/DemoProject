@@ -50,12 +50,10 @@ import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.entity.TutorialFile;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.enums.NotificationType;
-import com.notes.nicefact.exception.ServiceException;
-import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
 import com.notes.nicefact.service.GoogleDriveService;
-import com.notes.nicefact.service.GoogleDriveService.GoogleFileTypes;
+import com.notes.nicefact.service.GoogleDriveService.FOLDER;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
@@ -63,9 +61,9 @@ import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GoogleDriveFile;
+import com.notes.nicefact.to.MoveFileTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
-import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.MailService;
 import com.notes.nicefact.util.Utils;
@@ -84,7 +82,7 @@ public class BackendTaskController extends CommonController {
 			PostService postService = new PostService(em);
 			Post post = postService.get(postId);
 			AppUser user = CacheUtils.getAppUser(post.getCreatedBy());
-			if (user.getUseGoogleDrive() && StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
+			if (user.getUseGoogleDrive()) {
 				moveGroupPostFilesToUserGoogleDrive(post, user, em);
 			} else {
 				generateGroupPostFileThumbnail(em, post);
@@ -107,13 +105,14 @@ public class BackendTaskController extends CommonController {
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
 		List<PostFile> files = post.getFiles();
 		GoogleDriveFile driveFile;
+		MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(post.getGroupId()).addParents( FOLDER.Attachments, FOLDER.Post).setUser(user);
 		for (PostFile postFile : files) {
 			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
 				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
 				try {
 					driveFile = driveService.uploadFileToUserAccount(postFile, user);
 					if (null != driveFile) {
-						driveService.moveFile(driveFile.getId(), user.getGoogleDriveFolderId(), user);
+						moveFileTO.addFileIds(driveFile.getId());
 						driveService.renameFile(driveFile.getId(), postFile.getName(), user);
 						postFile.setGoogleDriveId(driveFile.getId());
 						postFile.setIcon(driveFile.getIconLink());
@@ -138,6 +137,7 @@ public class BackendTaskController extends CommonController {
 				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
 			}
 		}
+		driveService.moveFile(moveFileTO);
 	}
 	
 	void getGroupPostFilesThumbnailFromDriveFile(GoogleDriveFile driveFile, long groupId, AbstractFile postFile, AppUser user, CommonEntityService commonService ) {
@@ -224,7 +224,7 @@ public class BackendTaskController extends CommonController {
 			TutorialService tutorialService = new TutorialService(em);
 			Tutorial tutorial = tutorialService.get(tutorialId);
 			AppUser user = CacheUtils.getAppUser(tutorial.getCreatedBy());
-			if (user.getUseGoogleDrive() && StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
+			if (user.getUseGoogleDrive() ) {
 				moveTutorialFilesToUserGoogleDrive(tutorial, user, em);
 			} else {
 				generateTutorialFileThumbnails(em, tutorial);
@@ -247,13 +247,14 @@ public class BackendTaskController extends CommonController {
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
 		List<TutorialFile> files = tutorial.getFiles();
 		GoogleDriveFile driveFile;
+		MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).addParents( FOLDER.Tutorial).setUser(user);
 		for (TutorialFile postFile : files) {
 			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
 				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
 				try {
 					driveFile = driveService.uploadFileToUserAccount(postFile, user);
 					if (null != driveFile) {
-						driveService.moveFile(driveFile.getId(), user.getGoogleDriveFolderId(), user);
+						moveFileTO.addFileIds(driveFile.getId());
 						driveService.renameFile(driveFile.getId(), postFile.getName(), user);
 						postFile.setGoogleDriveId(driveFile.getId());
 						postFile.setIcon(driveFile.getIconLink());
@@ -279,6 +280,7 @@ public class BackendTaskController extends CommonController {
 				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
 			}
 		}
+		driveService.moveFile(moveFileTO);
 	}
 
 	void getTutorialFilesThumbnailFromDriveFile(GoogleDriveFile driveFile, TutorialFile postFile, AppUser user, CommonEntityService commonService ) {
@@ -912,7 +914,7 @@ public class BackendTaskController extends CommonController {
 		renderResponseRaw(true, response);
 	}
 
-	@POST
+	/*@POST
 	@Path("user/createGoogleDriveFolder")
 	public void createGoogleDriveFolderForUserTask(@QueryParam("email") String email, @Context HttpServletResponse response) throws IOException, InterruptedException {
 		logger.info("start createGoogleDriveFolderForUserTask, email : " + email);
@@ -930,7 +932,7 @@ public class BackendTaskController extends CommonController {
 				}
 
 				if (createFolder) {
-					folder = googleDriveService.createNewFile(AppProperties.getInstance().getDriveUserUploadFolderName(), GoogleFileTypes.FOLDER, user);
+					folder = googleDriveService.createNewFile(FOLDER.AllSchool.toString(), GoogleFileTypes.FOLDER, user);
 					if (null == folder) {
 						logger.error("cannot make drive folder for : " + email);
 					} else {
@@ -954,7 +956,7 @@ public class BackendTaskController extends CommonController {
 		logger.info("exit createGoogleDriveFolderForUserTask");
 		renderResponseRaw(true, response);
 	}
-
+*/
 	@GET
 	@Path("manuallyTrigger")
 	public void runManually(@QueryParam("taskId") Long taskId, @Context HttpServletResponse response) throws IOException {
@@ -1108,6 +1110,7 @@ public class BackendTaskController extends CommonController {
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
 		List<PostFile> files = task.getFiles();
 		GoogleDriveFile driveFile;
+		MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(task.getGroupId()).addParents( FOLDER.Attachments, FOLDER.Task).setUser(user);
 		for (int index = 0 ; index < files.size(); index++) {
 			PostFile postFile = files.get(index);
 			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
@@ -1115,10 +1118,7 @@ public class BackendTaskController extends CommonController {
 				try {
 					driveFile = driveService.uploadFileToUserAccount(postFile, user);
 					if (null != driveFile) {
-						if(null == task.getGoogleDriveFolderId()){
-							makeTaskGoogleDriveFolder(task , user , em);
-						}
-						driveService.moveFile(driveFile.getId(), task.getGoogleDriveFolderId(), user);
+						moveFileTO.addFileIds(driveFile.getId());
 						driveService.renameFile(driveFile.getId(), postFile.getName(), user);
 						postFile.setGoogleDriveId(driveFile.getId());
 						postFile.setIcon(driveFile.getIconLink());
@@ -1143,6 +1143,7 @@ public class BackendTaskController extends CommonController {
 				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
 			}
 		}
+		driveService.moveFile(moveFileTO);
 	}
 	
 	
@@ -1155,7 +1156,7 @@ public class BackendTaskController extends CommonController {
 			TaskService taskService = new TaskService(em);
 			Post post = taskService.get(taskId);
 			AppUser user = CacheUtils.getAppUser(post.getCreatedBy());
-			if (user.getUseGoogleDrive() && StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
+			if (user.getUseGoogleDrive() ) {
 				moveTaskFilesToUserGoogleDrive(post, user, em);
 			}
 
@@ -1176,16 +1177,14 @@ public class BackendTaskController extends CommonController {
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
 		List<TaskSubmissionFile> files = submission.getFiles();
 		GoogleDriveFile driveFile;
+		MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(task.getGroupId()).addParents( FOLDER.Task_Submission).setUser(user);
 		for (TaskSubmissionFile postFile : files) {
 			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
 				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
 				try {
 					driveFile = driveService.uploadFileToUserAccount(postFile, user);
 					if (null != driveFile) {
-						if(null == task.getGoogleDriveFolderId()){
-							makeTaskGoogleDriveFolder(task , user , em);
-						}
-						driveService.moveFile(driveFile.getId(), task.getGoogleDriveFolderId(), user);
+						moveFileTO.addFileIds(driveFile.getId());
 						driveService.renameFile(driveFile.getId(), postFile.getName(), user);
 						postFile.setGoogleDriveId(driveFile.getId());
 						postFile.setIcon(driveFile.getIconLink());
@@ -1210,9 +1209,10 @@ public class BackendTaskController extends CommonController {
 				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
 			}
 		}
+		driveService.moveFile(moveFileTO);
 	}
 	
-	private void makeTaskGoogleDriveFolder(Post task ,  AppUser user, EntityManager em) {
+/*	private void makeTaskGoogleDriveFolder(Post task ,  AppUser user, EntityManager em) {
 		Group group = CacheUtils.getGroup(task.getGroupId());
 		String name = group.getName() + "-task-" + task.getId();
 		GoogleDriveService googleDriveService = GoogleDriveService.getInstance();
@@ -1229,7 +1229,7 @@ public class BackendTaskController extends CommonController {
 
 		}
 		
-	}
+	}*/
 
 	@POST
 	@Path("task/submission")
@@ -1246,7 +1246,7 @@ public class BackendTaskController extends CommonController {
 					logger.warn("cannot fetch from db , task : " + task + ", submission : " + submission);
 				}
 				AppUser user = CacheUtils.getAppUser(task.getCreatedBy());
-				if (user.getUseGoogleDrive() && StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
+				if (user.getUseGoogleDrive()  ) {
 					moveTaskSubmissionFilesToUserGoogleDrive(task, submission, user, em);
 				} else {
 					logger.warn("User has not given google permission.");

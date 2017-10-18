@@ -50,6 +50,12 @@ public class GroupService extends CommonService<Group> {
 		return groupDao;
 	}
 
+	public Group upsert(Group group) {
+		Group db = super.upsert(group);
+		CacheUtils.addGroupToCache(db);
+		return db;
+	}
+	
 	public Group get(Long id) {
 		Group group = super.get(id);
 		if(null != group){

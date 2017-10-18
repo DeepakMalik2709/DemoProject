@@ -45,7 +45,7 @@ export default Ember.Route.extend(authenticationMixin , {
 	            	this.controller.set("isSaving", false);
 	            	if(result.code==0){
 	            		this.contextService.setLoginUser(result.item);
-	            		this.transitionTo('dashboard');
+	            		this.transitionTo('home');
 	            	}
 	            });
         	}

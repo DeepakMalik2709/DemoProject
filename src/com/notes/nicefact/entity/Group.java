@@ -89,7 +89,45 @@ public class Group extends CommonEntity {
 	@Column(columnDefinition = "TEXT")
 	String description;
 
+	String taskFolderId;
+	String postFolderId;
+	String scheduleFolderId;
+	String assignmentFolderId;
+	
+	
+	
 
+	public String getAssignmentFolderId() {
+		return assignmentFolderId;
+	}
+
+	public void setAssignmentFolderId(String assignmentFolderId) {
+		this.assignmentFolderId = assignmentFolderId;
+	}
+
+	public String getTaskFolderId() {
+		return taskFolderId;
+	}
+
+	public void setTaskFolderId(String taskFolderId) {
+		this.taskFolderId = taskFolderId;
+	}
+
+	public String getPostFolderId() {
+		return postFolderId;
+	}
+
+	public void setPostFolderId(String postFolderId) {
+		this.postFolderId = postFolderId;
+	}
+
+	public String getScheduleFolderId() {
+		return scheduleFolderId;
+	}
+
+	public void setScheduleFolderId(String scheduleFolderId) {
+		this.scheduleFolderId = scheduleFolderId;
+	}
 
 	public Set<GroupMember> getMembers() {
 		return members;
@@ -272,6 +310,4 @@ public class Group extends CommonEntity {
 		this.description = group.getDescription();
 		this.tagIds = new HashSet<>(group.getTagIds());
 	}
-
-	
 }

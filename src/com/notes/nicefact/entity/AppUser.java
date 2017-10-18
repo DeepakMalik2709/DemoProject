@@ -19,7 +19,6 @@ import javax.persistence.Transient;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.notes.nicefact.entity.AppUser.AUTHORIZED_SCOPES;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.util.Constants;
 
@@ -132,6 +131,12 @@ public class AppUser extends CommonEntity {
 	
 	String googleDriveFolderId;
 	
+	String googleDriveAttachmentsFolderId;
+	String googleDriveLibraryFolderId;
+	
+	String taskSubmissionFolderId;
+	String tutorialFolderId;
+	
 	@Basic
 	private Date googleDriveMsgDate;
 
@@ -214,6 +219,14 @@ public class AppUser extends CommonEntity {
 		return getScopes().contains(AUTHORIZED_SCOPES.CALENDAR);
 	}
 	
+	public String getTutorialFolderId() {
+		return tutorialFolderId;
+	}
+
+	public void setTutorialFolderId(String tutorialFolderId) {
+		this.tutorialFolderId = tutorialFolderId;
+	}
+
 	public Date getGoogleDriveMsgDate() {
 		return googleDriveMsgDate;
 	}
@@ -564,6 +577,31 @@ public class AppUser extends CommonEntity {
 		return displayName;
 	}
 
+	
+
+	public String getTaskSubmissionFolderId() {
+		return taskSubmissionFolderId;
+	}
+
+	public void setTaskSubmissionFolderId(String taskSubmissionFolderId) {
+		this.taskSubmissionFolderId = taskSubmissionFolderId;
+	}
+	public String getGoogleDriveAttachmentsFolderId() {
+		return googleDriveAttachmentsFolderId;
+	}
+
+	public void setGoogleDriveAttachmentsFolderId(String googleDriveAttachmentsFolderId) {
+		this.googleDriveAttachmentsFolderId = googleDriveAttachmentsFolderId;
+	}
+
+	public String getGoogleDriveLibraryFolderId() {
+		return googleDriveLibraryFolderId;
+	}
+
+	public void setGoogleDriveLibraryFolderId(String googleDriveLibraryFolderId) {
+		this.googleDriveLibraryFolderId = googleDriveLibraryFolderId;
+	}
+
 	@Override
 	public String toString() {
 		return "AppUser [email=" + email + ", photoUrl=" + photoUrl + ", uploadedPhotoPath=" + uploadedPhotoPath + ", getDisplayName()=" + getDisplayName() + "]";
@@ -575,5 +613,4 @@ public class AppUser extends CommonEntity {
 		email = email.toLowerCase().trim();
 		super.preStore();
 	}
-
 }
