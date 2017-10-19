@@ -39,6 +39,21 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 		return results;
 	}
 	
+	public GroupMember fetchGroupMemberByEmail(long groupId, String email) {
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from GroupMember t where  t.group.id = :groupId and t.email = :email");
+		query.setParameter("groupId", groupId);
+		query.setParameter("email", email);
+		query.setMaxResults(1);
+		try {
+			GroupMember result = (GroupMember) query.getSingleResult();
+			return result;
+		} catch (NoResultException nre) {
+			logger.warn(nre.getMessage());
+		}
+		return null;
+	}
+	
 	public List<Long> fetchGroupMembersByEmail(String email) {
 		List<Long> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();

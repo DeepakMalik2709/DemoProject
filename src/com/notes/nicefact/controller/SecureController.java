@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.fileupload.MultipartStream;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
@@ -50,7 +51,6 @@ import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
 import com.notes.nicefact.service.GroupService;
-import com.notes.nicefact.service.LibraryService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.TagService;
@@ -833,8 +833,6 @@ public class SecureController extends CommonController {
 		try {
 			AppUser user = (AppUser) req.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 			PostService postService = new PostService(em);
-			LibraryService libService = new LibraryService(em);
-		
 			CommonEntityService commonEntityService = new CommonEntityService(em);
 			PostFile postFile = postService.getByServerName(serverName);
 			if (postFile == null) {
@@ -958,7 +956,9 @@ public class SecureController extends CommonController {
 					AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 					if (items.size() > 0) {
 						for (Event event : items) {
-							postTos.add(new PostTO(event, user));
+							PostTO postto = new PostTO(event, user);
+							postto.setId(RandomUtils.nextLong());
+							postTos.add(postto);
 						}
 					}
 
@@ -1181,7 +1181,7 @@ public class SecureController extends CommonController {
 			TaskSubmission post = taskService.upsertTaskSubmission(sumbmissionTO, CurrentContext.getAppUser());
 			TaskSubmissionTO savedTO = new TaskSubmissionTO(post);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, savedTO);
+			/*json.put(Constants.DATA_ITEM, savedTO);*/
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e );
 

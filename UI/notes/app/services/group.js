@@ -56,8 +56,10 @@ export default DS.Store.extend(ajaxMixin ,{
 						}
 						
 						resolve({code : 0 , items : items, nextLink : data.nextLink});
+					}else{
+						resolve(data);
 					}
-			    	  resolve(data);
+			    	  
 			      });
 		 });
 	 },
@@ -73,12 +75,14 @@ export default DS.Store.extend(ajaxMixin ,{
 							if(storePost1){
 								this.unloadRecord(storePost1);
 							}
-							 const storePost = this.createRecord('post',thisItem );
+							 const storePost = this.createRecord('post', thisItem);
 							 items.push(storePost);
 						}
+						
 						resolve({code : 0 , items : items, nextLink : data.nextLink});
+					}else{
+						resolve(data);
 					}
-			    	  resolve(data);
 			      });
 		 });
 	 },

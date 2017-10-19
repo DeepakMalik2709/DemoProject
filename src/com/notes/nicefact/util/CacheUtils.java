@@ -45,9 +45,9 @@ public class CacheUtils {
 			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 			GroupService groupService = new GroupService(em);
 			group = groupService.get(id);
-			group.getMembers().size();
-			group.getMemberGroupsIds().size();
 			if (null!=group) {
+				group.getMembers().size();
+				group.getMemberGroupsIds().size();
 				em.detach(group);
 				putInCache(cacheKey, group);
 			}

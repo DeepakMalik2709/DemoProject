@@ -50,10 +50,12 @@ import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.entity.TutorialFile;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.enums.NotificationType;
+import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
 import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.service.GoogleDriveService.FOLDER;
+import com.notes.nicefact.service.GoogleDriveService.GoogleFileTypes;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
@@ -64,6 +66,7 @@ import com.notes.nicefact.to.GoogleDriveFile;
 import com.notes.nicefact.to.MoveFileTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
+import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.MailService;
 import com.notes.nicefact.util.Utils;
@@ -914,7 +917,7 @@ public class BackendTaskController extends CommonController {
 		renderResponseRaw(true, response);
 	}
 
-	/*@POST
+	@POST
 	@Path("user/createGoogleDriveFolder")
 	public void createGoogleDriveFolderForUserTask(@QueryParam("email") String email, @Context HttpServletResponse response) throws IOException, InterruptedException {
 		logger.info("start createGoogleDriveFolderForUserTask, email : " + email);
@@ -924,26 +927,8 @@ public class BackendTaskController extends CommonController {
 			GoogleDriveService googleDriveService = GoogleDriveService.getInstance();
 			AppUser user = appUserService.getAppUserByEmail(email);
 			if (StringUtils.isNotBlank(user.getRefreshToken())) {
-				boolean createFolder = true;
-				GoogleDriveFile folder;
-				if (StringUtils.isNotBlank(user.getGoogleDriveFolderId())) {
-					folder = googleDriveService.getFileFields(user.getGoogleDriveFolderId(), null, user);
-					createFolder = (null == folder);
-				}
-
-				if (createFolder) {
-					folder = googleDriveService.createNewFile(FOLDER.AllSchool.toString(), GoogleFileTypes.FOLDER, user);
-					if (null == folder) {
-						logger.error("cannot make drive folder for : " + email);
-					} else {
-						user.setGoogleDriveFolderId(folder.getId());
-						appUserService.upsert(user);
-						googleDriveService.updatePermission(folder.getId(), null, Constants.READER, Constants.ANYONE, "", true, false, user);
-
-					}
-					CacheUtils.addUserToCache(user);
-				}
-
+				MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(Constants.FIRST_LOGIN_TEST_GROUP).addParents( FOLDER.Attachments, FOLDER.Attachments, FOLDER.Library, FOLDER.Task_Submission).setUser(user);
+				googleDriveService.moveFile(moveFileTO);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -956,7 +941,7 @@ public class BackendTaskController extends CommonController {
 		logger.info("exit createGoogleDriveFolderForUserTask");
 		renderResponseRaw(true, response);
 	}
-*/
+
 	@GET
 	@Path("manuallyTrigger")
 	public void runManually(@QueryParam("taskId") Long taskId, @Context HttpServletResponse response) throws IOException {
@@ -1177,7 +1162,7 @@ public class BackendTaskController extends CommonController {
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
 		List<TaskSubmissionFile> files = submission.getFiles();
 		GoogleDriveFile driveFile;
-		MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(task.getGroupId()).addParents( FOLDER.Task_Submission).setUser(user);
+		MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(task.getGroupId()).addParents( FOLDER.Task_Submission).setUser(user).setPost(task);
 		for (TaskSubmissionFile postFile : files) {
 			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
 				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());

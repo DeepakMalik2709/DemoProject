@@ -127,10 +127,6 @@ public class PostTO {
 	public PostTO(Event event, AppUser user) {
 		this.eventId =event.getId();
 		
-		if(groupId !=null && groupId > 0){
-			Group group = CacheUtils.getGroup(this.groupId);
-			this.groupName =  group.getName();
-		}
 		this.postType = POST_TYPE.SCHEDULE;
 		this.comment = event.getDescription()+" "+event.getStart()+"-"+event.getEnd();
 		this.createdByEmail = event.getCreator().getEmail();

@@ -95,6 +95,7 @@ public class Constants {
 	public static final String GROUP = "group";
 	public static final String REDIRECT_URL = "/a/public/login?redirect=";
 	public static final String DATE_FORMAT_1 = "dd-MMM-yy hh:mm a";
+	public static final Long FIRST_LOGIN_TEST_GROUP = -905L;
 	
 	
 }

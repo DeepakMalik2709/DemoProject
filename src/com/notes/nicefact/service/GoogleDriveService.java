@@ -29,12 +29,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.notes.nicefact.dao.GroupMemberDAO;
+import com.notes.nicefact.dao.PostDAO;
 import com.notes.nicefact.entity.AbstractFile;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.entity.GroupMember;
+import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.exception.ServiceException;
-import com.notes.nicefact.service.GoogleDriveService.FOLDER;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GoogleDriveFile;
 import com.notes.nicefact.to.GoogleFilePermission;
@@ -373,12 +376,14 @@ public class GoogleDriveService {
 	}
 
 	public GoogleDriveFile createNewFile(String title, GoogleFileTypes fileType, AppUser user) {
+		logger.info("createNewFile start");
 		GoogleDriveFile file = null;
 		try {
 			JSONObject metadata = new JSONObject();
 			metadata.put("title", title);
 			metadata.put("convert", "true");
 			metadata.put("mimeType", fileType.getMimeType());
+			logger.info(metadata + " , for : " + user.getEmail()); 
 			List<Header> headers = new ArrayList<>();
 			headers.add(new BasicHeader(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_JSON));
 			String url = DRIVE_FILES_URL;
@@ -391,6 +396,7 @@ public class GoogleDriveService {
 		} catch (JSONException | UnsupportedEncodingException e) {
 			logger.error(e.getMessage(), e);
 		}
+		logger.info("exit createNewFile");
 		return file;
 	}
 
@@ -515,7 +521,7 @@ public class GoogleDriveService {
 	}
 
 	private void moveFile(String fileId, String parentId, AppUser user) {
-		logger.info("moveFile start");
+		logger.info("moveFile start , fileId : " + fileId +" , parentId:  " + parentId );
 		String url = DRIVE_FILES_URL + fileId + "/parents";
 		JSONObject postData = new JSONObject();
 		try {
@@ -830,16 +836,15 @@ public class GoogleDriveService {
 		logger.info("upload Input Stream File  start");
 		GoogleDriveFile driveFile= null;
 		JSONObject response=null;
-		FileTO fileTO =new FileTO(postFile.getName(), postFile.getServerName(), postFile.getMimeType(), postFile.getSizeBytes());		
-		PostFile newfile  = new PostFile(fileTO,postFile.getPath());		
 		String url = Constants.DRIVE_FILE_UPLOAD_URL + "?uploadType=media";
 		List<Header> headers = new ArrayList<>();
-		headers.add(new BasicHeader(Constants.CONTENT_TYPE, newfile.getMimeType()));
+		headers.add(new BasicHeader(Constants.CONTENT_TYPE, postFile.getMimeType()));
 		
 		response = doJsonPost(url, headers, bytes , user);
 		if (null != response) {
 			logger.info(response);
 			driveFile = new GoogleDriveFile(response);
+			renameFile(driveFile.getId(), postFile.getName(), user);
 		}
 		logger.info("upload Input Stream File  end");
 		return driveFile;
@@ -861,8 +866,8 @@ public class GoogleDriveService {
 	 * @param parents
 	 */
 	public void moveFile(MoveFileTO moveFileTO) {
-		logger.info("start moveFile");
-		if(moveFileTO.getFileIds().isEmpty()){
+		logger.info("start moveFile , moveFileTO : "+  moveFileTO);
+		if(moveFileTO.getFileIds().isEmpty() && Constants.FIRST_LOGIN_TEST_GROUP != moveFileTO.getGroupId()){
 			logger.warn("file ids is empty : " + moveFileTO);
 			return ;
 		}
@@ -875,10 +880,31 @@ public class GoogleDriveService {
 				}
 		}
 		
-		if( moveFileTO.getGroupId() !=null){
-			fileParentId =  verifyPublicGroupFolderId(moveFileTO.getGroupId(),  moveFileTO.getUser());
+		if( Constants.FIRST_LOGIN_TEST_GROUP == moveFileTO.getGroupId()){
+			logger.warn("first login folders task exit  ");
+			return;
 		}
-		if(StringUtils.isNotBlank(fileParentId)){
+		
+		if( moveFileTO.getGroupId() !=null ){
+			FOLDER parent = moveFileTO.getParents().get(0);
+			switch (parent) {
+			case Attachments:
+				fileParentId =  verifyPublicGroupFolderId(moveFileTO);
+				break;
+			case Library:
+				fileParentId =  verifyLibraryGroupFolderId(moveFileTO);
+				break;
+			case Task_Submission:	
+				fileParentId =  verifyTaskSubmissionGroupFolderId(moveFileTO);
+				break;
+			default:
+				throw new ServiceException("first parent error in moveFileTO.getParents() : " + parent);
+			}
+		}
+		
+		if(StringUtils.isBlank(fileParentId)){
+			logger.warn("fileParentId is null so exit without moving ");
+		}else{
 			Group group = CacheUtils.getGroup(moveFileTO.getGroupId());
 			List<FOLDER> parentsList = moveFileTO.getParents();
 			for(FOLDER parent : parentsList){
@@ -893,14 +919,13 @@ public class GoogleDriveService {
 					case Schedule:
 						fileParentId = group.getScheduleFolderId();
 						break;
+					case Assignment:
+						fileParentId = group.getAssignmentFolderId();
+						break;
 					
 					}
-				}else if(parentsList.contains(FOLDER.Task_Submission)){
-					AppUser taskCreator  = CacheUtils.getAppUser(moveFileTO.getFileOwner());
-					fileParentId =  taskCreator.getTaskSubmissionFolderId();
 				}
 			}
-			
 			if(StringUtils.isNotBlank(fileParentId)){
 				for(String id : moveFileTO.getFileIds()){
 					moveFile(id, fileParentId, moveFileTO.getUser());
@@ -910,7 +935,98 @@ public class GoogleDriveService {
 		logger.info("exit moveFile");
 	}
 	
-	private String verifyPublicGroupFolderId(Long groupId, AppUser memberUser) {
+	private String verifyTaskSubmissionGroupFolderId(MoveFileTO moveFileTO) {
+		logger.info("start verifyTaskSubmissionGroupFolderId");
+		AppUser user = moveFileTO.getUser();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		Post task = moveFileTO.getPost();
+		PostDAO postDAO = new PostDAO(em);
+		if (null == task) {
+			throw new ServiceException("task cannot be null for task submission");
+		}
+		Group group = CacheUtils.getGroup(task.getGroupId());
+		String fileId = null;
+		if (null == group) {
+			throw new ServiceException("null group , groupId : " + task.getGroupId() + " , group ; " + group);
+		}
+
+		fileId = task.getGoogleDriveFolderId();
+		GoogleDriveFile taskSubmissionFolder = StringUtils.isBlank(fileId) ? null : getFileFields(fileId, null, user);
+		if (null == taskSubmissionFolder) {
+			GroupMemberDAO groupMemberDAO = new GroupMemberDAO(em);
+			GroupMember member = groupMemberDAO.fetchGroupMemberByEmail(moveFileTO.getGroupId(), user.getEmail());
+			if (null == member) {
+				throw new ServiceException(user.getEmail() + " is not member of group id :  " + moveFileTO.getGroupId());
+			}
+			String groupTaskSubmissionFolderId = member.getTaskSubmissionFolderId();
+			GoogleDriveFile groupTaskSubmissionFolder = StringUtils.isBlank(groupTaskSubmissionFolderId) ? null : getFileFields(groupTaskSubmissionFolderId, null, user);
+			if (null == groupTaskSubmissionFolder) {
+				groupTaskSubmissionFolder = createNewFile(group.getName(), GoogleFileTypes.FOLDER, user);
+				if (null == groupTaskSubmissionFolder) {
+					throw new ServiceException("cannot make " + group.getName() + " groupTaskSubmission  folder for : " + user.getEmail());
+				}
+				groupTaskSubmissionFolderId = groupTaskSubmissionFolder.getId();
+				moveFile(groupTaskSubmissionFolderId, user.getTaskSubmissionFolderId(), user);
+				member.setTaskSubmissionFolderId(groupTaskSubmissionFolderId);
+				groupMemberDAO.upsert(member);
+			}
+
+			taskSubmissionFolder = createNewFile(task.getTitle(), GoogleFileTypes.FOLDER, user);
+			if (null == taskSubmissionFolder) {
+
+				throw new ServiceException("cannot make " + task.getTitle() + " library folder for : " + user.getEmail());
+			}
+			fileId = taskSubmissionFolder.getId();
+			moveFile(fileId, groupTaskSubmissionFolderId, user);
+			Post db = postDAO.get(task.getId());
+			db.setGoogleDriveFolderId(fileId);
+			postDAO.upsert(db);
+		}
+		if (em.isOpen()) {
+			em.close();
+		}
+		logger.info("exit verifyTaskSubmissionGroupFolderId, fileId : " + fileId);
+		return fileId;
+	}
+	
+	private String verifyLibraryGroupFolderId(MoveFileTO moveFileTO) {
+		logger.info("start verifyLibraryGroupFolderId");
+		AppUser user = moveFileTO.getUser();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		GroupMemberDAO groupMemberDAO = new GroupMemberDAO(em);
+		Group group = CacheUtils.getGroup(moveFileTO.getGroupId());
+		String fileId = null;
+		if (null == group) {
+			throw new ServiceException("null group , groupId : " + moveFileTO.getGroupId() + " , group ; " + group);
+		}
+		GroupMember member = groupMemberDAO.fetchGroupMemberByEmail(moveFileTO.getGroupId(), user.getEmail());
+		if(null == member){
+			throw new ServiceException( user.getEmail() + " is not member of group id :  " + moveFileTO.getGroupId());
+		}
+		fileId = member.getLibraryFolderId();
+		GoogleDriveFile libraryFolder = StringUtils.isBlank(fileId) ? null : getFileFields(fileId, null, user);
+		if (null == libraryFolder) {
+			libraryFolder = createNewFile(group.getName(), GoogleFileTypes.FOLDER, user);
+			if (null == libraryFolder) {
+				logger.error("cannot make " + group.getName() + " library folder for : " + user.getEmail());
+			} 
+			fileId = libraryFolder.getId();
+			moveFile(fileId, user.getGoogleDriveLibraryFolderId(), user);
+			member.setLibraryFolderId(fileId);
+			groupMemberDAO.upsert(member);
+			
+		}
+		if(em.isOpen()){
+			em.close();
+		}
+		logger.info("exit verifyLibraryGroupFolderId, fileId : " + fileId);
+		return fileId;
+	}
+
+	private String verifyPublicGroupFolderId(MoveFileTO moveFileTO ) {
+		logger.info("start verifyPublicGroupFolderId");
+		AppUser memberUser = moveFileTO.getUser();
+		Long groupId = moveFileTO.getGroupId();
 		Group group = CacheUtils.getGroup(groupId);
 		String fileId = null;
 		if (null == group) {
@@ -921,7 +1037,7 @@ public class GoogleDriveService {
 			Group db = null;
 			AppUser user = CacheUtils.getAppUser(group.getCreatedBy());
 			if (null == user) {
-				throw new ServiceException("groupId : " + groupId + " , group.getCreatedBy() :  " + group.getCreatedBy() + " , user : " + user);
+				throw new ServiceException("null group , groupId : " + groupId + " , group.getCreatedBy() :  " + group.getCreatedBy() + " , user : " + user);
 			}
 			fileId = group.getFolderId();
 			GoogleDriveFile file;
@@ -934,7 +1050,7 @@ public class GoogleDriveService {
 			if (createFolder) {
 				file = createNewFile(group.getName(), GoogleFileTypes.FOLDER, user);
 				if (null == file) {
-					logger.error("cannot make " + group.getName() + " folder for : " + user.getEmail());
+					logger.error("cannot make " + group.getName() + " attachment folder for : " + user.getEmail());
 				} else {
 					fileId = file.getId();
 					updatePermission(fileId, null, Constants.READER, Constants.ANYONE, "", true, false, user);
@@ -984,9 +1100,13 @@ public class GoogleDriveService {
 				groupService.upsert(db);
 
 				if (!memberUser.getEmail().equals(user.getEmail())) {
-					updatePermission(fileId, null, Constants.WRITER, Constants.USER, memberUser.getEmail(), false, false, user);
+					GoogleFilePermission permission = updatePermission(fileId, null, Constants.WRITER, Constants.USER, memberUser.getEmail(), false, false, user);
 					if (StringUtils.isNotBlank(memberUser.getRefreshTokenAccountEmail()) && !memberUser.getRefreshTokenAccountEmail().equals(memberUser.getEmail())) {
-						updatePermission(fileId, null, Constants.WRITER, Constants.USER, memberUser.getRefreshTokenAccountEmail(), false, false, user);
+						permission = updatePermission(fileId, null, Constants.WRITER, Constants.USER, memberUser.getRefreshTokenAccountEmail(), false, false, user);
+					}
+					
+					if(null !=permission && StringUtils.isNotBlank(memberUser.getGoogleDriveAttachmentsFolderId())){
+						moveFile(fileId, memberUser.getGoogleDriveAttachmentsFolderId(), memberUser);
 					}
 				}
 			}
@@ -995,10 +1115,12 @@ public class GoogleDriveService {
 				em.close();
 			}
 		}
+		logger.info("exit verifyPublicGroupFolderId, fileId : " + fileId);
 		return fileId;
 	}
 
 	private String verifyUserFolders(FOLDER folder, AppUser user) {
+		logger.info("start verifyUserFolders, folder: " + folder + " , email : " + user.getEmail());
 		String fileId = null;
 		if (null != folder && null != user) {
 			boolean createFolder = true;
@@ -1032,7 +1154,7 @@ public class GoogleDriveService {
 			if (createFolder) {
 				file = createNewFile(folder.toString(), GoogleFileTypes.FOLDER, user);
 				if (null == file) {
-					logger.error("cannot make " + folder.toString() + " folder for : " + user.getEmail());
+					throw new ServiceException("cannot make " + folder.toString() + " folder for : " + user.getEmail());
 				} else {
 					fileId = file.getId();
 					EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
@@ -1079,6 +1201,7 @@ public class GoogleDriveService {
 			}
 
 		}
+		logger.info("exit verifyUserFolders, fileId : " + fileId);
 		return fileId;
 	}
 

@@ -66,6 +66,7 @@ export default Ember.Route.extend({
 	        	   
 	        });
         }
+        $.event.trigger( "sidebarUpdated");
     },
 
 

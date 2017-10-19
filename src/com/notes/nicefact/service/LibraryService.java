@@ -1,7 +1,6 @@
 package com.notes.nicefact.service;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.persistence.EntityManager;
 
@@ -11,7 +10,9 @@ import com.notes.nicefact.content.AllSchoolError;
 import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.PostFile;
+import com.notes.nicefact.service.GoogleDriveService.FOLDER;
 import com.notes.nicefact.to.GoogleDriveFile;
+import com.notes.nicefact.to.MoveFileTO;
 
 public class LibraryService {
 	private final static Logger logger = Logger.getLogger(LibraryService.class.getName());
@@ -23,6 +24,7 @@ public class LibraryService {
 	}
 
 	public GoogleDriveFile addToLibrary(String serverName, AppUser user) throws IOException, AllSchoolException {
+		logger.info("logger start");
 		GoogleDriveFile driveFile = null;
 		GoogleDriveService driveService = GoogleDriveService.getInstance();
 		PostFile postFile = postService.getByServerName(serverName);
@@ -32,10 +34,12 @@ public class LibraryService {
 		byte[] bytes = driveService.downloadFile(postFile,user);
 		if(bytes!=null){
 			driveFile = driveService.uploadInputStreamFile(postFile,user,bytes);
+			MoveFileTO moveFileTO =  MoveFileTO.getInstances().addFileIds(driveFile.getId()).setFileOwner(user.getEmail()).setGroupId(postFile.getPost().getGroupId()).addParents( FOLDER.Library).setUser(user);
+			driveService.moveFile(moveFileTO);
 		}else{
 			throw new AllSchoolException(AllSchoolError.FILE_NOT_AVAILABLE_CODE,AllSchoolError.FILE_NOT_AVAILABLE_MESSAGE); 
 		}
-		
+		logger.info("logger exit");
 		return driveFile;
 		
 	}

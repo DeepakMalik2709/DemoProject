@@ -102,13 +102,13 @@ public class BackendTaskService extends CommonService<BackendTask> {
 	}
 
 
-/*	public void createGoogleDriveFolderForUserTask(AppUser user) {
+	public void createGoogleDriveFolderForUserTask(AppUser user) {
 		BackendTask task = new BackendTask();
 		task.setPath("user/createGoogleDriveFolder");
 		task.addToParamsMap("email", user.getEmail());
 		saveAndTrigger(task);
 
-	}*/
+	}
 
 	public void postCommentedTask(Post post, PostComment comment) {
 		BackendTask task = new BackendTask();
