@@ -136,7 +136,7 @@ public class AppUser extends CommonEntity {
 	
 	String taskSubmissionFolderId;
 	String tutorialFolderId;
-	
+	String scheduleFolderId;
 	@Basic
 	private Date googleDriveMsgDate;
 
@@ -200,6 +200,13 @@ public class AppUser extends CommonEntity {
 		return map;
 	}
 
+	public String getScheduleFolderId() {
+		return scheduleFolderId;
+	}
+
+	public void setScheduleFolderId(String scheduleFolderId) {
+		this.scheduleFolderId = scheduleFolderId;
+	}
 	public Set<AUTHORIZED_SCOPES> getScopes() {
 		if(null == scopes){
 			scopes = new HashSet<>();

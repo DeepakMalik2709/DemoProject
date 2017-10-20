@@ -91,7 +91,7 @@ public class Group extends CommonEntity {
 
 	String taskFolderId;
 	String postFolderId;
-	String scheduleFolderId;
+	
 	String assignmentFolderId;
 	
 	
@@ -121,13 +121,7 @@ public class Group extends CommonEntity {
 		this.postFolderId = postFolderId;
 	}
 
-	public String getScheduleFolderId() {
-		return scheduleFolderId;
-	}
 
-	public void setScheduleFolderId(String scheduleFolderId) {
-		this.scheduleFolderId = scheduleFolderId;
-	}
 
 	public Set<GroupMember> getMembers() {
 		return members;

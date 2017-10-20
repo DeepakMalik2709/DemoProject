@@ -941,19 +941,17 @@ public class SecureController extends CommonController {
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
+			AppUser user = CurrentContext.getAppUser();
 			PostService postService = new PostService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
-			List<Object> feed = new ArrayList<>();
-			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
-			feed.addAll(postTos);
+			List<PostTO> postTos = postService.fetchMyPosts(searchTO, user);
 			try {
 				com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 				// List the next 10 events from the primary calendar.
 				if (service != null) {
 					Events events = service.events().list("primary").execute();
 					List<Event> items = events.getItems();
-					AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 					if (items.size() > 0) {
 						for (Event event : items) {
 							PostTO postto = new PostTO(event, user);
@@ -967,12 +965,11 @@ public class SecureController extends CommonController {
 				logger.error(e.getMessage());
 			}
 			Collections.sort(postTos, new CreatedDateComparator());
-			feed.addAll(postTos);
-			if (feed.isEmpty()) {
+			if (postTos.isEmpty()) {
 				json.put(Constants.CODE, Constants.NO_RESULT);
 			} else {
 
-				json.put(Constants.DATA_ITEMS, feed);
+				json.put(Constants.DATA_ITEMS, postTos);
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 				json.put(Constants.CODE, Constants.RESPONSE_OK);
 				json.put(Constants.TOTAL, postTos.size());
@@ -980,7 +977,6 @@ public class SecureController extends CommonController {
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
 			json.put(Constants.MESSAGE, e.getMessage());
 		} finally {

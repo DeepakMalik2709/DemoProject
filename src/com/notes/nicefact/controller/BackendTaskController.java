@@ -927,7 +927,7 @@ public class BackendTaskController extends CommonController {
 			GoogleDriveService googleDriveService = GoogleDriveService.getInstance();
 			AppUser user = appUserService.getAppUserByEmail(email);
 			if (StringUtils.isNotBlank(user.getRefreshToken())) {
-				MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(Constants.FIRST_LOGIN_TEST_GROUP).addParents( FOLDER.Attachments, FOLDER.Attachments, FOLDER.Library, FOLDER.Task_Submission).setUser(user);
+				MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(Constants.FIRST_LOGIN_TEST_GROUP).addParents( FOLDER.Attachments,  FOLDER.Library, FOLDER.Task_Submission).setUser(user);
 				googleDriveService.moveFile(moveFileTO);
 			}
 		} catch (Exception e) {

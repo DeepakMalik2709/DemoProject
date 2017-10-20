@@ -33,7 +33,7 @@ public class ServiceFilter implements Filter {
 	}
 
 	/*filter will directly forward requests for urls matching these resources*/
-	private String[] skipResources = { "/assets/" , "/img/" , "/css/" , "/fonts/" };
+	private String[] skipResources = { "/assets/" , "/img/" , "/css/" , "/rest/public/","/fonts/" };
 
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 
@@ -41,7 +41,7 @@ public class ServiceFilter implements Filter {
 		HttpServletRequest request = ((HttpServletRequest) req);
 		HttpServletResponse response = ((HttpServletResponse) resp);
 		String url = request.getRequestURI();
-		if (StringUtils.indexOfAny(url, skipResources) >= 0) {
+		if (StringUtils.indexOfAny(url, skipResources) >= 0 || "/".equals(url)) {
 			chain.doFilter(request, response);
 		} else {
 			CommonContext commonContext = (CommonContext) request.getSession().getAttribute(Constants.SESSION_KEY_COMMON_CONTEXT);
@@ -53,7 +53,7 @@ public class ServiceFilter implements Filter {
 				request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
 			}
 
-			if (null == user && (request.getRequestURI().contains("/secure"))) {
+			if (null == user && (url.contains("/secure"))) {
 				if (request.getRequestURI().contains("/rest")) {
 					Map<String, Object> json = new HashMap<>();
 					json.put(Constants.CODE, 401);
@@ -74,6 +74,13 @@ public class ServiceFilter implements Filter {
 				if (null == commonContext) {
 					commonContext = new CommonContext();
 					request.getSession().setAttribute(Constants.SESSION_KEY_COMMON_CONTEXT, commonContext);
+				}
+				if(user!=null && StringUtils.isNotBlank(user.getRefreshToken()) && StringUtils.isBlank(user.getGoogleDriveLibraryFolderId())){
+					AppUser updatedUser = CacheUtils.getAppUser(user.getEmail());
+					if(StringUtils.isNotBlank(updatedUser.getGoogleDriveAttachmentsFolderId())){
+						user = updatedUser;
+						request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, updatedUser);
+					}
 				}
 				try {
 					CurrentContext.set(commonContext, request.getSession(),  user);

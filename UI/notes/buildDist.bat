@@ -1,0 +1,1 @@
+ember build --environment=production
