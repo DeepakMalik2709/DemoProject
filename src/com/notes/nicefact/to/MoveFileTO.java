@@ -36,7 +36,7 @@ public class MoveFileTO {
 		for (String id : fileIds) {
 			this.fileIds.add(id);
 		}
-		return instance;
+		return this;
 	}
 
 	public String getFileOwner() {
@@ -45,7 +45,7 @@ public class MoveFileTO {
 
 	public MoveFileTO setFileOwner(String fileOwner) {
 		this.fileOwner = fileOwner;
-		return instance;
+		return this;
 	}
 
 	public Long getGroupId() {
@@ -54,7 +54,7 @@ public class MoveFileTO {
 
 	public MoveFileTO setGroupId(Long groupId) {
 		this.groupId = groupId;
-		return instance;
+		return this;
 	}
 	
 	public AppUser getUser() {
@@ -63,7 +63,7 @@ public class MoveFileTO {
 
 	public MoveFileTO setUser(AppUser appuser) {
 		this.user = appuser;
-		return instance;
+		return this;
 	}
 
 	public List<FOLDER> getParents() {
@@ -74,7 +74,7 @@ public class MoveFileTO {
 		for (FOLDER folder : parents) {
 			this.parents.add(folder);
 		}
-		return instance;
+		return this;
 	}
 
 	public Post getPost() {
@@ -83,13 +83,12 @@ public class MoveFileTO {
 
 	public MoveFileTO setPost(Post post) {
 		this.post = post;
-		return instance;
+		return this;
 	}
 
-	private static MoveFileTO instance ; 
 	public static MoveFileTO getInstances(){
-		instance = new MoveFileTO();
-		return instance;
+		MoveFileTO x = new MoveFileTO();
+		return x;
 	}
 
 	@Override
