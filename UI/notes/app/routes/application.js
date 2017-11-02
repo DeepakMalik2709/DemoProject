@@ -29,12 +29,38 @@ export default Ember.Route.extend({
     			 }), 2000);
 
     }),
+    showAddInstituteMessage : _.once(function(){
+    	var this1 = this;
+    	setTimeout((function() {
+ 			if(confirm("Please add your institute to AllSchool to help connect with your peers.")){
+ 				this1.transitionTo('profile');
+ 			}
+			 }), 2000);
+
+}),
     setupController: function(controller, model) {
         this._super(controller, model);
         controller.set("isLoggedIn", Ember.computed.notEmpty("model"));
         controller.set("showNotifications", false);
         controller.set("isSearchButtonDisabled", Ember.computed.empty("searchTerm"));
         if(model){
+        	if(model.get('institutes').length <= 0){
+	        	var showAddInstituteMessage = false;
+	        	var addInstituteMsgDate = model.get('loginUser.addInstituteMsgDate');
+	    		if(addInstituteMsgDate){
+        			model.set('loginUser.addInstituteMsgDate', null);
+        			var diff = new Date().getTime() - addInstituteMsgDate ;
+        			if(diff > (1*24*60*60*1000)){
+        				showAddInstituteMessage = true;
+        			}
+        		}else{
+        			showAddInstituteMessage = true;
+        		}
+	        	
+	    		if(showAddInstituteMessage){
+	    			this.showAddInstituteMessage();
+	    		}
+	        }
         	if(!model.get('loginUser.refreshTokenAccountEmail')){
         		var showGoogleDriveMsgDate = false;
         		var googleDriveMsgDate = model.get('loginUser.googleDriveMsgDate');
@@ -47,7 +73,6 @@ export default Ember.Route.extend({
         		}else{
         			showGoogleDriveMsgDate = true;
         		}
-        		
         		if(showGoogleDriveMsgDate){
         			this.showGooglePermissionMessage();
         		}

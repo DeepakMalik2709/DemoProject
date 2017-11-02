@@ -191,6 +191,21 @@ public class MailService {
 		
 	}
 	
+	public void sendInstituteAddNotificationnEmail(  Notification notification, NotificationRecipient recipient) {
+		String templateName = getTemplateName(recipient);
+			Template t = velocityEngine.getTemplate(Utils.getTemplateFilePath(templateName), Constants.UTF_8);
+			VelocityContext context = getCommonVelocityContext();
+			context.put("notification", notification);
+			StringWriter writer = new StringWriter();
+			t.merge(context, writer);
+			String subject = getNotificationSubject(recipient, notification);
+			List<String> to = new ArrayList<String>();
+			to.add(recipient.getEmail());
+			sendMessage(subject, writer, to);
+			logger.info("\n" + writer);
+		
+	}
+	
 	public void sendPostNotificationEmail(Post post , AbstractComment comment,  Notification notification, NotificationRecipient recipient) {
 		String templateName = getTemplateName(recipient);
 		if (null == templateName) {

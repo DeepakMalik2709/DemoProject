@@ -38,6 +38,8 @@ import com.notes.nicefact.entity.BackendTask.BackendTaskStatus;
 import com.notes.nicefact.entity.CommentRecipient;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
+import com.notes.nicefact.entity.Institute;
+import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.entity.Notification;
 import com.notes.nicefact.entity.NotificationRecipient;
 import com.notes.nicefact.entity.Post;
@@ -55,8 +57,8 @@ import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
 import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.service.GoogleDriveService.FOLDER;
-import com.notes.nicefact.service.GoogleDriveService.GoogleFileTypes;
 import com.notes.nicefact.service.GroupService;
+import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.TaskService;
@@ -64,6 +66,7 @@ import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GoogleDriveFile;
 import com.notes.nicefact.to.MoveFileTO;
+import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
@@ -719,6 +722,13 @@ public class BackendTaskController extends CommonController {
 
 						}
 					}
+				}else if (null != notification.getInstituteId()) {
+					for (NotificationRecipient recipient : notification.getRecipients()) {
+						if (recipient.getSendEmail() && Utils.isValidEmailAddress(recipient.getEmail())) {
+							mailService.sendInstituteAddNotificationnEmail(notification, recipient);
+
+						}
+					}
 				}
 
 			}
@@ -1248,4 +1258,85 @@ public class BackendTaskController extends CommonController {
 		logger.info("exit afterTaskSubmissionSave");
 		renderResponseRaw(true, response);
 	}
+	
+	@POST
+	@Path("institute/afterSave")
+	public void institutePostSaveTask(@QueryParam("instituteId") Long instituteId, @Context HttpServletResponse response)  {
+		logger.info("start institutePostSaveTask, groupId : " + instituteId);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+
+			InstituteService instituteService = new InstituteService(em);
+			NotificationService notificationService = new NotificationService(em);
+			Institute institute = instituteService.get(instituteId);
+			AppUser notificationSender = null;
+
+			AppUser user = null;
+			if (null != institute) {
+				SearchTO searchTO = new SearchTO();
+				searchTO.setFirst(0).setLimit(200);
+				List<InstituteMember> members = null;
+				Set<String> recipientEmailSet = new HashSet<>();
+				do {
+
+					members = instituteService.getMembers(instituteId, searchTO);
+					for (InstituteMember member : members) {
+						if (!member.getIsNotificationSent()) {
+							if (null == notificationSender) {
+								notificationSender = CacheUtils.getAppUser(member.getCreatedBy());
+							}
+							recipientEmailSet.add(member.getEmail());
+						}
+					}
+				} while (!members.isEmpty());
+				/* avoid sending mail to group creator */
+				recipientEmailSet.remove(institute.getCreatedBy());
+
+				if (!recipientEmailSet.isEmpty()) {
+					Notification notification = new Notification(notificationSender);
+					notification.setInstituteId(institute.getId());
+					notification.setGroupName(institute.getName());
+					notification.setTitle(institute.getName());
+					notification.setType(NotificationType.INSTITUTE);
+					notificationService.upsert(notification);
+					NotificationRecipient notificationRecipient;
+					for (String email : recipientEmailSet) {
+						user = CacheUtils.getAppUser(email);
+						if (user == null) {
+							notificationRecipient = new NotificationRecipient(email);
+						} else {
+							notificationRecipient = new NotificationRecipient(user);
+							notificationRecipient.setSendEmail(user.getSendGroupPostMentionEmail());
+						}
+						notificationRecipient.setAction(NotificationAction.INSTITUTE_ADDED);
+						notificationRecipient.setNotification(notification);
+						notification.getRecipients().add(notificationRecipient);
+						notificationService.upsertRecipient(notificationRecipient);
+					}
+					notificationService.upsert(notification);
+
+					/* update flag in group memeber */
+					for (InstituteMember member : members) {
+						if (!member.getIsNotificationSent()) {
+							member.setIsNotificationSent(true);
+							instituteService.updateMember(member);
+						}
+					}
+
+					BackendTaskService backendTaskService = new BackendTaskService(em);
+					backendTaskService.createSendNotificationMailsTask(notification);
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+
+		logger.info("exit institutePostSaveTask");
+		renderResponseRaw(true, response);
+	}
+
 }

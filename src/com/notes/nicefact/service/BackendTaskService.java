@@ -187,4 +187,11 @@ public class BackendTaskService extends CommonService<BackendTask> {
 		saveAndTrigger(task);
 		
 	}
+
+	public void createInstituteAfterSaveTask(Long instituteId) {
+		BackendTask task = new BackendTask();
+		task.setPath("institute/afterSave");
+		task.addToParamsMap("instituteId", instituteId);
+		saveAndTrigger(task);
+	}
 }

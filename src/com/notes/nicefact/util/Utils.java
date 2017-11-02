@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.MultipartStream;
@@ -56,6 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
@@ -666,6 +668,10 @@ public class Utils {
 	
 	public static String getTaskFolderPath(Post task) {	
 		return AppProperties.getInstance().getGroupUploadsFolder() + task.getGroupId() +  File.separator + task.getId();
+	}
+
+	public static List<Institute> getInstitutesFromSession(HttpSession session) {
+		return (List<Institute>) session.getAttribute(Constants.SESSION_INSTITUTES);
 	}
 
 }

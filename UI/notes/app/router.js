@@ -25,8 +25,13 @@ Router.map(function() {
         this.route('task.edit',{path : '/task/edit/:taskId'});
       });
   this.route('tag', function() {
-      this.route('view',{path : '/view'});
+      this.route('view',{path : '/:groupId'});
        this.route('edit',{path : '/edit/:tagId'});
+        this.route('create',{path : '/create'});
+      });
+  this.route('institute', function() {
+      this.route('view',{path : '/:instituteId'});
+       this.route('edit',{path : '/:instituteId/edit'});
         this.route('create',{path : '/create'});
       });
   this.route('calendar');

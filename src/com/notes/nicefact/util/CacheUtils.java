@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.GroupService;
@@ -162,6 +163,17 @@ public class CacheUtils {
 			group.getMembers().size();
 			group.getMemberGroupsIds().size();
 			String cacheKey = generateGroupKey(group.getId());
+			putInCache(cacheKey, group);
+		}
+	}
+	
+	private static String generateInstituteKey(Long id) {
+		return "Institute_" + id;
+	}
+	
+	public static void addInstituteToCache(Institute group ){
+		if (null!= group) {
+			String cacheKey = generateInstituteKey(group.getId());
 			putInCache(cacheKey, group);
 		}
 	}

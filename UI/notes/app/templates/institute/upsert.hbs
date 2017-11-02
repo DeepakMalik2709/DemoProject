@@ -1,0 +1,17 @@
+<section class="content-header">
+    <h1>
+        {{pageTitle}}
+       
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">{{pageTitle}}</li>
+    </ol>
+</section>
+<section class="content">
+	<div class="row">  
+	  <div class="col-md-6">
+	    {{institute-item-form item=model buttonLabel=buttonLabel saveInstitute="saveInstitute" cancelClicked="cancelClicked"}}
+	  </div>
+	</div>
+</section>

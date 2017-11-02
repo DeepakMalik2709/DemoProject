@@ -2,28 +2,15 @@ import DS from 'ember-data';
 import ajaxMixin from '../mixins/ajax';
 
 export default DS.Adapter.extend(ajaxMixin ,{
-	 languages : [{id :  "ENGLISH", label : "English"} ,{id: "HINDI", label : "Hindi" }],
 	 findRecord: function(store, type, id, snapshot) {
 
 		    return new Ember.RSVP.Promise((resolve, reject) =>{
-		      this.doGet(`/rest/secure/post/${id}`).then((data)=> {
+		      this.doGet(`/rest/secure/institute/${id}`).then((data)=> {
 		    	  if(data.code ==0){
 		    		  var record = data.item;
-		    		  record.languagesUI = [];
-		    		  if(record.languages && record.languages.length){
-			    		  for(var i =0; i < record.languages.length; i++){
-			    			  var thisLang = record.languages[i];
-			    			  for(var k =0; k< this.languages.length; k++){
-			    				  var iterLang = this.languages[k];
-			    				  if(iterLang.id == thisLang){
-			    					  record.languagesUI.push(iterLang);
-			    				  }
-			    			  }
-			    		  }
-		    		  }
 		    		  var newJson = {
 		    				  id: record.id,
-		    			        type: 'post',
+		    			        type: 'institute',
 		    			        attributes : record,
 		    		  }
 		    		  resolve(record);
@@ -46,7 +33,7 @@ export default DS.Adapter.extend(ajaxMixin ,{
 		  upsert :  function(store, type, snapshot) {
 			    var json = this.serialize(snapshot, { includeId: true });
 			    return new Ember.RSVP.Promise((resolve, reject) =>{
-			    	var url = '/rest/secure/group/post';
+			    	var url = '/rest/secure/institute/upsert';
 			    	this.doPost(url , json).then(function(data) {
 			    	  Ember.run(null, resolve, data.item);
 			      }, function(jqXHR) {
@@ -58,9 +45,8 @@ export default DS.Adapter.extend(ajaxMixin ,{
 		  
 		  deleteRecord: function(store, type, snapshot) {
 			    var id = snapshot.id;
-			    var post = this.serialize(snapshot, { includeId: true });
 			    return new Ember.RSVP.Promise((resolve, reject) =>{
-			    	var url = "/rest/secure/group/" + post.groupId + "/post/" + post.id;
+			    	var url = `/rest/secure/institute/${id}`;
 			    	this.doDelete(url ).then(function(data) {
 			        Ember.run(null, resolve, data.item);
 			      }, function(jqXHR) {
@@ -69,13 +55,12 @@ export default DS.Adapter.extend(ajaxMixin ,{
 			      });
 			    });
 			  },
-			  saveTask :  function( snapshot) {
-				    var json = this.serialize(snapshot, { includeId: true });
+			  searchByName :  function( name) {
 				    return new Ember.RSVP.Promise((resolve, reject) =>{
-				    	var url = '/rest/secure/group/task';
-				    	this.doPost(url , json).then(function(data) {
+				    	var url = '/rest/secure/institute/search?q=' + name;
+				    	this.doGet(url ).then(function(data) {
 				    		if(data.code == 0){
-				    			Ember.run(null, resolve, data.items[0]);
+				    			Ember.run(null, resolve, data.items);
 				    		}else{
 				    			  Ember.run(null, reject, jqXHR);
 				    		}

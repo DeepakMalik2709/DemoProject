@@ -1,7 +1,12 @@
 package com.notes.nicefact.to;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.GroupMember;
+import com.notes.nicefact.entity.InstituteMember;
+import com.notes.nicefact.enums.UserPosition;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GroupMemberTO {
@@ -14,11 +19,11 @@ public class GroupMemberTO {
 	
 	boolean isBlocked;
 	
-	String position;
-	
 	String department;
 	
 	String organization;
+	
+	private Set<UserPosition> positions = new HashSet<>();
 	
 	long id ;
 
@@ -38,13 +43,6 @@ public class GroupMemberTO {
 		this.name = name;
 	}
 
-	public String getPosition() {
-		return position;
-	}
-
-	public void setPosition(String position) {
-		this.position = position;
-	}
 
 	public String getDepartment() {
 		return department;
@@ -82,20 +80,18 @@ public class GroupMemberTO {
 		this.email = member.getEmail();
 		this.name = member.getName();
 		this.isAdmin = member.getIsAdmin();
-		this.position = member.getPosition();
 		this.department = member.getDepartment();
 		this.organization = member.getOrganization();
 		this.isBlocked = member.getIsBlocked();
 		this.id = member.getId();
 	}
 
-	public GroupMemberTO(String email, String name, boolean isAdmin, boolean isBlocked, String position, String department, String organization, long id) {
+	public GroupMemberTO(String email, String name, boolean isAdmin, boolean isBlocked,  String department, String organization, long id) {
 		super();
 		this.email = email;
 		this.name = name;
 		this.isAdmin = isAdmin;
 		this.isBlocked = isBlocked;
-		this.position = position;
 		this.department = department;
 		this.organization = organization;
 		this.id = id;
@@ -106,6 +102,18 @@ public class GroupMemberTO {
 		this.email = email;
 	}
 	
+	public GroupMemberTO(InstituteMember member) {
+		super();
+		this.email = member.getEmail();
+		this.name = member.getName();
+		this.isAdmin = member.getIsAdmin();
+		this.department = member.getDepartment();
+		this.organization = member.getOrganization();
+		this.isBlocked = member.getIsBlocked();
+		this.id = member.getId();
+		this.positions = member.getPositions();
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -120,6 +128,14 @@ public class GroupMemberTO {
 
 	public void setAdmin(boolean isAdmin) {
 		this.isAdmin = isAdmin;
+	}
+
+	public Set<UserPosition> getPositions() {
+		return positions;
+	}
+
+	public void setPositions(Set<UserPosition> positions) {
+		this.positions = positions;
 	}
 	
 	

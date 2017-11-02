@@ -37,7 +37,9 @@ public class GroupService extends CommonService<Group> {
 	AppUserService appUserService;
 	private TagDAO tagDao;
 	BackendTaskService backendTaskService;
+	EntityManager em ;
 	public GroupService(EntityManager em) {
+		this.em = em;
 		groupDao = new GroupDAO(em);
 		groupMemberDAO = new GroupMemberDAO(em);
 		appUserService = new AppUserService(em);
@@ -108,7 +110,6 @@ public class GroupService extends CommonService<Group> {
 		}
 		backendTaskService.createSendGroupAddNotificationTask(group.getId());
 		backendTaskService.createUpdateGroupMemberAccessPermissionsTask(group.getId());
-		CacheUtils.addGroupToCache(group);
 		return group;
 	}
 
