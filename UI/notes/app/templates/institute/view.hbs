@@ -25,18 +25,26 @@
      <p class="form-control-static"> {{model.description}}</p>
     </div>
   </div>
+  
+      <div class="form-group" >
+    <label for="inputEmail3" class="col-sm-4 control-label">Background photo</label>
+    <div class="col-sm-8">
+     <p class="form-control-static">   <img src='{{bgImageSrc}}' class="institute-img-preview"></p>
+    </div>
+  </div>
+  
          {{#if model.isAdmin}}
   <div class="form-group" >
      <div class=" col-sm-6 ">
       <button  {{action 'showMembers' model}} class="btn btn-default" >Members</button>
     <button  {{action 'showAddMemberModal' model }} class="btn btn-default" >Add members</button>
-      <button  {{action 'showJoinRequests' model}} class="btn btn-default" >Join Requests</button>
+      <button  {{action 'showJoinRquests' model}} class="btn btn-default" >Join Requests</button>
     </div>
     
    <div class=" col-sm-6 ">
-    {{#link-to 'group.edit' model.id tagName="button" class="btn btn-default"}}Edit
+    {{#link-to 'institute.edit' model.id tagName="button" class="btn btn-default"}}Edit
       {{/link-to}}
-       <button type="button"  data-toggle="modal" {{action 'confirmAndDeleteGroup' model}} class="btn btn-default">Delete</button>
+      <!--  <button type="button"  data-toggle="modal" {{action 'confirmAndDeleteGroup' model}} class="btn btn-default">Delete</button> -->
     </div>
     
   </div>
@@ -107,13 +115,9 @@
         	{{model.name}} : members list <span class="{{if isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
       	</h4>
       	
-      	<ul class="nav nav-tabs">
-  <li class="{{unless model.showGroupMembers 'active' ''}}"><a href="javascript:void(0);" {{action "toggleUserList"}} >Users</a></li>
-  <li  class="{{if model.showGroupMembers 'active' ''}}"><a href="javascript:void(0);" {{action "toggleUserList"}}>Groups</a></li>
-</ul>
       </div>
       <div class="modal-body">
-      	<div class="form-box group-form mtop-15"  class="{{unless model.showGroupMembers 'show' 'hide'}}">
+      	<div class="form-box group-form mtop-15"  >
           <div class="form-group">
             <div class="ol-user-list"> 
             {{#each model.members as |user| }}    	
@@ -123,6 +127,46 @@
                          <button type="button" {{action "deleteMember" user}} class="btn btn-sm btn-default mr-5" ><i class="fa fa-trash" aria-hidden="true"></i>Delete</button>
                          <button type="button" {{action "toggleBlockMember" user}} class="btn btn-sm btn-default mr-5  {{if user.isBlocked 'black-border-1px' ''}}" ><i class="fa fa-ban {{if user.isBlocked 'text-danger'}}" aria-hidden="true"></i>Block</button>
                          <button type="button" {{action "toggleAdminMember" user}} class="btn btn-sm btn-default mr-5 {{if user.isAdmin 'black-border-1px' ''}}"><i class="fa {{if user.isAdmin 'fa-unlock' 'fa-lock'}}" aria-hidden="true"></i>Admin</button>
+                   <span class="{{if user.isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
+                    </div>
+                </div>
+              {{/each}}
+              
+            </div>
+          </div>
+        </div>
+        
+        <!-- user list end -->
+      </div>
+ 	</div>
+ </div>
+</div>
+
+<div class="modal vcenter" id="members-request-modal" tabindex="-1" role="dialog" aria-labelledby="PopUp" data-backdrop="static" >
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content">
+      <div class="modal-header noborder"> 
+      	<a class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></a>
+        <h4 class="modal-title" id="myModalLabel"> 
+        	{{model.name}} : Join requests <span class="{{if isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
+      	</h4>
+      	
+      </div>
+      <div class="modal-body">
+      	<div class="form-box group-form mtop-15"  >
+          <div class="form-group">
+            <div class="ol-user-list"> 
+            {{#each model.joinRequests as |user| }}    	
+                <div class="user-with-email" >
+                    <div class="s-list">
+                        {{user.email}}
+                         <button type="button" {{action "deleteMember" user}} class="btn btn-sm btn-default mr-5" ><i class="fa fa-trash" aria-hidden="true"></i>Delete</button>
+                         <select>
+	                         <option value='STUDENT'>Student</option>
+	                         <option value='TEACHER'>Teacher</option>
+	                         <option value='ADMIN'>Admin</option>
+                         </select>
+                         <button type="button" {{action "toggleAdminMember" user}} class="btn btn-sm btn-default mr-5 {{if user.isAdmin 'black-border-1px' ''}}"><i class="fa {{if user.isAdmin 'fa-unlock' 'fa-lock'}}" aria-hidden="true"></i>Approve</button>
                    <span class="{{if user.isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
                     </div>
                 </div>

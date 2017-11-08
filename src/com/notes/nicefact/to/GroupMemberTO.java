@@ -19,6 +19,8 @@ public class GroupMemberTO {
 	
 	boolean isBlocked;
 	
+	boolean isJoinRequestApproved ;
+	
 	String department;
 	
 	String organization;
@@ -84,24 +86,9 @@ public class GroupMemberTO {
 		this.organization = member.getOrganization();
 		this.isBlocked = member.getIsBlocked();
 		this.id = member.getId();
+		
 	}
 
-	public GroupMemberTO(String email, String name, boolean isAdmin, boolean isBlocked,  String department, String organization, long id) {
-		super();
-		this.email = email;
-		this.name = name;
-		this.isAdmin = isAdmin;
-		this.isBlocked = isBlocked;
-		this.department = department;
-		this.organization = organization;
-		this.id = id;
-	}
-
-	public GroupMemberTO(String email) {
-		super();
-		this.email = email;
-	}
-	
 	public GroupMemberTO(InstituteMember member) {
 		super();
 		this.email = member.getEmail();
@@ -112,6 +99,7 @@ public class GroupMemberTO {
 		this.isBlocked = member.getIsBlocked();
 		this.id = member.getId();
 		this.positions = member.getPositions();
+		this.isJoinRequestApproved = member.getIsJoinRequestApproved();
 	}
 
 	public long getId() {

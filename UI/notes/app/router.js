@@ -30,7 +30,8 @@ Router.map(function() {
         this.route('create',{path : '/create'});
       });
   this.route('institute', function() {
-      this.route('view',{path : '/:instituteId'});
+	  this.route('public',{path : '/:instituteId'});
+      this.route('view',{path : '/:instituteId/view'});
        this.route('edit',{path : '/:instituteId/edit'});
         this.route('create',{path : '/create'});
       });

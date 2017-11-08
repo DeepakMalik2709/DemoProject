@@ -1,15 +1,16 @@
 package com.notes.nicefact.entity;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Basic;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
 import com.notes.nicefact.enums.UserPosition;
-import com.notes.nicefact.to.AppUserTO;
 
 /**
  *  This will be the top most group an organisation can have, or we can call it home page of XYZ institute.
@@ -35,10 +36,16 @@ public class InstituteMember extends CommonEntity {
 
 	Boolean isAdmin = false;
 
-	Boolean isBlocked = false;
+	Boolean isBlocked = true;
 	
 	Boolean isAppUser = true;
+	
+	Boolean isJoinRequestApproved = false;
 
+	String joinRequestApprover ;
+	
+	@Basic
+	Date  joinRequestApproveDate;
 	String department;
 	
 	String organization;
@@ -125,10 +132,38 @@ public class InstituteMember extends CommonEntity {
 		this.isNotificationSent = isNotificationSent;
 	}
 	
+	public Boolean getIsJoinRequestApproved() {
+		if(null == isJoinRequestApproved){
+			isJoinRequestApproved = true;
+		}
+		return isJoinRequestApproved;
+	}
+
+	public void setIsJoinRequestApproved(Boolean isJoinRequestApproved) {
+		this.isJoinRequestApproved = isJoinRequestApproved;
+	}
+
+	public String getJoinRequestApprover() {
+		return joinRequestApprover;
+	}
+
+	public void setJoinRequestApprover(String joinRequestApprover) {
+		this.joinRequestApprover = joinRequestApprover;
+	}
+
+	public Date getJoinRequestApproveDate() {
+		return joinRequestApproveDate;
+	}
+
+	public void setJoinRequestApproveDate(Date joinRequestApproveDate) {
+		this.joinRequestApproveDate = joinRequestApproveDate;
+	}
+
 	public InstituteMember(String email, String name) {
 		super();
 		this.email = email;
 		this.name = name;
+		this.isAppUser = false;
 	}
 
 	public  InstituteMember(AppUser appuser) {
@@ -137,15 +172,9 @@ public class InstituteMember extends CommonEntity {
 		this.name = appuser.getDisplayName();
 		this.department = appuser.getDepartment();
 		this.organization = appuser.getOrganization();
+		this.isAppUser = true;
 	}
 	
-	public  InstituteMember(AppUserTO appuser) {
-		super();
-		this.email = appuser.getEmail();
-		this.name = appuser.getDisplayName();
-		this.department = appuser.getDepartment();
-		this.organization = appuser.getOrganization();
-	}
 	
 	public InstituteMember() {
 		super();

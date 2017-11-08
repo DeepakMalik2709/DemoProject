@@ -1,6 +1,12 @@
 package com.notes.nicefact.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,12 +21,16 @@ import com.notes.nicefact.dao.InstituteMemberDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.InstituteMember;
+import com.notes.nicefact.entity.TaskSubmissionFile;
+import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.exception.UnauthorizedException;
+import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
 import com.notes.nicefact.to.InstituteTO;
 import com.notes.nicefact.to.SearchTO;
+import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CurrentContext;
 import com.notes.nicefact.util.Utils;
@@ -32,12 +42,14 @@ public class InstituteService extends CommonService<Institute> {
 	BackendTaskService backendTaskService;
 	InstituteDAO instituteDAO;
 	InstituteMemberDAO instituteMemberDAO;
+	AppUserService appUserService ;
 	
 	public InstituteService(EntityManager em) {
 		this.em = em;
 		instituteDAO = new InstituteDAO(em);
 		instituteMemberDAO = new InstituteMemberDAO(em);
 		backendTaskService  = new BackendTaskService(em);
+		appUserService = new AppUserService(em);
 	}
 
 	@Override
@@ -149,7 +161,7 @@ public class InstituteService extends CommonService<Institute> {
 	}
 	
 	public List<GroupMemberTO> fetchInstituteMembers(long instituteId, SearchTO searchTO) {
-		List<InstituteMember> members = instituteMemberDAO.fetchByInstituteId(instituteId, searchTO);
+		List<InstituteMember> members = instituteMemberDAO.fetchByInstituteId(instituteId, true,searchTO);
 		List<GroupMemberTO> memberTos = new ArrayList<>();
 		GroupMemberTO memberTO;
 		for (InstituteMember instituteMember : members) {
@@ -159,6 +171,17 @@ public class InstituteService extends CommonService<Institute> {
 		return memberTos;
 	}
 
+	public List<GroupMemberTO> fetchInstituteJoinRequests(long instituteId, SearchTO searchTO) {
+		List<InstituteMember> members = instituteMemberDAO.fetchByInstituteId(instituteId,false, searchTO);
+		List<GroupMemberTO> memberTos = new ArrayList<>();
+		GroupMemberTO memberTO;
+		for (InstituteMember instituteMember : members) {
+			memberTO = new GroupMemberTO(instituteMember);
+			memberTos.add(memberTO);
+		}
+		return memberTos;
+	}
+	
 	public Institute upsert(Institute institute) {
 		Institute db = super.upsert(institute);
 		CacheUtils.addInstituteToCache(db);
@@ -168,29 +191,59 @@ public class InstituteService extends CommonService<Institute> {
 	public Institute upsert(InstituteTO instituteTO, AppUser appUser) {
 		Institute institute = new Institute(instituteTO);
 		if (instituteTO.getId() > 0) {
-			Institute tutorialDB = get(instituteTO.getId());
-			if (tutorialDB.getAdmins().contains(appUser.getEmail())) {
-				tutorialDB.updateProps(instituteTO);
-				upsert(tutorialDB);
-				return tutorialDB;
+			Institute instituteDB = get(instituteTO.getId());
+			if (instituteDB.getAdmins().contains(appUser.getEmail())) {
+				instituteDB.updateProps(instituteTO);
+				institute = upsert(instituteDB);
+				institute = instituteDB;
 			} else {
 				throw new UnauthorizedException();
 			}
 		} else {
-			addMembersToNewInstitute(instituteTO, institute, appUser);
 			upsert(institute);
+			addMembersToNewInstitute(instituteTO, institute, appUser);
 			appUser.getInstituteIds().add(institute.getId());
+			backendTaskService.createInstituteAfterSaveTask(institute.getId());
 		}
-		backendTaskService.createInstituteAfterSaveTask(institute.getId());
+
+		FileTO fileTO = instituteTO.getBgImageFile();
+		if (null != fileTO) {
+			String fileBasePath = Utils.getInstituteFolderPath(institute);
+			try {
+				if (Files.notExists(Paths.get(fileBasePath))) {
+					Files.createDirectories(Paths.get(fileBasePath));
+				}
+				fileBasePath += File.separator;
+				String serverFilePath = fileBasePath + fileTO.getServerName();
+				String tempFilePath = AppProperties.getInstance().getTempUploadsFolder() + fileTO.getServerName();
+				if (Files.exists(Paths.get(tempFilePath))) {
+					Files.move(Paths.get(tempFilePath), Paths.get(serverFilePath), StandardCopyOption.REPLACE_EXISTING);
+					institute.setBgImageId(fileTO.getServerName());
+					institute.setBgImagePath(serverFilePath);
+					institute.setBgImageName(fileTO.getName());
+					upsert(institute);
+				}
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+			}
+
+		}
+
 		return institute;
 	}
 	
-	private void addMembersToNewInstitute(InstituteTO instituteTO, Institute institute, AppUser appUserTO) {
-		InstituteMember member = new InstituteMember(appUserTO);
+	private void addMembersToNewInstitute(InstituteTO instituteTO, Institute institute, AppUser user) {
+		InstituteMember member = new InstituteMember(user);
 		member.setIsAdmin(true);
+		member.setIsJoinRequestApproved(true);
+		member.setIsBlocked(false);
+		member.setJoinRequestApproveDate(new Date());
+		member.setJoinRequestApprover(user.getEmail());
+		member.setInstitute(institute);
+		member.getPositions().add(UserPosition.ADMIN);
 		Set<InstituteMember> allNewMembers = new HashSet<>();
 		allNewMembers.add(member);
-		institute.getAdmins().add(appUserTO.getEmail());
+		institute.getAdmins().add(user.getEmail());
 		if (instituteTO.getMembers() != null) {
 			for (GroupMemberTO memberTO : instituteTO.getMembers()) {
 				if (Utils.isValidEmailAddress(memberTO.getEmail())) {
@@ -201,16 +254,25 @@ public class InstituteService extends CommonService<Institute> {
 					} else {
 						member = new InstituteMember(userHr);
 					}
+					member.setIsJoinRequestApproved(true);
+					member.setIsBlocked(false);
+					member.setJoinRequestApproveDate(new Date());
+					member.setJoinRequestApprover(user.getEmail());
+					member.setInstitute(institute);
 					allNewMembers.add(member);
 				}
 			}
 		}
 		instituteMemberDAO.upsertAll(allNewMembers);
+		
+		AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
+		dbUser.getInstituteIds().add(institute.getId());
+		appUserService.upsert(dbUser);
 	}
 
 
 	public List<InstituteMember> getMembers(Long instituteId, SearchTO searchTO) {
-		return instituteMemberDAO.fetchByInstituteId(instituteId, searchTO);
+		return instituteMemberDAO.fetchByInstituteId(instituteId,true, searchTO);
 	}
 
 	public void updateMember(InstituteMember member) {
@@ -220,5 +282,49 @@ public class InstituteService extends CommonService<Institute> {
 	public List<Institute> searchInstitutes( SearchTO searchTO) {
 		logger.info(" searchInstitutes , searchTO : " + searchTO);
 		return instituteDAO.search(searchTO);
+	}
+
+	public InstituteMember joinInstitute(long instituteId, AppUser user) {
+		InstituteMember member =  instituteMemberDAO.fetchMemberByEmail(instituteId, user.getEmail());
+		if (member == null) {
+			Institute institute = get(instituteId);
+			if(institute == null){
+				throw new ServiceException("Instiute not found for id : " + instituteId);
+			}
+			member = new InstituteMember(user);
+			member.setIsJoinRequestApproved(false);
+			member.setIsBlocked(true);
+			
+			member.setInstitute(institute);
+			instituteMemberDAO.upsert(member);
+			AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
+			dbUser.getJoinRequestInstitutes().add(instituteId);
+			appUserService.upsert(dbUser);
+		}
+		return member;
+	}
+	
+	public InstituteMember approveJoinInstitute(long instituteId, AppUser user) {
+		InstituteMember member =  instituteMemberDAO.fetchMemberByEmail(instituteId, user.getEmail());
+		if (member != null && !member.getIsJoinRequestApproved()) {
+			member.setIsJoinRequestApproved(true);
+			member.setIsBlocked(false);
+			member.setJoinRequestApproveDate(new Date());
+			member.setJoinRequestApprover(user.getEmail());
+			instituteMemberDAO.upsert(member);
+			AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
+			dbUser.getJoinRequestInstitutes().remove(instituteId);
+			dbUser.getInstituteIds().add(instituteId);
+			appUserService.upsert(dbUser);
+		}
+		return member;
+	}
+	
+	public List<InstituteMember> fetchJoinedInstituteMembers(String email) {
+		return instituteMemberDAO.fetchJoinedInstituteMembers(email);
+	}
+
+	public InstituteMember fetchInstituteMember(Long instituteId, String email) {
+		return instituteMemberDAO.fetchMemberByEmail(instituteId, email);
 	}
 }

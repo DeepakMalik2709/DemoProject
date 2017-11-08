@@ -127,6 +127,12 @@ public class AppUser extends CommonEntity {
 	
 	@ElementCollection(fetch = FetchType.EAGER)
 	Set<Long> instituteIds;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<Long> joinRequestGroups;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<Long> joinRequestInstitutes;
 
 	@Basic
 	@Enumerated(EnumType.STRING)
@@ -634,6 +640,28 @@ public class AppUser extends CommonEntity {
 
 	public void setAddInstituteMsgDate(Date addInstituteMsgDate) {
 		this.addInstituteMsgDate = addInstituteMsgDate;
+	}
+
+	public Set<Long> getJoinRequestGroups() {
+		if (null == joinRequestGroups) {
+			this.joinRequestGroups = new HashSet<>();
+		}
+		return joinRequestGroups;
+	}
+
+	public void setJoinRequestGroups(Set<Long> joinRequestGroups) {
+		this.joinRequestGroups = joinRequestGroups;
+	}
+
+	public Set<Long> getJoinRequestInstitutes() {
+		if (null == joinRequestInstitutes) {
+			this.joinRequestInstitutes = new HashSet<>();
+		}
+		return joinRequestInstitutes;
+	}
+
+	public void setJoinRequestInstitutes(Set<Long> joinRequestInstitutes) {
+		this.joinRequestInstitutes = joinRequestInstitutes;
 	}
 
 	@Override

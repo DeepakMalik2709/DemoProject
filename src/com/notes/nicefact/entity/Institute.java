@@ -11,6 +11,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.notes.nicefact.enums.InstituteType;
 import com.notes.nicefact.to.InstituteTO;
 
@@ -42,6 +44,10 @@ public class Institute extends CommonEntity {
 	private Integer noOfAdmins;
 	
 	String bgImageId;
+	
+	String bgImageName;
+	
+	String bgImagePath;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	Set<String> admins = new HashSet<>();
@@ -63,6 +69,11 @@ public class Institute extends CommonEntity {
 		this.name = group.getName();
 		this.description = group.getDescription();
 		this.type = group.getType();
+		if(StringUtils.isBlank(group.getBgImageId() )){
+			this.bgImageId = null;
+			this.bgImageName = null;
+			this.bgImagePath = null;
+		}
 	}
 
 	public String getName() {
@@ -131,4 +142,21 @@ public class Institute extends CommonEntity {
 	public void setBgImageId(String bgImageId) {
 		this.bgImageId = bgImageId;
 	}
+
+	public String getBgImageName() {
+		return bgImageName;
+	}
+
+	public void setBgImageName(String bgImageName) {
+		this.bgImageName = bgImageName;
+	}
+
+	public String getBgImagePath() {
+		return bgImagePath;
+	}
+
+	public void setBgImagePath(String bgImagePath) {
+		this.bgImagePath = bgImagePath;
+	}
+	
 }

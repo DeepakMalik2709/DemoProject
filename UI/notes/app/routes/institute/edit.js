@@ -5,7 +5,7 @@ export default Ember.Route.extend(authenticationMixin,{
 
 
     model(params) {
-        return this.store.findRecord('institute', params.groupId);
+        return this.store.findRecord('institute', params.instituteId);
 
     },
 
@@ -26,7 +26,7 @@ export default Ember.Route.extend(authenticationMixin,{
     		 this.transitionTo('institute.view', group.id);
          },
 
-         saveGroup(group) {
+         saveInstitute(group) {
         		group.set("isSaving", true);
          	group.save().then((resp) => {
          		group.set("isSaving", false);

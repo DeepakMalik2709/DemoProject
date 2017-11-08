@@ -62,18 +62,6 @@ public class InstituteDAO extends CommonDAOImpl<Institute> {
 		return results;
 	}
 
-	public List<Long> getParentInstitutesIds(Long id) {
-		List<Long> results = new ArrayList<>();
-		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select g.id from Institute g join g.memberInstitutesIds m where m= :groupId");
-		query.setParameter("groupId", id);
-		try {
-			results = (List<Long>) query.getResultList();
-		} catch (NoResultException nre) {
-			return new ArrayList<>();
-		}
-		return results;
-	}
 
 	public List<Institute> search(SearchTO searchTO) {
 		List<Institute> results = new ArrayList<>();

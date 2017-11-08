@@ -38,6 +38,10 @@ export default Ember.Route.extend(authenticationMixin, {
         	group.set("isSaving", true);
         	group.save().then((resp) => {
         		group.set("isSaving", false);
+        		this.contextService.fetchContext(function(resp){
+        			Ember.get(resp, "institutes").pushObject(resp);
+        		});
+        		
         		this.transitionTo('institute.view', resp.id);
             });
         },

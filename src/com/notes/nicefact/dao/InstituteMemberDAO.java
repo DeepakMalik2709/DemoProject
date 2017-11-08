@@ -21,11 +21,12 @@ public class InstituteMemberDAO extends CommonDAOImpl<InstituteMember> {
 	}
 	
 
-	public List<InstituteMember> fetchByInstituteId(long instituteId, SearchTO searchTO) {
+	public List<InstituteMember> fetchByInstituteId(long instituteId, boolean isJoined, SearchTO searchTO) {
 		List<InstituteMember> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t from InstituteMember t where  t.institute.id = :instituteId order by t.email");
-		query.setParameter("groupId", instituteId);
+		Query query = pm.createQuery("select t from InstituteMember t where  t.institute.id = :instituteId and t.isJoinRequestApproved = :isJoined order by t.email");
+		query.setParameter("instituteId", instituteId);
+		query.setParameter("isJoined", isJoined);
 		query.setFirstResult(searchTO.getFirst());
 		query.setMaxResults(searchTO.getLimit());
 		try {
@@ -36,10 +37,10 @@ public class InstituteMemberDAO extends CommonDAOImpl<InstituteMember> {
 		return results;
 	}
 	
-	public InstituteMember fetchMemberByEmail(long groupId, String email) {
+	public InstituteMember fetchMemberByEmail(long instituteId, String email) {
 		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t from InstituteMember t where  t.group.id = :groupId and t.email = :email");
-		query.setParameter("groupId", groupId);
+		Query query = pm.createQuery("select t from InstituteMember t where  t.institute.id = :instituteId and t.email = :email");
+		query.setParameter("instituteId", instituteId);
 		query.setParameter("email", email);
 		query.setMaxResults(1);
 		try {
@@ -54,7 +55,7 @@ public class InstituteMemberDAO extends CommonDAOImpl<InstituteMember> {
 	public List<Long> fetchGroupMembersByEmail(String email) {
 		List<Long> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t.group.id from InstituteMember t where  t.email = :email ");
+		Query query = pm.createQuery("select t.institute.id from InstituteMember t where  t.email = :email ");
 		query.setParameter("email", email);
 		try {
 			results = (List<Long>) query.getResultList();
@@ -64,5 +65,18 @@ public class InstituteMemberDAO extends CommonDAOImpl<InstituteMember> {
 		return results;
 	}
 
+
+	public List<InstituteMember> fetchJoinedInstituteMembers(String email) {
+		List<InstituteMember> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from InstituteMember t where  t.email = :email");
+		query.setParameter("email", email);
+		try {
+			results = (List<InstituteMember>) query.getResultList();
+		} catch (NoResultException nre) {
+			logger.warn(nre.getMessage());
+		}
+		return results;
+	}
 
 }

@@ -13,6 +13,21 @@
         </div>
     </div>
     
+         <div class="form-group">
+        <label class="col-sm-2 control-label">Background Photo</label>
+        <div class="col-sm-10">
+		{{#if item.bgImageFile.name	}}
+			{{item.bgImageFile.name}}
+		 <button type="button" class="btn btn-default" {{action 'removePhoto' item}}>Remove Photo</button>
+        {{else if bgImageSrc}}
+        <img src='{{bgImageSrc}}' class="institute-img-preview">
+          <button type="button" class="btn btn-default" {{action 'removePhoto' item}}>Remove Photo</button>
+        {{else }}
+            <input   id="institute-photo-upload-1" onchange={{action "uploadPhoto"}} accept="image/*" type="file" value="Upload Photo"  >
+         {{/if}}   
+        </div>
+    </div>
+    
     
     {{#unless item.id}}
         <div class="form-group ">

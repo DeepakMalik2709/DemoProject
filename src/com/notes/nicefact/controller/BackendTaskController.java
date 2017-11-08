@@ -1278,7 +1278,6 @@ public class BackendTaskController extends CommonController {
 				List<InstituteMember> members = null;
 				Set<String> recipientEmailSet = new HashSet<>();
 				do {
-
 					members = instituteService.getMembers(instituteId, searchTO);
 					for (InstituteMember member : members) {
 						if (!member.getIsNotificationSent()) {
@@ -1288,6 +1287,7 @@ public class BackendTaskController extends CommonController {
 							recipientEmailSet.add(member.getEmail());
 						}
 					}
+					searchTO.setFirst(searchTO.getFirst() + searchTO.getLimit());
 				} while (!members.isEmpty());
 				/* avoid sending mail to group creator */
 				recipientEmailSet.remove(institute.getCreatedBy());

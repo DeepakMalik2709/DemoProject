@@ -84,9 +84,17 @@
         </div>
         <div class="col-sm-10 col-sm-offset-2">
             {{#each model.institutes as |institute|}}
+                <div >
+                {{#nav-link-to 'institute.public' institute.id tagName="a"}}
+    		{{institute.name}} 
+    		{{/nav-link-to}}, Position : 
+{{#each institute.positions as |position|}}
                 <span class="file-tag blue" >
-    		{{institute.name}}
-			    </span>
+    	{{position}}
+    </span>
+    	{{/each}}
+    		
+			    </div>
 			{{/each}}
         
         </div>

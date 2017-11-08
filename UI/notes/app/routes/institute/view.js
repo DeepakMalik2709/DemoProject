@@ -8,13 +8,10 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
     model(params) {
         return this.store.findRecord('institute', params.instituteId);
     },
-/*    afterModel(group, transition) {
-        if (group) {
-        	//this.fetchMembers();
-        }
-      },*/
     hasMoreRecords : true,
     nextPageLink : null,
+    joinRequestNextPageLink : null,
+    hasMoreRequestRecords : true,
     groupService: Ember.inject.service('group'),
     blockQueue : null,
     adminQueue : null,
@@ -31,10 +28,14 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
         this.controller.set("newMembers", []);
          this.set('hasMoreRecords', true);
 	    this.set('nextPageLink', null);
-        this.fetchMembers(model);
+        this.fetchMembers();
+        if(model.get( "bgImagePath")){
+    		var bgImageSrc  = "/a/public/file/preivew?id=" + model.get( "bgImagePath")
+    		 this.controller.set("bgImageSrc",bgImageSrc);
+    	}
     },
 
-    fetchMembers (group){
+    fetchMembers (){
     	var controller = this.get("controller");
     	if(this.hasMoreRecords && !controller.get("isLoading")){
     		
@@ -42,14 +43,14 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
     		controller.set("isLoading" , true);
     		var url = this.nextPageLink;
     		if(!url){
-    			url = "/rest/secure/group/" + group.get("id") + "/members";
+    			url = "/rest/secure/institute/" + model.get("id") + "/members";
     		}
     		this.doGet(url).then((result)=>{
     			controller.set("isLoading" , false);
     			if(result.code ==0){
     				if(result.items){
     					this.addMembersToGroup( result.items);
-    					Ember.set(group, "memberGroups" ,result.memberGroups)
+    					Ember.set(model, "memberGroups" ,result.memberGroups)
     				}
     				if(result.nextLink){
     					this.set("nextPageLink", result.nextLink);
@@ -63,7 +64,34 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
     	}
     	
     },
-
+    fetchJoinRquests (){
+    	var controller = this.get("controller");
+    	if(this.hasMoreRecords && !controller.get("isLoading")){
+    		
+    		var model = controller.get('model');
+    		controller.set("isLoading" , true);
+    		var url = this.joinRequestNextPageLink;
+    		if(!url){
+    			url = "/rest/secure/institute/" + model.get("id") + "/joinRequests";
+    		}
+    		this.doGet(url).then((result)=>{
+    			controller.set("isLoading" , false);
+    			if(result.code ==0){
+    				if(result.items){
+    					Ember.set(model, "joinRequests" ,result.items)
+    				}
+    				if(result.nextLink){
+    					this.set("joinRequestNextPageLink", result.nextLink);
+    				}else{
+    					this.set("joinRequestNextPageLink", null);
+    					this.set("hasMoreRequestRecords", false);
+    				}
+    				
+    			}
+    		})
+    	}
+    	
+    },
     addMembersToGroup( list, addedGroups){
 		let controller = this.get("controller");
     	let model = controller.get('model');
@@ -91,16 +119,6 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
 
     actions: {
 
-        confirmAndDeleteGroup() {
-        	var group = this.controller.get("model");
-            let confirmation = confirm(`Are you sure you want to delete ${group.get("name")} ?`);
-
-            if (confirmation) {
-            	this.get("groupService.myGroups").removeObject(group); 
-            	group.destroyRecord();
-            	this.transitionTo('dashboard');
-            }
-        },
         showAddMemberModal(){
         	Ember.$("#members-add-modal").modal("show");
         	if(this.get('groupService').myGroups){
@@ -126,17 +144,6 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
         		 this.controller.get("newMembers").pushObject({email : searchTerm});
         		 this.controller.set("userSearchTerm" , "");
         	}
-        },
-        addGroup(group1){
-        	var addedGroups = this.controller.get("addedGroups");
-        	var index = addedGroups.indexOf(group1);
-        	if(index < 0){
-        		addedGroups.pushObject(group1);
-        	}
-        },
-        removeGroup(group1) {
-        	var addedGroups = this.controller.get("addedGroups");
-        	addedGroups.removeObject(group1);
         },
         removeMember(member) {
             var membersList = this.controller.get("newMembers");
@@ -164,9 +171,18 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
 	    	if(typeof model.get("members") == 'undefined' || model.get("members").length <=0){
 	    		  this.set('hasMoreRecords', true);
 	         	    this.set('nextPageLink', null);
-	                 this.fetchMembers(model);
+	                 this.fetchMembers();
 			}
         	Ember.$("#members-list-modal").modal("show");
+        },
+        showJoinRquests(){
+        	var model = this.controller.get('model');
+	    	if(typeof model.get("joinRequests") == 'undefined' || model.get("joinRequests").length <=0){
+	    		  this.set('hasMoreRequestRecords', true);
+	         	    this.set('joinRequestNextPageLink', null);
+	                 this.fetchJoinRquests();
+			}
+        	Ember.$("#members-request-modal").modal("show");
         },
         error(reason){
         	this.transitionTo('dashboard');
@@ -183,18 +199,6 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
 	        	this.get('groupService').deleteMember(model , member ).then((result)=>{
 	        		if (result.code == 0 ){
 	        			model.get("members").removeObject(member);
-	        		}
-	        	});
-	        }
-        },
-        deleteGroupMember(memberGroup){
-        	let confirmation = confirm("Remove sub group " + memberGroup.name +  "?");
-        	if(confirmation){
-	        	let model = this.controller.get('model');
-	        	Ember.set(memberGroup, "isLoading" ,true);
-	        	this.get('groupService').deleteMemberGroup(model , memberGroup ).then((result)=>{
-	        		if (result.code == 0 ){
-	        			model.memberGroups.removeObject(memberGroup);
 	        		}
 	        	});
 	        }

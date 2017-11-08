@@ -101,15 +101,15 @@ public class SecureController extends CommonController {
 						req.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, dbUser);
 					}
 				}
-				List<Institute> institutesList = Utils.getInstitutesFromSession(req.getSession());
-				if (null == institutesList) {
+				List<InstituteMember> instituteMemberList = Utils.getInstitutesFromSession(req.getSession());
+				if (null == instituteMemberList) {
 					InstituteService instituteService = new InstituteService(em);
-					AppUser cacheUser = CacheUtils.getAppUser(user.getEmail());
-					institutesList = instituteService.getByKeys(cacheUser.getInstituteIds());
-					req.getSession().setAttribute(Constants.SESSION_INSTITUTES, institutesList);
+					instituteMemberList = instituteService.fetchJoinedInstituteMembers(user.getEmail());
+					Utils.detachInstituteMembers(instituteMemberList);
+					req.getSession().setAttribute(Constants.SESSION_INSTITUTES, instituteMemberList);
 				}
 				List<InstituteTO> institutes = new ArrayList<>();
-				if(institutes.isEmpty()){
+				if(instituteMemberList.isEmpty()){
 					if (null == user.getAddInstituteMsgDate() || ((new Date().getTime() - user.getAddInstituteMsgDate().getTime()) > (1 * 24 * 60 * 60 * 1000))) {
 						AppUserService appUserService = new AppUserService(em);
 						AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
@@ -119,8 +119,8 @@ public class SecureController extends CommonController {
 					}
 				}else{
 					InstituteTO instituteTO;
-					for (Institute institute : institutesList) {
-						instituteTO = new InstituteTO(institute);
+					for (InstituteMember member : instituteMemberList) {
+						instituteTO = new InstituteTO(member);
 						institutes.add(instituteTO);
 					}
 				}
@@ -1261,16 +1261,19 @@ public class SecureController extends CommonController {
 	@POST
 	@Path("/institute/upsert")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void upsertInstitute(InstituteTO instituteTO, @Context HttpServletResponse response) {
+	public void upsertInstitute(InstituteTO instituteTO, @Context HttpServletResponse response, @Context HttpServletRequest request) {
 		logger.info("upsertInstitute start");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			InstituteService instituteService = new InstituteService(em);
 			Institute institute = instituteService.upsert(instituteTO, CurrentContext.getAppUser());
-			InstituteTO savedTO = new InstituteTO(institute);
+			InstituteMember member = instituteService.fetchInstituteMember(institute.getId(), CurrentContext.getEmail());
+			InstituteTO savedTO = new InstituteTO(member);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEM, savedTO);
+			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, CurrentContext.getAppUser());
+			request.getSession().removeAttribute(Constants.SESSION_INSTITUTES);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 
@@ -1285,45 +1288,7 @@ public class SecureController extends CommonController {
 		logger.info("upsertInstitute exit");
 	}
 
-	@GET
-	@Path("/institute/{instituteId}")
-	public void fetchInstitute(@PathParam("instituteId") long instituteId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
-		logger.info("fetchInstitute start, instituteId : " + instituteId);
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			InstituteService instituteService = new InstituteService(em);
-			AppUser user = CurrentContext.getAppUser();
-			if (!user.getInstituteIds().contains(instituteId)) {
-				AppUserService appUserService = new AppUserService(em);
-				user = appUserService.getAppUserByEmail(user.getEmail());
-				if (!user.getInstituteIds().contains(instituteId)) {
-					throw new UnauthorizedException("User cannot view this institute.");
-				}
-				request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-			}
-			Institute institute = instituteService.get(instituteId);
-			if (null == institute) {
-				json.put(Constants.CODE, Constants.NO_RESULT);
-			} else {
-				CacheUtils.addInstituteToCache(institute);
-				InstituteTO savedTO = new InstituteTO(institute);
-				json.put(Constants.CODE, Constants.RESPONSE_OK);
-				json.put(Constants.DATA_ITEM, savedTO);
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
 
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("fetchInstitute exit");
-	}
 
 	@POST
 	@Path("/institute/{instituteId}/members")
@@ -1352,6 +1317,98 @@ public class SecureController extends CommonController {
 		logger.info("exit : addInstituteMembers");
 	}
 
+	@POST
+	@Path("/institute/{instituteId}/join")
+	public void joinInstitute(@PathParam("instituteId") long instituteId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("joinInstitute start, instituteId : " + instituteId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			AppUser user = CacheUtils.getAppUser( CurrentContext.getEmail());
+			InstituteMember member = instituteService.joinInstitute(instituteId, user);
+			if (null == member) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			} else {
+				GroupMemberTO memberTO = new GroupMemberTO(member);
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, memberTO);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("joinInstitute exit");
+	}
+	
+	@POST
+	@Path("/institute/{instituteId}/approveJoin")
+	public void joinInstituteApprove(@PathParam("instituteId") long instituteId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("joinInstituteApprove start, instituteId : " + instituteId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			AppUser user = CacheUtils.getAppUser( CurrentContext.getEmail());
+			InstituteMember member = instituteService.approveJoinInstitute(instituteId, user);
+			if (null == member) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			} else {
+				GroupMemberTO memberTO = new GroupMemberTO(member);
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, memberTO);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("joinInstituteApprove exit");
+	}
+	
+	@GET
+	@Path("/institute/{instituteId}/joinRequests")
+	public void fetchInstituteJoinRequests(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId) {
+		logger.info("start : fetchInstituteJoinRequests");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			List<GroupMemberTO> members = instituteService.fetchInstituteJoinRequests(instituteId, searchTO);
+			json.put(Constants.DATA_ITEMS, members);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			if (!members.isEmpty()) {
+				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : fetchInstituteJoinRequests");
+	}
+
+	
 	@GET
 	@Path("/institute/{instituteId}/members")
 	public void fetchInstituteMembers(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId) {

@@ -1,15 +1,21 @@
 package com.notes.nicefact.to;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Base64;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.Institute;
+import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.enums.InstituteType;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.SHARING;
+import com.notes.nicefact.enums.UserPosition;
+import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,7 +25,7 @@ public class InstituteTO {
 
 	List<TagTO> tags = new ArrayList<>();
 	private SHARING sharing;
-
+	
 	Integer noOfMembers;
 
 	Integer noOfAdmins;
@@ -35,6 +41,10 @@ public class InstituteTO {
 	boolean isBlocked;
 
 	private String bgImageId;
+	
+	private String bgImagePath;
+	
+	FileTO bgImageFile ;
 
 	String folderId;
 
@@ -50,7 +60,20 @@ public class InstituteTO {
 	
 	InstituteType type;
 
+	private Set<UserPosition> positions = new HashSet<>();
+	boolean isJoinRequestApproved ;
+	boolean isJoinRequested ;
+	
 	public InstituteTO() {
+		
+	}
+	public InstituteTO(InstituteMember member) {
+		this(member.getInstitute());
+		this.isJoinRequestApproved = member.getIsJoinRequestApproved();
+		if(this.isJoinRequestApproved == false){
+			this.isJoinRequested = true;
+		}
+		this.positions = member.getPositions();
 	}
 
 	public InstituteTO(Institute group ) {
@@ -64,6 +87,13 @@ public class InstituteTO {
 		this.description = group.getDescription();
 		admins = group.getAdmins();
 		this.type = group.getType();
+		if(group.getBgImagePath()!=null){
+			try {
+				this.bgImagePath = Base64.encodeBase64URLSafeString(group.getBgImagePath().getBytes(Constants.UTF_8));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
 		if (CurrentContext.getAppUser() != null) {
 			isMember = CurrentContext.getAppUser().getInstituteIds().contains(id);
 			isAdmin = group.getAdmins().contains(CurrentContext.getEmail());
@@ -222,6 +252,38 @@ public class InstituteTO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Set<UserPosition> getPositions() {
+		return positions;
+	}
+
+	public void setPositions(Set<UserPosition> positions) {
+		this.positions = positions;
+	}
+	public FileTO getBgImageFile() {
+		return bgImageFile;
+	}
+	public void setBgImageFile(FileTO bgImageFile) {
+		this.bgImageFile = bgImageFile;
+	}
+	public String getBgImagePath() {
+		return bgImagePath;
+	}
+	public void setBgImagePath(String bgImagePath) {
+		this.bgImagePath = bgImagePath;
+	}
+	public boolean getIsJoinRequestApproved() {
+		return isJoinRequestApproved;
+	}
+	public void setIsJoinRequestApproved(boolean isJoinRequestApproved) {
+		this.isJoinRequestApproved = isJoinRequestApproved;
+	}
+	public boolean getIsJoinRequested() {
+		return isJoinRequested;
+	}
+	public void setIsJoinRequested(boolean isJoinRequested) {
+		this.isJoinRequested = isJoinRequested;
 	}
 
 }

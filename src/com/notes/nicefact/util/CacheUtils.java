@@ -167,14 +167,14 @@ public class CacheUtils {
 		}
 	}
 	
-	private static String generateInstituteKey(Long id) {
+	public static String generateInstituteKey(Long id) {
 		return "Institute_" + id;
 	}
 	
-	public static void addInstituteToCache(Institute group ){
-		if (null!= group) {
-			String cacheKey = generateInstituteKey(group.getId());
-			putInCache(cacheKey, group);
+	public static void addInstituteToCache(Institute institute ){
+		if (null!= institute) {
+			String cacheKey = generateInstituteKey(institute.getId());
+			putInCache(cacheKey, institute);
 		}
 	}
 	

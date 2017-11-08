@@ -5,7 +5,7 @@ export default DS.Adapter.extend(ajaxMixin ,{
 	 findRecord: function(store, type, id, snapshot) {
 
 		    return new Ember.RSVP.Promise((resolve, reject) =>{
-		      this.doGet(`/rest/secure/institute/${id}`).then((data)=> {
+		      this.doGet(`/rest/public/institute/${id}`).then((data)=> {
 		    	  if(data.code ==0){
 		    		  var record = data.item;
 		    		  var newJson = {
@@ -70,4 +70,20 @@ export default DS.Adapter.extend(ajaxMixin ,{
 				      });
 				    });
 				  },
+				  
+				  joinInstitute :  function( id) {
+					    return new Ember.RSVP.Promise((resolve, reject) =>{
+					    	var url = '/rest/secure/institute/' + id + '/join';
+					    	this.doPost(url ).then(function(data) {
+					    		if(data.code == 0){
+					    			Ember.run(null, resolve, data.items);
+					    		}else{
+					    			  Ember.run(null, reject, jqXHR);
+					    		}
+					      }, function(jqXHR) {
+					        jqXHR.then = null; // tame jQuery's ill mannered promises
+					        Ember.run(null, reject, jqXHR);
+					      });
+					    });
+					  },
 });
