@@ -1,20 +1,21 @@
 import Ember from 'ember';
 import ajaxMixin from '../../mixins/ajax';
 import authenticationMixin from '../../mixins/authentication';
+import instituteMixin from '../../mixins/institute';
 
-export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
-
+export default Ember.Route.extend(ajaxMixin,authenticationMixin, instituteMixin, {
 
     model(params) {
         return this.store.findRecord('institute', params.instituteId);
     },
+    instituteAdapter : null,
     hasMoreRecords : true,
     nextPageLink : null,
     joinRequestNextPageLink : null,
     hasMoreRequestRecords : true,
-    groupService: Ember.inject.service('group'),
     blockQueue : null,
     adminQueue : null,
+    
     init() {
 	    this._super(...arguments);
 	    this.set('blockQueue', []);
@@ -26,6 +27,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
         this._super(controller, model);
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         this.controller.set("newMembers", []);
+        this.controller.set("roles", this.roles);
          this.set('hasMoreRecords', true);
 	    this.set('nextPageLink', null);
         this.fetchMembers();
@@ -33,6 +35,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
     		var bgImageSrc  = "/a/public/file/preivew?id=" + model.get( "bgImagePath")
     		 this.controller.set("bgImageSrc",bgImageSrc);
     	}
+        this.instituteAdapter = this.store.adapterFor('institute');
     },
 
     fetchMembers (){
@@ -50,7 +53,6 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
     			if(result.code ==0){
     				if(result.items){
     					this.addMembersToGroup( result.items);
-    					Ember.set(model, "memberGroups" ,result.memberGroups)
     				}
     				if(result.nextLink){
     					this.set("nextPageLink", result.nextLink);
@@ -78,6 +80,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
     			controller.set("isLoading" , false);
     			if(result.code ==0){
     				if(result.items){
+    					this.cleanupMembers(result.items);
     					Ember.set(model, "joinRequests" ,result.items)
     				}
     				if(result.nextLink){
@@ -92,51 +95,23 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
     	}
     	
     },
-    addMembersToGroup( list, addedGroups){
+    addMembersToGroup( list){
 		let controller = this.get("controller");
     	let model = controller.get('model');
     	if(list && list.length){
 	    	if(typeof model.get("members") == 'undefined'){
 				model.set("members" , [])
 			}
+	    	this.cleanupMembers(list);
 			model.get("members").pushObjects(list);
     	}
     	
-    	if(addedGroups && addedGroups.length){
-    		if(typeof model.get("memberGroups") == 'undefined'){
-				model.set("memberGroups" , [])
-			}
-	    	 for(var k =0;k<addedGroups.length;k++){
-	    		 let thisGroup = addedGroups[k];
-	    		 let isExists = model.get("memberGroups").filterBy("id", Ember.get(thisGroup, "id")).length;
-	    		 if(!isExists){
-	    			 model.get("memberGroups").pushObject({ id : thisGroup.id , name : thisGroup.label });
-	    		 }
-	    		 
-			  }
-    	}
     },
 
     actions: {
-
         showAddMemberModal(){
         	Ember.$("#members-add-modal").modal("show");
-        	if(this.get('groupService').myGroups){
-        		var thisId = this.controller.get("model.id");
-        		var myOwnedGroups = [];
-        		var myGroups = this.get('groupService').myGroups;
-        		
-        		let myGroup;
-        		for(var i =0;i<myGroups.length; i++){
-        			myGroup = myGroups[i];
-        			if(myGroup.isAdmin && myGroup.id != thisId){
-        				myOwnedGroups.push({id : myGroup.id , label : Ember.get(myGroup, "name")});
-        			}
-        		}
-        		this.controller.set('myOwnedGroups', myOwnedGroups);
-        		this.controller.set('addedGroups', []);
-        	}
-        	 
+        	this.cleanupMembers(this.controller.get("model.members"));
         },
         addMember(){
         	var searchTerm = this.controller.get("userSearchTerm");
@@ -149,19 +124,17 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
             var membersList = this.controller.get("newMembers");
             membersList.removeObject(member);
         },
-        saveGroupMembers(){
+        saveMembers(){
         	var members =  this.controller.get("newMembers");
-        	var addedGroups =  this.controller.get("addedGroups");
-        	if(members.length>0 || addedGroups.length > 0){
+        	if(members.length>0 ){
         		var model = this.controller.get('model');
-        		var url =  "/rest/secure/group/" + model.id +"/members";
+        		var url =  "/rest/secure/institute/" + model.id +"/members";
         		var json = {
         				members : members,
-        				groups : addedGroups
         		}
         		this.doPost(url , json).then((result)=>{
         			  this.controller.set("newMembers", []);
-        			  this.addMembersToGroup( result.item.members, addedGroups);
+        			  this.addMembersToGroup( result.item.members);
         			   this.send('showMembers');
         		});
         	}
@@ -187,46 +160,42 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
         error(reason){
         	this.transitionTo('dashboard');
         },
-        toggleUserList(){
-        	 this.controller.get('model').toggleProperty("showGroupMembers");
-        	return false;
-        },
         deleteMember(member){
         	let confirmation = confirm("Remove user " + member.email +  "?");
         	if(confirmation){
 	        	let model = this.controller.get('model');
 	        	Ember.set(member, "isLoading" ,true);
-	        	this.get('groupService').deleteMember(model , member ).then((result)=>{
+	        	this.instituteAdapter.deleteMember(model.id , member ).then((result)=>{
 	        		if (result.code == 0 ){
-	        			model.get("members").removeObject(member);
+	        			if(model.get("members")){
+	        				model.get("members").removeObject(member);
+	        			}
+	        			if(model.get("joinRequests")){
+	        				model.get("joinRequests").removeObject(member);
+	        			}
 	        		}
 	        	});
 	        }
         },
-        toggleAdminMember(member){
-        	var queue =  this.get('adminQueue');
-        	let isQueued = queue.findBy( "id" , member.id);
+        approveMember(member){
+	        	let model = this.controller.get('model');
+	        	
+	        	this.instituteAdapter.approveMember(model.get("id") ,member );
+	        	model.get("joinRequests").removeObject(member);
+	        	model.get("members").pushObject(member);
+	        	if(!model.get("joinRequests").length){
+	        		Ember.$("#members-request-modal").modal("hide");
+	        	}
+        },
+        updateMember(member){
+        	let model = this.controller.get('model');
         	Ember.set(member, "isLoading" ,true);
-        	if(isQueued){
-        		Ember.run.cancel(isQueued.timer);
-        		queue.removeObject(isQueued);
+        	Ember.set(member, "isUpdated" ,false);
+        	this.instituteAdapter.updateMember(model.get("id") ,member ).then((result)=>{
         		Ember.set(member, "isLoading" ,false);
-        	}else{
-        		var timer = Ember.run.later(()=>{
-		        	let model = this.controller.get('model');
-		        	this.get('groupService').toggleAdminMember(model , member , !member.isAdmin).then((result)=>{
-		        		Ember.set(member, "isLoading" ,false);
-		        		if (result.code == 0 && result.item){
-		        			var updatedMember = result.item;
-		        			Ember.set(member, "isAdmin" , updatedMember.isAdmin);
-		        		}
-		        	});
-		        	isQueued = queue.findBy( "id" , member.id);
-                	queue.removeObject(isQueued);
-        		} , 500);
-        		queue.pushObject({"id" : member.id , "timer" : timer});
-        	}
-       },
+        	});
+        	
+	    },
         toggleBlockMember(member){
         	var queue =  this.get('blockQueue');
         	let isQueued = queue.findBy( "id" , member.id);
@@ -238,7 +207,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
         	}else{
         		var timer = Ember.run.later(()=>{
         			let model = this.controller.get('model');
-                	this.get('groupService').toggleBlockMember(model , member , !member.isBlocked).then((result)=>{
+        			this.instituteAdapter.toggleBlockMember(model.id , member , !member.isBlocked).then((result)=>{
                 		Ember.set(member, "isLoading" ,false);
                 		if (result.code == 0 && result.item){
                 			var updatedMember = result.item;

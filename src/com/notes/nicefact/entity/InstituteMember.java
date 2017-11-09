@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.persistence.Basic;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
@@ -27,14 +29,13 @@ public class InstituteMember extends CommonEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Institute institute;
 	
-	@ElementCollection(fetch = FetchType.EAGER)
+	@Enumerated(EnumType.STRING)
+	@ElementCollection(fetch = FetchType.EAGER  )
 	private Set<UserPosition> positions = new HashSet<>();
 	
 	String email;
 
 	String name;
-
-	Boolean isAdmin = false;
 
 	Boolean isBlocked = true;
 	
@@ -85,11 +86,7 @@ public class InstituteMember extends CommonEntity {
 	}
 
 	public Boolean getIsAdmin() {
-		return isAdmin;
-	}
-
-	public void setIsAdmin(Boolean isAdmin) {
-		this.isAdmin = isAdmin;
+		return getPositions().contains(UserPosition.ADMIN);
 	}
 
 	public Boolean getIsBlocked() {

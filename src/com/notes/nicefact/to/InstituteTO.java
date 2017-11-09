@@ -98,6 +98,10 @@ public class InstituteTO {
 			isMember = CurrentContext.getAppUser().getInstituteIds().contains(id);
 			isAdmin = group.getAdmins().contains(CurrentContext.getEmail());
 			isBlocked = group.getBlocked().contains(CurrentContext.getEmail());
+			isJoinRequested = CurrentContext.getAppUser().getJoinRequestInstitutes().contains(id);
+			if(!isJoinRequestApproved){
+				this.isJoinRequested = true;
+			}
 		}
 	}
 

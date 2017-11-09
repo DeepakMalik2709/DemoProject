@@ -201,8 +201,16 @@
             {{#each searchInstitutes as |institute| }}    	
                 <div class="share-with-email" >
                     <div class="s-list">
-                        {{institute.name}}
-                        <span {{action "removeMember" user}} class="pointer close-slist"><i class="fa fa-times"></i></span>
+                        {{#nav-link-to 'institute.public' institute.id tagName="a" }}
+    		{{institute.name}} 
+    		{{/nav-link-to}}
+    		{{#if institute.isJoinRequested}}
+                      Joined
+                  {{else if institute.isJoinRequested}}
+                  Request sent
+                  	{{else}}
+                  	 <button type="button" data-dismiss="modal" {{action "joinInstituteClick" institute}} class="btn btn-sm btn-default mr-5 "><i class="fa fa-check" aria-hidden="true"></i>Join</button>
+                  	{{/if}}
                     </div>
                 </div>
               {{/each}}

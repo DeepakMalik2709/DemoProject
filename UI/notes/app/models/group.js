@@ -10,6 +10,8 @@ export default DS.Model.extend({
 	  isBlocked: DS.attr('boolean'),
 	  isAdmin: DS.attr('boolean'),
 	  isSaving : DS.attr('boolean'),
+	  instituteId : DS.attr('number'),
+	  instituteName: DS.attr('string'),
 	  members: DS.attr( {
 		    defaultValue() { return []; }
 	  }),

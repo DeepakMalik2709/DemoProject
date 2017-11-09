@@ -21,7 +21,6 @@ import com.notes.nicefact.dao.InstituteMemberDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.InstituteMember;
-import com.notes.nicefact.entity.TaskSubmissionFile;
 import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.exception.UnauthorizedException;
@@ -58,29 +57,7 @@ public class InstituteService extends CommonService<Institute> {
 	}
 
 	
-	public InstituteMember toggleInstituteAdmin(long instituteId, long memberId, boolean isAdmin) {
-		logger.info("toggleinstituteAdmin start , instituteId : " + instituteId  + " , member Id : " + memberId + " , isAdmin : " + isAdmin );
-		InstituteMember member = instituteMemberDAO.get(memberId);
-		if (member != null) {
-			Institute institute = member.getInstitute();
-			if (institute.getAdmins().contains(CurrentContext.getEmail())) {
-				if (!isAdmin && institute.getAdmins().contains(member.getEmail()) && institute.getAdmins().size() == 1) {
-					throw new ServiceException("Cannot remove only admin");
-				}
-				member.setIsAdmin(isAdmin);
-				member = instituteMemberDAO.upsert(member);
-				if (isAdmin) {
-					institute.getAdmins().add(member.getEmail());
-				} else {
-					institute.getAdmins().remove(member.getEmail());
-				}
-				instituteDAO.upsert(institute);
-			} else {
-				throw new UnauthorizedException("You cannot update this institute");
-			}
-		}
-		return member;
-	}
+
 
 	public InstituteMember toggleInstituteBlock(long instituteId, long memberId, boolean isBlocked) {
 		logger.info("deleteInstituteMember start , instituteId : " + instituteId  + " , member Id : " + memberId + " , isBlocked : " + isBlocked );
@@ -110,6 +87,10 @@ public class InstituteService extends CommonService<Institute> {
 			Institute institute = member.getInstitute();
 			if (institute.getAdmins().contains(appUser.getEmail())) {
 				instituteMemberDAO.remove(memberId);
+				AppUser dbUser = appUserService.getAppUserByEmail(member.getEmail());
+				dbUser.getInstituteIds().remove(instituteId);
+				dbUser.getJoinRequestInstitutes().remove(instituteId);
+				appUserService.upsert(dbUser);
 			} else {
 				throw new UnauthorizedException("You cannot update this institute");
 			}
@@ -126,8 +107,8 @@ public class InstituteService extends CommonService<Institute> {
 			InstituteMember member;
 			for (GroupMemberTO memberTO : members) {
 				if (Utils.isValidEmailAddress(memberTO.getEmail())) {
-						InstituteMember dbmember = instituteMemberDAO.fetchMemberByEmail(instituteId, memberTO.getEmail());
-						if(null == dbmember){
+					InstituteMember dbmember = instituteMemberDAO.fetchMemberByEmail(instituteId, memberTO.getEmail());
+					if (null == dbmember) {
 						AppUser userHr = CacheUtils.getAppUser(memberTO.getEmail());
 						if (null == userHr) {
 							member = new InstituteMember(memberTO.getEmail(), memberTO.getName());
@@ -135,14 +116,27 @@ public class InstituteService extends CommonService<Institute> {
 						} else {
 							member = new InstituteMember(userHr);
 						}
-						member.setPositions(memberTO.getPositions());
+						if (memberTO.getPositions() == null || memberTO.getPositions().isEmpty()) {
+							member.getPositions().add(UserPosition.STUDENT);
+						} else {
+							member.getPositions().addAll(memberTO.getPositions());
+						}
 						member.setInstitute(institute);
+						member.setIsJoinRequestApproved(true);
+						member.setIsBlocked(false);
+						member.setJoinRequestApproveDate(new Date());
+						member.setJoinRequestApprover(appuser.getEmail());
 						allNewMembers.add(member);
+					} else if (!dbmember.getIsJoinRequestApproved()) {
+						dbmember.setIsJoinRequestApproved(true);
+						dbmember.setIsBlocked(false);
+						dbmember.setJoinRequestApproveDate(new Date());
+						dbmember.setJoinRequestApprover(appuser.getEmail());
+						allNewMembers.add(dbmember);
 					}
 				}
 			}
 
-			
 			institute = upsert(institute);
 			instituteMemberDAO.upsertAll(allNewMembers);
 			instituteTO = new InstituteTO(institute);
@@ -234,7 +228,6 @@ public class InstituteService extends CommonService<Institute> {
 	
 	private void addMembersToNewInstitute(InstituteTO instituteTO, Institute institute, AppUser user) {
 		InstituteMember member = new InstituteMember(user);
-		member.setIsAdmin(true);
 		member.setIsJoinRequestApproved(true);
 		member.setIsBlocked(false);
 		member.setJoinRequestApproveDate(new Date());
@@ -294,7 +287,6 @@ public class InstituteService extends CommonService<Institute> {
 			member = new InstituteMember(user);
 			member.setIsJoinRequestApproved(false);
 			member.setIsBlocked(true);
-			
 			member.setInstitute(institute);
 			instituteMemberDAO.upsert(member);
 			AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
@@ -304,18 +296,30 @@ public class InstituteService extends CommonService<Institute> {
 		return member;
 	}
 	
-	public InstituteMember approveJoinInstitute(long instituteId, AppUser user) {
-		InstituteMember member =  instituteMemberDAO.fetchMemberByEmail(instituteId, user.getEmail());
-		if (member != null && !member.getIsJoinRequestApproved()) {
-			member.setIsJoinRequestApproved(true);
-			member.setIsBlocked(false);
-			member.setJoinRequestApproveDate(new Date());
-			member.setJoinRequestApprover(user.getEmail());
-			instituteMemberDAO.upsert(member);
-			AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
-			dbUser.getJoinRequestInstitutes().remove(instituteId);
-			dbUser.getInstituteIds().add(instituteId);
-			appUserService.upsert(dbUser);
+	public InstituteMember approveJoinInstitute(long instituteId, GroupMemberTO memberTO, AppUser user) {
+		InstituteMember  member =null;
+		Institute institute = CacheUtils.getInstitute(instituteId);
+		if (institute != null && institute.getAdmins().contains(user.getEmail())) {
+			member = instituteMemberDAO.fetchMemberByEmail(instituteId, memberTO.getEmail());
+			if (member != null && !member.getIsJoinRequestApproved()) {
+				member.setIsJoinRequestApproved(true);
+				member.setIsBlocked(false);
+				member.setJoinRequestApproveDate(new Date());
+				member.setJoinRequestApprover(user.getEmail());
+				if (memberTO.getPositions() == null || memberTO.getPositions().isEmpty()) {
+					member.getPositions().add(UserPosition.STUDENT);
+				} else {
+					member.getPositions().clear();
+					member.getPositions().addAll(memberTO.getPositions());
+				}
+				instituteMemberDAO.upsert(member);
+				AppUser dbUser = appUserService.getAppUserByEmail(memberTO.getEmail());
+				dbUser.getJoinRequestInstitutes().remove(instituteId);
+				dbUser.getInstituteIds().add(instituteId);
+				appUserService.upsert(dbUser);
+			}
+		}else{
+			throw new UnauthorizedException();
 		}
 		return member;
 	}
@@ -326,5 +330,78 @@ public class InstituteService extends CommonService<Institute> {
 
 	public InstituteMember fetchInstituteMember(Long instituteId, String email) {
 		return instituteMemberDAO.fetchMemberByEmail(instituteId, email);
+	}
+	
+	public InstituteTO updateInstituteMembers(long instituteId, GroupChildrenTO children, AppUser appuser) {
+		List<GroupMemberTO> members = children.getMembers();
+		InstituteTO instituteTO = null;
+		Institute institute = instituteDAO.get(instituteId);
+		if (institute.getAdmins().contains(appuser.getEmail())) {
+			Set<InstituteMember> allNewMembers = new HashSet<>();
+			for (GroupMemberTO memberTO : members) {
+				if (Utils.isValidEmailAddress(memberTO.getEmail())) {
+					InstituteMember dbmember = instituteMemberDAO.fetchMemberByEmail(instituteId, memberTO.getEmail());
+					if (null != dbmember) {
+						if (memberTO.getPositions() == null || memberTO.getPositions().isEmpty()) {
+							dbmember.getPositions().add(UserPosition.STUDENT);
+						} else {
+							dbmember.getPositions().clear();
+							dbmember.getPositions().addAll(memberTO.getPositions());
+						}
+						boolean isAdmin = dbmember.getIsAdmin();
+						if(isAdmin){
+							institute.getAdmins().add(memberTO.getEmail());
+						}else{
+							institute.getAdmins().remove(memberTO.getEmail());
+						}
+						allNewMembers.add(dbmember);
+					}
+				}
+			}
+
+			institute = upsert(institute);
+			instituteMemberDAO.upsertAll(allNewMembers);
+			instituteTO = new InstituteTO(institute);
+
+			for (InstituteMember addedMember : allNewMembers) {
+				GroupMemberTO to = new GroupMemberTO(addedMember);
+				instituteTO.getMembers().add(to);
+			}
+
+		} else {
+			throw new UnauthorizedException(appuser.getEmail() + " does not have permission to edit this institute.");
+		}
+
+		return instituteTO;
+	}
+	
+	public GroupMemberTO updateInstituteMember(long instituteId, GroupMemberTO memberTO, AppUser appuser) {
+		GroupMemberTO updatedMember = null;
+		Institute institute = instituteDAO.get(instituteId);
+		if (institute.getAdmins().contains(appuser.getEmail())) {
+			InstituteMember dbmember = instituteMemberDAO.fetchMemberByEmail(instituteId, memberTO.getEmail());
+			if (null != dbmember) {
+				if (memberTO.getPositions() == null || memberTO.getPositions().isEmpty()) {
+					dbmember.getPositions().add(UserPosition.STUDENT);
+				} else {
+					dbmember.getPositions().clear();
+					dbmember.getPositions().addAll(memberTO.getPositions());
+				}
+				boolean isAdmin = dbmember.getIsAdmin();
+				if (isAdmin) {
+					institute.getAdmins().add(memberTO.getEmail());
+				} else {
+					institute.getAdmins().remove(memberTO.getEmail());
+				}
+			}
+
+			institute = upsert(institute);
+			instituteMemberDAO.upsert(dbmember);
+			updatedMember = new GroupMemberTO(dbmember);
+		} else {
+			throw new UnauthorizedException(appuser.getEmail() + " does not have permission to edit this institute.");
+		}
+
+		return updatedMember;
 	}
 }

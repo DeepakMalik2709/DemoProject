@@ -109,7 +109,6 @@ export default Ember.Route.extend(authenticationMixin , {
         	this.get("controller").set("searchInstitutes", []);
         	const adapter = this.store.adapterFor('institute');
  			adapter.searchByName(this.get("controller").get("instituteSearchTerm")).then((resp) => {
- 				console.log(11, resp)
  				this.controller.set( "showLoadingInstitutes", false);
  				if(resp.length){
  					this.get("controller").set("searchInstitutes", resp);
@@ -118,6 +117,11 @@ export default Ember.Route.extend(authenticationMixin , {
  				}
 	    			
 	    		});
-        }
+        },
+        joinInstituteClick(institute){
+        		const instituteAdapter = this.store.adapterFor('institute');
+        		instituteAdapter.joinInstitute(institute.id);
+        		alert("your request has been sent for approval.")
+        },
     }
 });

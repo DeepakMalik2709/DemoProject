@@ -1316,6 +1316,33 @@ public class SecureController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("exit : addInstituteMembers");
 	}
+	
+	@POST
+	@Path("/institute/{instituteId}/member/update")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void updateInstituteMembers(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId, GroupMemberTO memberTO) {
+		logger.info("start : updateInstituteMembers");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			GroupMemberTO instituteTO = instituteService.updateInstituteMember(instituteId, memberTO, CurrentContext.getAppUser());
+			json.put(Constants.DATA_ITEM, instituteTO);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : updateInstituteMembers");
+	}
 
 	@POST
 	@Path("/institute/{instituteId}/join")
@@ -1350,14 +1377,14 @@ public class SecureController extends CommonController {
 	
 	@POST
 	@Path("/institute/{instituteId}/approveJoin")
-	public void joinInstituteApprove(@PathParam("instituteId") long instituteId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+	public void joinInstituteApprove(@PathParam("instituteId") long instituteId, GroupMemberTO memberTO1, @Context HttpServletResponse response, @Context HttpServletRequest request) {
 		logger.info("joinInstituteApprove start, instituteId : " + instituteId);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			InstituteService instituteService = new InstituteService(em);
 			AppUser user = CacheUtils.getAppUser( CurrentContext.getEmail());
-			InstituteMember member = instituteService.approveJoinInstitute(instituteId, user);
+			InstituteMember member = instituteService.approveJoinInstitute(instituteId,memberTO1,  user);
 			if (null == member) {
 				json.put(Constants.CODE, Constants.NO_RESULT);
 			} else {
@@ -1462,33 +1489,6 @@ public class SecureController extends CommonController {
 		logger.info("exit : deleteInstituteMember");
 	}
 
-
-	@POST
-	@Path("/institute/{instituteId}/members/{memberId}/toggleAdmin")
-	public void toggleInstituteAdmin(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId, @PathParam("memberId") long memberId,
-			@QueryParam("isAdmin") boolean isAdmin) {
-		logger.info("start : toggleInstituteAdmin");
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			InstituteService instituteService = new InstituteService(em);
-			InstituteMember member = instituteService.toggleInstituteAdmin(instituteId, memberId, isAdmin);
-			GroupMemberTO to = new GroupMemberTO(member);
-			json.put(Constants.DATA_ITEM, to);
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("exit : toggleInstituteAdmin");
-	}
 
 	@POST
 	@Path("/institute/{instituteId}/members/{memberId}/toggleBlock")

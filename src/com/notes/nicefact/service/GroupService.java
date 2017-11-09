@@ -17,6 +17,7 @@ import com.notes.nicefact.dao.TagDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
+import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.exception.ServiceException;
@@ -104,6 +105,11 @@ public class GroupService extends CommonService<Group> {
 				throw new UnauthorizedException();
 			}
 		} else {
+			if(groupTO.getInstituteId() !=null && groupTO.getInstituteId() > 0){
+				InstituteService instituteService = new InstituteService(em);
+				Institute institute = instituteService.get(groupTO.getInstituteId());
+				group.setInstitute(institute);
+			}
 			addMembersToNewGroup(groupTO, group, appUser);
 			upsert(group);
 			appUser.getGroupIds().add(group.getId());

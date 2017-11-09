@@ -86,4 +86,77 @@ export default DS.Adapter.extend(ajaxMixin ,{
 					      });
 					    });
 					  },
+					  toggleBlockMember :  function( id, member , isBlocked) {
+						    return new Ember.RSVP.Promise((resolve, reject) =>{
+						    	var url = '/rest/secure/institute/' + id + "/members/" + member.id + "/toggleBlock?isBlocked=" + isBlocked;
+						    	this.doPost(url ).then(function(data) {
+						    		if(data.code == 0){
+						    			Ember.run(null, resolve, data);
+						    		}else{
+						    			  Ember.run(null, reject, jqXHR);
+						    		}
+						      }, function(jqXHR) {
+						        jqXHR.then = null; // tame jQuery's ill mannered promises
+						        Ember.run(null, reject, jqXHR);
+						      });
+						    });
+						  },
+						  approveMember :  function( id, member) {
+							    return new Ember.RSVP.Promise((resolve, reject) =>{
+							    	let url = "/rest/secure/institute/" + id + "/approveJoin";
+							    	let json = {
+						        			email : member.email,
+						        			positions : [],
+						        			id:member.id,
+						        	}
+						        	for(var i =0; i<member.roles.length;i++){
+						        		var role = member.roles[i];
+						        		json.positions.push(role.id);
+						        	}
+							    	this.doPost(url, json ).then(function(data) {
+							    		if(data.code == 0){
+							    			Ember.run(null, resolve, data);
+							    		}else{
+							    			  Ember.run(null, reject, jqXHR);
+							    		}
+							      }, function(jqXHR) {
+							        jqXHR.then = null; // tame jQuery's ill mannered promises
+							        Ember.run(null, reject, jqXHR);
+							      });
+							    });
+							  },
+							  
+								 deleteMember: function(id, member ) {
+									 return  new Ember.RSVP.Promise((resolve, reject) =>{
+											var url = "/rest/secure/institute/" +id + "/members/" + member.id ;
+											this.doDelete(url).then((data ) =>{
+										    	  resolve(data);
+										      });
+									 });
+								 },
+								  updateMember :  function( id, member) {
+									    return new Ember.RSVP.Promise((resolve, reject) =>{
+									    	let url = "/rest/secure/institute/" +id + "/member/update";
+									    	let json = {
+								        			email : member.email,
+								        			positions : [],
+								        			id:member.id,
+								        	}
+								    		for(var i =0; i<member.roles.length;i++){
+								        		var role = member.roles[i];
+								        		json.positions.push(role.id);
+								        	}
+								        	
+									    	this.doPost(url, json ).then(function(data) {
+									    		if(data.code == 0){
+									    			Ember.run(null, resolve, data);
+									    		}else{
+									    			  Ember.run(null, reject, jqXHR);
+									    		}
+									      }, function(jqXHR) {
+									        jqXHR.then = null; // tame jQuery's ill mannered promises
+									        Ember.run(null, reject, jqXHR);
+									      });
+									    });
+									  },
 });

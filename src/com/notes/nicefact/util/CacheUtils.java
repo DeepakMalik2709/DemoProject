@@ -23,6 +23,7 @@ import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.GroupService;
+import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.PostService;
 
 import net.spy.memcached.MemcachedClient;
@@ -176,6 +177,22 @@ public class CacheUtils {
 			String cacheKey = generateInstituteKey(institute.getId());
 			putInCache(cacheKey, institute);
 		}
+	}
+	
+	public static Institute getInstitute(Long id) {
+		String cacheKey = generateInstituteKey(id);
+		Institute user = (Institute) getFromCache(cacheKey);
+		if (null == user) {
+			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+			InstituteService instituteService = new  InstituteService(em);
+			user = instituteService.get(id); 
+			if (null!=user) {
+				em.detach(user);
+				putInCache(cacheKey, user);
+			}
+			em.close();
+		}
+		return user;
 	}
 	
 	public static AppUser getAppUser(String email) {
