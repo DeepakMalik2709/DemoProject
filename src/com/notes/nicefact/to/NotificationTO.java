@@ -75,7 +75,7 @@ public class NotificationTO implements Serializable {
 
 	boolean isRead;
 
-	long groupId;
+	Long groupId;
 	
 	String groupName;
 	
@@ -220,6 +220,9 @@ public class NotificationTO implements Serializable {
 	}
 
 	public long getGroupId() {
+		if(null == groupId){
+			return 0;
+		}
 		return groupId;
 	}
 

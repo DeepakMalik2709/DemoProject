@@ -1,0 +1,57 @@
+<div class="form-horizontal">
+    <div class="form-group has-feedback {{if item.isValid 'has-success'}}">
+        <label class="col-sm-2 control-label">Name*</label>
+        <div class="col-sm-10">
+          {{input type="text" value=item.name class="form-control" placeholder="Institute name"}}
+          {{#if item.isValidName}}<span class="glyphicon glyphicon-ok form-control-feedback"></span>{{/if}}
+        </div>
+    </div>
+     <div class="form-group">
+        <label class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-10">
+          {{textarea type="text" value=item.description class="form-control" placeholder="Description"}}
+        </div>
+    </div>
+    
+         <div class="form-group">
+        <label class="col-sm-2 control-label">Background Photo</label>
+        <div class="col-sm-10">
+		{{#if item.bgImageFile.name	}}
+			{{item.bgImageFile.name}}
+		 <button type="button" class="btn btn-default" {{action 'removePhoto' item}}>Remove Photo</button>
+        {{else if bgImageSrc}}
+        <img src='{{bgImageSrc}}' class="institute-img-preview">
+          <button type="button" class="btn btn-default" {{action 'removePhoto' item}}>Remove Photo</button>
+        {{else }}
+            <input   id="institute-photo-upload-1" onchange={{action "uploadPhoto"}} accept="image/*" type="file" value="Upload Photo"  >
+         {{/if}}   
+        </div>
+    </div>
+    
+    
+    {{#unless item.id}}
+        <div class="form-group ">
+        <label class="col-sm-2 control-label">Members</label>
+        <div class="col-sm-10 pos-rel">
+        <div class="tooltip top-tooltip process-tip {{if userSearchTerm.length 'active' ''}}"   role="tooltip">
+                            <div class="tooltip-arrow"></div>
+                            <div class="tooltip-inner">Enter to add</div>
+                       </div>
+          {{input type="text" class="form-control" placeholder="Email" value=userSearchTerm insert-newline='addMember'  }}
+          
+                      {{#each item.members as |user| }}    	
+                 <span class="file-tag blue" >
+                        {{user.email}}
+                        <span {{action "removeMember" user}} class="pointer close-slist"><i class="fa fa-times"></i></span>
+                </span>
+              {{/each}}
+        </div>
+    </div>
+   	{{/unless}}
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default" {{action 'saveInstitute' item}} disabled={{unless item.isValid true}}>{{buttonLabel}}</button>
+              <button type="submit" class="btn btn-default" {{action 'cancelClicked' item}}>Cancel</button>
+        </div>
+    </div>
+</div>

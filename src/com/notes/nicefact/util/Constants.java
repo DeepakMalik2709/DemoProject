@@ -21,7 +21,7 @@ public class Constants {
 	public static final String DATA_ITEMS = "items";
 	
 	public static final String LOGIN_USER = "loginUser";
-	
+	public static final String SESSION_INSTITUTES = "institutes";
 	public static final String CONTEXT = "properties";
 
 	public static final String NEXT_LINK = "nextLink";

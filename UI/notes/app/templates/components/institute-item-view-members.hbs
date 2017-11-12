@@ -1,0 +1,42 @@
+<div class="modal vcenter" id="members-list-modal" tabindex="-1" role="dialog" aria-labelledby="PopUp" data-backdrop="static" >
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content">
+      <div class="modal-header noborder"> 
+      	<a class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></a>
+        <h4 class="modal-title" id="myModalLabel"> 
+        	{{model.name}} : members list <span class="{{if isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
+      	</h4>
+      	
+      </div>
+      <div class="modal-body">
+      	<div class="form-box group-form mtop-15"  >
+          <div class="form-group">
+            <div class="ol-user-list"> 
+            {{#each model.members as |user| }}    	
+                <div class="user-with-email" >
+                    <div class="s-list">
+                        {{user.email}}
+                         <button type="button" {{action "deleteMember" user}} class="btn btn-sm btn-default mr-5" ><i class="fa fa-trash" aria-hidden="true"></i>Delete</button>
+                         <button type="button" {{action "toggleBlockMember" user}} class="btn btn-sm btn-default mr-5  {{if user.isBlocked 'black-border-1px' ''}}" ><i class="fa fa-ban {{if user.isBlocked 'text-danger'}}" aria-hidden="true"></i>Block</button>
+                       <div class="power-select-container pos-rel" id="power1">
+                        {{#power-select-multiple selected=user.roles  options=roles  destination = "power1" renderInPlace="true" user=user
+	                        class="institute-member-role-select pos-rel" tagName=div
+  							  onchange=(action   "onchangeMemberPosition" user )  as |role| }}
+							  {{role.label}}
+							{{/power-select-multiple}}
+							</div>
+                         <button type="button" {{action "updateMember" user}} class="btn btn-sm btn-default mr-5 {{if user.isUpdated 'show-inline' 'hide'}}"><i class="fa fa-save" aria-hidden="true"></i>Save</button>
+                   <span class="{{if user.isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
+                    </div>
+                </div>
+              {{/each}}
+              
+            </div>
+          </div>
+        </div>
+        
+        <!-- user list end -->
+      </div>
+ 	</div>
+ </div>
+</div>

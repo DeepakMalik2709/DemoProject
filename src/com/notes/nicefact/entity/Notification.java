@@ -60,7 +60,10 @@ public class Notification extends CommonEntity{
 	@Basic
 	private Long groupId;
 	
-	// name of group
+	@Basic
+	private Long instituteId;
+	
+	// name of group or institute
 	@Basic String groupName;;
 	
 	@Enumerated(EnumType.STRING)
@@ -222,6 +225,14 @@ public class Notification extends CommonEntity{
 
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
+	}
+
+	public Long getInstituteId() {
+		return instituteId;
+	}
+
+	public void setInstituteId(Long instituteId) {
+		this.instituteId = instituteId;
 	}
 	
 }

@@ -20,6 +20,9 @@ export default DS.Model.extend({
 	sendCommentOnCommentEmail : DS.attr('boolean'),
 	googleDriveMsgDate : DS.attr('number'),
 	refreshTokenAccountEmail: DS.attr('string'),
+	institutes: DS.attr( {
+		    defaultValue() { return []; }
+		  }),
 	  isValidFirstName: Ember.computed.notEmpty('firstName'),
 	  isValidLastName: Ember.computed.notEmpty('lastName'),
 	  isPasswordNotEmpty :  Ember.computed.notEmpty('password'),

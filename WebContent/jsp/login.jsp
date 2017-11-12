@@ -109,7 +109,7 @@ padding-bottom:10px;
 <form class="form-horizontal"  method="POST" >
 <fieldset>
 
-  <input id="username" name="username" type="text" placeholder="Enter User Name" class="form-control input-md">
+  <input id="username" name="username" type="text" placeholder="Enter User Name" class="form-control input-md" onkeyup="keyUp();">
   <div class="spacing"><!-- <input type="checkbox" checked name="remember-me" id="checkboxes-0" ><small> Remember me</small> --></div>
   <input id="password" name="password" type="password" placeholder="Enter Password" class="form-control input-md" onkeyup="keyUp();">
   <div class="spacing"><a href="javascript:void(0);" data-toggle="modal" data-target="#forgot-password1"><small> Forgot Password?</small></a><a href="javascript:void(0);" class="pull-right" data-toggle="modal" data-target="#new-user-form"><small> Register</small></a><br/></div>

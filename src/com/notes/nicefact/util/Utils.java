@@ -27,12 +27,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.MultipartStream;
@@ -56,6 +58,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.Institute;
+import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
@@ -666,6 +670,29 @@ public class Utils {
 	
 	public static String getTaskFolderPath(Post task) {	
 		return AppProperties.getInstance().getGroupUploadsFolder() + task.getGroupId() +  File.separator + task.getId();
+	}
+	
+	public static String getInstituteFolderPath(Institute institute) {	
+		String path = AppProperties.getInstance().getInstituteUploadsFolder()  + institute.getId();
+		
+		return path;
+	}
+
+	public static List<InstituteMember> getInstitutesFromSession(HttpSession session) {
+		return (List<InstituteMember>) session.getAttribute(Constants.SESSION_INSTITUTES);
+	}
+
+	public static void detachInstituteMembers(List<InstituteMember> instituteMemberList) {
+		InstituteMember member;
+		for (Iterator<InstituteMember> memberIter = instituteMemberList.iterator(); memberIter.hasNext();) {
+			member = memberIter.next();
+			if (null == member.getInstitute()) {
+				memberIter.remove();
+			} else {
+				member.getPositions().size();
+				member.getInstitute().toString();
+			}
+		}
 	}
 
 }
