@@ -32,6 +32,14 @@ export default DS.Store.extend(ajaxMixin,{
 	},
 	fetchList:function(){
 		return this.get("/rest/dashboard/items" );
+	},
+	dashboardData:function(){
+		return  new Ember.RSVP.Promise((resolve, reject) =>{
+			var url ="/rest/dashboard/dataList";
+			this.doGet(url).then((data) =>{
+		    	  resolve(data);
+		      });
+		});
 	}
 	
 });

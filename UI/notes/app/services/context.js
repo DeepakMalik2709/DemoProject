@@ -88,6 +88,9 @@ export default Ember.Service.extend(ajaxMixin ,utilsMixin ,{
 				data : JSON.stringify(json)
 				})
 			)
+	},
+	dashboardData:function(){
+		return this.get("/rest/dashboard/dataList" );
 	}
 	
 });

@@ -17,22 +17,24 @@ public class EventTO {
 	private String description;
 	private String	eventType;
 	
-	public EventTO(String id,String title, DateTime start, DateTime end, String backgroundColor,
+	public EventTO(String id,String title,String eventType, DateTime start, DateTime end, String backgroundColor,
 			String borderColor){
 		super();
 		this.id = id;
 		this.title = title;
+		this.eventType = eventType;
 		this.start = new Date(start.getValue());
 		this.backgroundColor = backgroundColor;
 		this.borderColor = borderColor;
 		this.end =new Date(end.getValue());
 	}
 	
-	public EventTO(String id,String title, Date start, Date end, String backgroundColor,
+	public EventTO(String id,String title,String eventType, Date start, Date end, String backgroundColor,
 			String borderColor) {
 		super();
 		this.id = id;
 		this.title = title;
+		this.eventType = eventType;
 		this.start = start;
 		this.backgroundColor = backgroundColor;
 		this.borderColor = borderColor;
@@ -44,6 +46,7 @@ public class EventTO {
 	public void setTitle(String title) {
 		this.title = title;
 	}
+	
 	public Date getStart() {
 		return start;
 	}
