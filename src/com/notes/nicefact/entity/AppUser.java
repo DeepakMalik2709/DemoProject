@@ -124,6 +124,15 @@ public class AppUser extends CommonEntity {
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	Set<Long> groupIds;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<Long> instituteIds;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<Long> joinRequestGroups;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<Long> joinRequestInstitutes;
 
 	@Basic
 	@Enumerated(EnumType.STRING)
@@ -140,6 +149,9 @@ public class AppUser extends CommonEntity {
 	@Basic
 	private Date googleDriveMsgDate;
 
+	@Basic
+	private Date addInstituteMsgDate; 
+	
 	public enum GENDER {
 		MALE, FEMALE
 	};
@@ -187,7 +199,9 @@ public class AppUser extends CommonEntity {
 		if(this.googleDriveMsgDate !=null){
 			map.put("googleDriveMsgDate", this.googleDriveMsgDate.getTime());
 		}
-		
+		if(this.addInstituteMsgDate !=null){
+			map.put("addInstituteMsgDate", this.addInstituteMsgDate.getTime());
+		}
 		
 		map.put("sendCommentMentiondEmail", getSendCommentMentiondEmail());
 		map.put("sendCommentOnMentiondPostEmail", getSendCommentOnMentiondPostEmail());
@@ -336,6 +350,17 @@ public class AppUser extends CommonEntity {
 
 	public String getRefreshToken() {
 		return refreshToken;
+	}
+
+	public Set<Long> getInstituteIds() {
+		if (null == instituteIds) {
+			this.instituteIds = new HashSet<>();
+		}
+		return instituteIds;
+	}
+
+	public void setInstituteIds(Set<Long> instituteIds) {
+		this.instituteIds = instituteIds;
 	}
 
 	public Set<Long> getGroupIds() {
@@ -607,6 +632,36 @@ public class AppUser extends CommonEntity {
 
 	public void setGoogleDriveLibraryFolderId(String googleDriveLibraryFolderId) {
 		this.googleDriveLibraryFolderId = googleDriveLibraryFolderId;
+	}
+
+	public Date getAddInstituteMsgDate() {
+		return addInstituteMsgDate;
+	}
+
+	public void setAddInstituteMsgDate(Date addInstituteMsgDate) {
+		this.addInstituteMsgDate = addInstituteMsgDate;
+	}
+
+	public Set<Long> getJoinRequestGroups() {
+		if (null == joinRequestGroups) {
+			this.joinRequestGroups = new HashSet<>();
+		}
+		return joinRequestGroups;
+	}
+
+	public void setJoinRequestGroups(Set<Long> joinRequestGroups) {
+		this.joinRequestGroups = joinRequestGroups;
+	}
+
+	public Set<Long> getJoinRequestInstitutes() {
+		if (null == joinRequestInstitutes) {
+			this.joinRequestInstitutes = new HashSet<>();
+		}
+		return joinRequestInstitutes;
+	}
+
+	public void setJoinRequestInstitutes(Set<Long> joinRequestInstitutes) {
+		this.joinRequestInstitutes = joinRequestInstitutes;
 	}
 
 	@Override

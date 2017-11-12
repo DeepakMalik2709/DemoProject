@@ -1,28 +1,31 @@
 package com.notes.nicefact.to;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Base64;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.notes.nicefact.entity.Group;
-import com.notes.nicefact.entity.GroupMember;
-import com.notes.nicefact.entity.Tag;
+import com.notes.nicefact.entity.Institute;
+import com.notes.nicefact.entity.InstituteMember;
+import com.notes.nicefact.enums.InstituteType;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.SHARING;
+import com.notes.nicefact.enums.UserPosition;
+import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GroupTO {
-
+public class InstituteTO {
+	
 	List<GroupMemberTO> members = new ArrayList<>();
 
 	List<TagTO> tags = new ArrayList<>();
 	private SHARING sharing;
-
-	private Integer noOfPosts;
-
+	
 	Integer noOfMembers;
 
 	Integer noOfAdmins;
@@ -32,16 +35,16 @@ public class GroupTO {
 	private String icon;
 
 	private long id;
-	
-	private Long instituteId;
-	
-	private String instituteName;
 
 	boolean isAdmin;
 	boolean isMember;
 	boolean isBlocked;
 
 	private String bgImageId;
+	
+	private String bgImagePath;
+	
+	FileTO bgImageFile ;
 
 	String folderId;
 
@@ -54,45 +57,57 @@ public class GroupTO {
 	List<LANGUAGE> languages = new ArrayList<>();
 
 	Set<String> admins = new HashSet<>();
+	
+	InstituteType type;
 
-	public GroupTO() {
+	private Set<UserPosition> positions = new HashSet<>();
+	boolean isJoinRequestApproved ;
+	boolean isJoinRequested ;
+	
+	public InstituteTO() {
+		
+	}
+	public InstituteTO(InstituteMember member) {
+		this(member.getInstitute());
+		this.isJoinRequestApproved = member.getIsJoinRequestApproved();
+		if(this.isJoinRequestApproved == false){
+			this.isJoinRequested = true;
+		}
+		this.positions = member.getPositions();
 	}
 
-	public GroupTO(Group group, boolean fetchMembers) {
+	public InstituteTO(Institute group ) {
 		this.id = group.getId();
-		this.sharing = group.getSharing();
-		this.noOfPosts = group.getNoOfPosts();
 		this.noOfMembers = group.getNoOfMembers();
 		this.noOfAdmins = group.getNoOfAdmins();
 		this.name = group.getName();
-		this.icon = group.getIcon();
 		this.bgImageId = group.getBgImageId();
-		this.folderId = group.getFolderId();
 		this.lastModified = group.getUpdatedTime().getTime();
 		this.created = group.getCreatedTime().getTime();
-		this.languages.addAll(group.getLanguages());
 		this.description = group.getDescription();
 		admins = group.getAdmins();
-		TagTO tagTO;
-		for (Tag tag : group.getTags()) {
-			tagTO = new TagTO(tag);
-			this.tags.add(tagTO);
-		}
-		if (fetchMembers) {
-			for (GroupMember member : group.getMembers()) {
-				GroupMemberTO postReactionTO = new GroupMemberTO(member);
-				members.add(postReactionTO);
+		this.type = group.getType();
+		if(group.getBgImagePath()!=null){
+			try {
+				this.bgImagePath = Base64.encodeBase64URLSafeString(group.getBgImagePath().getBytes(Constants.UTF_8));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
 			}
 		}
-		if(group.getInstitute() !=null){
-			this.instituteId = group.getInstitute().getId();
-			this.instituteName = group.getInstitute().getName();
-		}
 		if (CurrentContext.getAppUser() != null) {
-			isMember = CurrentContext.getAppUser().getGroupIds().contains(id);
+			isJoinRequestApproved = CurrentContext.getAppUser().getInstituteIds().contains(id);
 			isAdmin = group.getAdmins().contains(CurrentContext.getEmail());
 			isBlocked = group.getBlocked().contains(CurrentContext.getEmail());
+			isJoinRequested = CurrentContext.getAppUser().getJoinRequestInstitutes().contains(id);
 		}
+	}
+
+	public InstituteType getType() {
+		return type;
+	}
+
+	public void setType(InstituteType type) {
+		this.type = type;
 	}
 
 	public boolean getIsBlocked() {
@@ -199,13 +214,6 @@ public class GroupTO {
 		this.sharing = sharing;
 	}
 
-	public Integer getNoOfPosts() {
-		return noOfPosts;
-	}
-
-	public void setNoOfPosts(Integer noOfPosts) {
-		this.noOfPosts = noOfPosts;
-	}
 
 	public String getIcon() {
 		return icon;
@@ -247,20 +255,36 @@ public class GroupTO {
 		this.name = name;
 	}
 
-	public Long getInstituteId() {
-		return instituteId;
+	public Set<UserPosition> getPositions() {
+		return positions;
 	}
 
-	public void setInstituteId(Long instituteId) {
-		this.instituteId = instituteId;
+	public void setPositions(Set<UserPosition> positions) {
+		this.positions = positions;
 	}
-
-	public String getInstituteName() {
-		return instituteName;
+	public FileTO getBgImageFile() {
+		return bgImageFile;
 	}
-
-	public void setInstituteName(String instituteName) {
-		this.instituteName = instituteName;
+	public void setBgImageFile(FileTO bgImageFile) {
+		this.bgImageFile = bgImageFile;
+	}
+	public String getBgImagePath() {
+		return bgImagePath;
+	}
+	public void setBgImagePath(String bgImagePath) {
+		this.bgImagePath = bgImagePath;
+	}
+	public boolean getIsJoinRequestApproved() {
+		return isJoinRequestApproved;
+	}
+	public void setIsJoinRequestApproved(boolean isJoinRequestApproved) {
+		this.isJoinRequestApproved = isJoinRequestApproved;
+	}
+	public boolean getIsJoinRequested() {
+		return isJoinRequested;
+	}
+	public void setIsJoinRequested(boolean isJoinRequested) {
+		this.isJoinRequested = isJoinRequested;
 	}
 
 }

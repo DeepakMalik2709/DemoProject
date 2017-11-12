@@ -421,7 +421,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 		EntityManager pm = getEntityManager();
 		Query query = pm.createQuery("select h from " + this.clazz.getSimpleName() + " h where h.id in (:keys)");
 		query.setParameter("keys", keys);
-		List<E> objs = null;
+		List<E> objs = new ArrayList<>();
 		try {
 			objs = (List<E>) query.getResultList();
 			for (E obj : objs) {

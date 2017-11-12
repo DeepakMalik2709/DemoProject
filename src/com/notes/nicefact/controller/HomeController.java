@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -21,19 +22,25 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
 
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.Institute;
+import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.entity.TutorialFile;
 import com.notes.nicefact.exception.AppException;
+import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.CommonEntityService;
+import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
+import com.notes.nicefact.to.InstituteTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.AppProperties;
@@ -403,6 +410,39 @@ public class HomeController extends CommonController {
 	}
 	
 	@GET
+	@Path("/file/preivew")
+	public void filePreview(@QueryParam("id") String id, @Context HttpServletRequest req, @Context HttpServletResponse response) {
+		logger.info("filePreview start , id :" + id);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			String cacheKey = CacheUtils.getThumbnailCacheKey(id);
+			byte[] fileBytes = (byte[]) CacheUtils.getFromCache(cacheKey);
+			if (null == fileBytes) {
+				byte[] bytes = Base64.decodeBase64(id);
+				if (bytes != null) {
+					String serverPath = new String(bytes, Constants.UTF_8);
+					if (Files.exists(Paths.get(serverPath))) {
+						fileBytes = Utils.readFileBytes(serverPath);
+						CacheUtils.putInCache(cacheKey, fileBytes);
+					}
+				}
+			}
+				if (null == fileBytes) {
+					response.sendRedirect(Constants.NO_PREVIEW_IMAGE);
+				} else {
+					renderImage(fileBytes, response);
+				}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		logger.info("filePreview exit");
+	}
+	
+	@GET
 	@Path("/tutorial/file/thumbnail")
 	public void generateFileThumbnail(@QueryParam("name") String serverName, @Context HttpServletRequest req, @Context HttpServletResponse response) {
 		logger.info("generateFileThumbnail start");
@@ -433,5 +473,61 @@ public class HomeController extends CommonController {
 			}
 		}
 		logger.info("generateFileThumbnail exit");
+	}
+	
+	@GET
+	@Path("/institute/{instituteId}")
+	public void fetchInstitute(@PathParam("instituteId") long instituteId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("fetchInstitute start, instituteId : " + instituteId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			AppUser user = CurrentContext.getAppUser();
+			InstituteTO instituteTO = null;
+			if(user == null){
+				instituteTO =  getInstitute(instituteId, em);
+			}else{
+				InstituteMember member = instituteService.fetchInstituteMember(instituteId, CurrentContext.getEmail());
+				if(member == null){
+					instituteTO =  getInstitute(instituteId, em);
+				}else{
+					instituteTO = new InstituteTO(member);
+				}
+			}
+		
+			if (null == instituteTO) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			} else {
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, instituteTO);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("fetchInstitute exit");
+	}
+	
+	InstituteTO getInstitute(long id ,EntityManager em){
+		String cacheKey = CacheUtils.generateInstituteKey(id);
+		Institute institute =	(Institute) CacheUtils.getFromCache(cacheKey);
+		if(institute == null){
+			InstituteService instituteService = new InstituteService(em);
+			institute = instituteService.get(id);
+		}
+		
+		if(institute == null){
+			throw new ServiceException("Instiute not found for id : " + id);
+		}
+		InstituteTO instituteTO = new InstituteTO(institute);
+		return instituteTO;
+		
 	}
 }

@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -26,6 +27,9 @@ public class Group extends CommonEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Institute institute;
+	
 	// members in group
 	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<GroupMember> members = new HashSet<>();
@@ -271,6 +275,14 @@ public class Group extends CommonEntity {
 
 	public void setMemberGroupsIds(Set<Long> memberGroupsIds) {
 		this.memberGroupsIds = memberGroupsIds;
+	}
+	
+	public Institute getInstitute() {
+		return institute;
+	}
+
+	public void setInstitute(Institute institute) {
+		this.institute = institute;
 	}
 
 	public Group() {
