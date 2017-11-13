@@ -57,7 +57,6 @@ export default DS.Adapter.extend(ajaxMixin ,{
 			  },
 		  
 		  deleteRecord: function(store, type, snapshot) {
-			  console.log(34)
 			    var id = snapshot.id;
 			    var post = this.serialize(snapshot, { includeId: true });
 			    return new Ember.RSVP.Promise((resolve, reject) =>{

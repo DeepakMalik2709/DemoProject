@@ -21,7 +21,7 @@ public class Constants {
 	public static final String DATA_ITEMS = "items";
 	
 	public static final String LOGIN_USER = "loginUser";
-	
+	public static final String SESSION_INSTITUTES = "institutes";
 	public static final String CONTEXT = "properties";
 
 	public static final String NEXT_LINK = "nextLink";
@@ -71,7 +71,7 @@ public class Constants {
 
 	public static final String GOOGLE_SERVICE_ACCOUNT_SCOPES = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/cloud-platform";
 
-	public static final String GOOGLE_DRIVE_SCOPES = "https://www.googleapis.com/auth/drive.file";
+	public static final String GOOGLE_DRIVE_SCOPES = "https://www.googleapis.com/auth/drive";
 	public static final String PROFILE_SCOPES = " https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
 	public static final String GOOGLE_CALLBACK = "/googleCallback";
 	
@@ -95,6 +95,7 @@ public class Constants {
 	public static final String GROUP = "group";
 	public static final String REDIRECT_URL = "/a/public/login?redirect=";
 	public static final String DATE_FORMAT_1 = "dd-MMM-yy hh:mm a";
+	public static final Long FIRST_LOGIN_TEST_GROUP = -905L;
 	
 	
 }

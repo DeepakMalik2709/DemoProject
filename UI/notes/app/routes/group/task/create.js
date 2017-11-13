@@ -77,7 +77,6 @@ export default Ember.Route.extend(authenticationMixin,{
 	 	    			Ember.set(task, "isSaving", false);
 	 	    			Ember.set(task, "showLoading", false);
 	 	    			alert("Task posted.")
-	 	    			console.log(resp1)
 	 	    			this.transitionTo('group.posts',  Ember.get(resp1,"groupId"));
 	 	    			
 	 	    		});

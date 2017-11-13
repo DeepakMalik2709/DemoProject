@@ -66,6 +66,11 @@ public class AppProperties {
 	private static final String groupUploadsDev = "folder.group.uploads.dev";
 	private static final String tempUploads = "folder.group.temp";
 	private static final String tempUploadsDev = "folder.group.temp.dev";
+	
+	private static final String instituteUploads = "folder.institute.uploads";
+	private static final String instituteUploadsSandbox = "folder.institute.uploads.sandbox";
+	private static final String instituteUploadsDev = "folder.institute.uploads.dev";
+	
 	private static final String GOOGLE_SERVICE_ACCOUNT_ID = "google.service.account.id";
 	private static final String GOOGLE_SERVICE_ACCOUNT_EMAIL = "google.service.account.email";
 	private static final String GOOGLE_SERVICE_ACCOUNT_PASSWORD = "google.service.account.password";
@@ -231,5 +236,16 @@ public class AppProperties {
 
 	public String getDriveUserUploadLibraryFolderName() {
 		return props.getProperty(DRIVE_USER_UPLOAD_LIBRARY_FOLDER_NAME);
+	}
+	
+
+	public String getInstituteUploadsFolder() {
+		if (isSandbox()) {
+			return props.getProperty(instituteUploadsSandbox);
+		}else if (isProduction()) {
+			return props.getProperty(instituteUploads);
+		} else {
+			return props.getProperty(instituteUploadsDev);
+		}
 	}
 }

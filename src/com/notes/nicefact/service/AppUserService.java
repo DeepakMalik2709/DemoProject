@@ -66,6 +66,12 @@ public class AppUserService extends CommonService<AppUser> {
 
 		return appUser;
 	}
+	
+	public AppUser upsert(AppUser user) {
+		AppUser db = super.upsert(user);
+		CacheUtils.addUserToCache(db);
+		return db;
+	}
 
 	public AppUserTO upsert(AppUserTO appUserTO) {
 		if (!StringUtils.isBlank(appUserTO.getEmail())) {

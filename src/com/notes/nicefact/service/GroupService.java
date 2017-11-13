@@ -17,6 +17,7 @@ import com.notes.nicefact.dao.TagDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
+import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.exception.ServiceException;
@@ -37,7 +38,9 @@ public class GroupService extends CommonService<Group> {
 	AppUserService appUserService;
 	private TagDAO tagDao;
 	BackendTaskService backendTaskService;
+	EntityManager em ;
 	public GroupService(EntityManager em) {
+		this.em = em;
 		groupDao = new GroupDAO(em);
 		groupMemberDAO = new GroupMemberDAO(em);
 		appUserService = new AppUserService(em);
@@ -50,6 +53,12 @@ public class GroupService extends CommonService<Group> {
 		return groupDao;
 	}
 
+	public Group upsert(Group group) {
+		Group db = super.upsert(group);
+		CacheUtils.addGroupToCache(db);
+		return db;
+	}
+	
 	public Group get(Long id) {
 		Group group = super.get(id);
 		if(null != group){
@@ -96,13 +105,17 @@ public class GroupService extends CommonService<Group> {
 				throw new UnauthorizedException();
 			}
 		} else {
+			if(groupTO.getInstituteId() !=null && groupTO.getInstituteId() > 0){
+				InstituteService instituteService = new InstituteService(em);
+				Institute institute = instituteService.get(groupTO.getInstituteId());
+				group.setInstitute(institute);
+			}
 			addMembersToNewGroup(groupTO, group, appUser);
 			upsert(group);
 			appUser.getGroupIds().add(group.getId());
 		}
 		backendTaskService.createSendGroupAddNotificationTask(group.getId());
 		backendTaskService.createUpdateGroupMemberAccessPermissionsTask(group.getId());
-		CacheUtils.addGroupToCache(group);
 		return group;
 	}
 

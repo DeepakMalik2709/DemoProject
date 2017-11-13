@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.fileupload.MultipartStream;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
@@ -36,6 +37,8 @@ import com.notes.nicefact.comparator.CreatedDateComparator;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
+import com.notes.nicefact.entity.Institute;
+import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
@@ -50,7 +53,7 @@ import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
 import com.notes.nicefact.service.GroupService;
-import com.notes.nicefact.service.LibraryService;
+import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.TagService;
@@ -62,6 +65,7 @@ import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
 import com.notes.nicefact.to.GroupTO;
+import com.notes.nicefact.to.InstituteTO;
 import com.notes.nicefact.to.NotificationTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
@@ -86,23 +90,54 @@ public class SecureController extends CommonController {
 		json.put(Constants.CODE, Constants.RESPONSE_OK);
 		AppUser user = CurrentContext.getAppUser();
 		if (null != user) {
-			if(StringUtils.isBlank(user.getRefreshTokenAccountEmail())){
-				if(null == user.getGoogleDriveMsgDate() ||  ((new Date().getTime() - user.getGoogleDriveMsgDate().getTime())   > (1*24*60*60*1000) )){
-					EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-					AppUserService appUserService = new AppUserService(em);
-					AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
-					dbUser.setGoogleDriveMsgDate(new Date());
-					appUserService.upsert(dbUser);
-					req.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, dbUser);
+			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+			try {
+				if (StringUtils.isBlank(user.getRefreshTokenAccountEmail())) {
+					if (null == user.getGoogleDriveMsgDate() || ((new Date().getTime() - user.getGoogleDriveMsgDate().getTime()) > (1 * 24 * 60 * 60 * 1000))) {
+						AppUserService appUserService = new AppUserService(em);
+						AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
+						dbUser.setGoogleDriveMsgDate(new Date());
+						appUserService.upsert(dbUser);
+						req.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, dbUser);
+					}
+				}
+				List<InstituteMember> instituteMemberList = Utils.getInstitutesFromSession(req.getSession());
+				if (null == instituteMemberList) {
+					InstituteService instituteService = new InstituteService(em);
+					instituteMemberList = instituteService.fetchJoinedInstituteMembers(user.getEmail());
+					Utils.detachInstituteMembers(instituteMemberList);
+					req.getSession().setAttribute(Constants.SESSION_INSTITUTES, instituteMemberList);
+				}
+				List<InstituteTO> institutes = new ArrayList<>();
+				if(instituteMemberList.isEmpty()){
+					if (null == user.getAddInstituteMsgDate() || ((new Date().getTime() - user.getAddInstituteMsgDate().getTime()) > (1 * 24 * 60 * 60 * 1000))) {
+						AppUserService appUserService = new AppUserService(em);
+						AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
+						dbUser.setAddInstituteMsgDate(new Date());
+						appUserService.upsert(dbUser);
+						req.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, dbUser);
+					}
+				}else{
+					InstituteTO instituteTO;
+					for (InstituteMember member : instituteMemberList) {
+						instituteTO = new InstituteTO(member);
+						institutes.add(instituteTO);
+					}
+				}
+				json.put(Constants.SESSION_INSTITUTES, institutes);
+				Map<String, Object> userMap = user.toMap();
+				json.put(Constants.LOGIN_USER, userMap);
+				json.put(Constants.CONTEXT, CurrentContext.getCommonContext().toMap());
+				CurrentContext.getCommonContext().setMessage(null);
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+				json.put(Constants.MESSAGE, e.getMessage());
+			} finally {
+				if (em.isOpen()) {
 					em.close();
 				}
 			}
-			
-			
-			Map<String, Object> userMap = user.toMap();
-			json.put(Constants.LOGIN_USER, userMap);
-			json.put(Constants.CONTEXT, CurrentContext.getCommonContext().toMap());
-			CurrentContext.getCommonContext().setMessage(null);
 		}
 
 		renderResponseJson(json, response);
@@ -832,8 +867,6 @@ public class SecureController extends CommonController {
 		try {
 			AppUser user = (AppUser) req.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 			PostService postService = new PostService(em);
-			LibraryService libService = new LibraryService(em);
-		
 			CommonEntityService commonEntityService = new CommonEntityService(em);
 			PostFile postFile = postService.getByServerName(serverName);
 			if (postFile == null) {
@@ -942,22 +975,22 @@ public class SecureController extends CommonController {
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
+			AppUser user = CurrentContext.getAppUser();
 			PostService postService = new PostService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
-			List<Object> feed = new ArrayList<>();
-			List<PostTO> postTos = postService.fetchMyPosts(searchTO, CurrentContext.getAppUser());
-			feed.addAll(postTos);
+			List<PostTO> postTos = postService.fetchMyPosts(searchTO, user);
 			try {
 				com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 				// List the next 10 events from the primary calendar.
 				if (service != null) {
 					Events events = service.events().list("primary").execute();
 					List<Event> items = events.getItems();
-					AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 					if (items.size() > 0) {
 						for (Event event : items) {
-							postTos.add(new PostTO(event, user));
+							PostTO postto = new PostTO(event, user);
+							postto.setId(RandomUtils.nextLong());
+							postTos.add(postto);
 						}
 					}
 
@@ -966,12 +999,11 @@ public class SecureController extends CommonController {
 				logger.error(e.getMessage());
 			}
 			Collections.sort(postTos, new CreatedDateComparator());
-			feed.addAll(postTos);
-			if (feed.isEmpty()) {
+			if (postTos.isEmpty()) {
 				json.put(Constants.CODE, Constants.NO_RESULT);
 			} else {
 
-				json.put(Constants.DATA_ITEMS, feed);
+				json.put(Constants.DATA_ITEMS, postTos);
 				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
 				json.put(Constants.CODE, Constants.RESPONSE_OK);
 				json.put(Constants.TOTAL, postTos.size());
@@ -979,7 +1011,6 @@ public class SecureController extends CommonController {
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
 			json.put(Constants.MESSAGE, e.getMessage());
 		} finally {
@@ -1168,7 +1199,8 @@ public class SecureController extends CommonController {
 		logger.info("markNotificationAsRead exit");
 	}
 	
-
+	/* task methods start */
+	
 	@POST
 	@Path("task/submission")
 	public void taskSubmission(TaskSubmissionTO sumbmissionTO, @Context HttpServletRequest request, @Context HttpServletResponse response) {
@@ -1180,7 +1212,7 @@ public class SecureController extends CommonController {
 			TaskSubmission post = taskService.upsertTaskSubmission(sumbmissionTO, CurrentContext.getAppUser());
 			TaskSubmissionTO savedTO = new TaskSubmissionTO(post);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, savedTO);
+			/*json.put(Constants.DATA_ITEM, savedTO);*/
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e );
 
@@ -1222,4 +1254,303 @@ public class SecureController extends CommonController {
 		logger.info("downlaodTaskSubmission exit");
 	}
 	
+	/* task methods end */
+	
+	/* institute methods start */
+	@POST
+	@Path("/institute/upsert")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void upsertInstitute(InstituteTO instituteTO, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("upsertInstitute start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			Institute institute = instituteService.upsert(instituteTO, CurrentContext.getAppUser());
+			InstituteMember member = instituteService.fetchInstituteMember(institute.getId(), CurrentContext.getEmail());
+			InstituteTO savedTO = new InstituteTO(member);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, savedTO);
+			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, CurrentContext.getAppUser());
+			request.getSession().removeAttribute(Constants.SESSION_INSTITUTES);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("upsertInstitute exit");
+	}
+
+
+
+	@POST
+	@Path("/institute/{instituteId}/members")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void addInstituteMembers(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId, GroupChildrenTO members) {
+		logger.info("start : addInstituteMembers");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			InstituteTO instituteTO = instituteService.addInstituteMembers(instituteId, members, CurrentContext.getAppUser());
+			json.put(Constants.DATA_ITEM, instituteTO);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : addInstituteMembers");
+	}
+	
+	@POST
+	@Path("/institute/{instituteId}/member/update")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void updateInstituteMembers(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId, GroupMemberTO memberTO) {
+		logger.info("start : updateInstituteMembers");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			GroupMemberTO instituteTO = instituteService.updateInstituteMember(instituteId, memberTO, CurrentContext.getAppUser());
+			json.put(Constants.DATA_ITEM, instituteTO);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : updateInstituteMembers");
+	}
+
+	@POST
+	@Path("/institute/{instituteId}/join")
+	public void joinInstitute(@PathParam("instituteId") long instituteId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("joinInstitute start, instituteId : " + instituteId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			AppUser user = CacheUtils.getAppUser( CurrentContext.getEmail());
+			InstituteMember member = instituteService.joinInstitute(instituteId, user);
+			if (null == member) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			} else {
+				GroupMemberTO memberTO = new GroupMemberTO(member);
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, memberTO);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("joinInstitute exit");
+	}
+	
+	@POST
+	@Path("/institute/{instituteId}/approveJoin")
+	public void joinInstituteApprove(@PathParam("instituteId") long instituteId, GroupMemberTO memberTO1, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("joinInstituteApprove start, instituteId : " + instituteId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			AppUser user = CacheUtils.getAppUser( CurrentContext.getEmail());
+			InstituteMember member = instituteService.approveJoinInstitute(instituteId,memberTO1,  user);
+			if (null == member) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			} else {
+				GroupMemberTO memberTO = new GroupMemberTO(member);
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, memberTO);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("joinInstituteApprove exit");
+	}
+	
+	@GET
+	@Path("/institute/{instituteId}/joinRequests")
+	public void fetchInstituteJoinRequests(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId) {
+		logger.info("start : fetchInstituteJoinRequests");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			List<GroupMemberTO> members = instituteService.fetchInstituteJoinRequests(instituteId, searchTO);
+			json.put(Constants.DATA_ITEMS, members);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			if (!members.isEmpty()) {
+				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : fetchInstituteJoinRequests");
+	}
+
+	
+	@GET
+	@Path("/institute/{instituteId}/members")
+	public void fetchInstituteMembers(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId) {
+		logger.info("start : fetchInstituteMembers");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			List<GroupMemberTO> members = instituteService.fetchInstituteMembers(instituteId, searchTO);
+			json.put(Constants.DATA_ITEMS, members);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			if (!members.isEmpty()) {
+				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : fetchInstituteMembers");
+	}
+
+	@DELETE
+	@Path("/institute/{instituteId}/members/{memberId}")
+	public void deleteInstituteMember(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId, @PathParam("memberId") long memberId) {
+		logger.info("start : deleteInstituteMember");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			instituteService.deleteInstituteMember(instituteId, memberId, CurrentContext.getAppUser());
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : deleteInstituteMember");
+	}
+
+
+	@POST
+	@Path("/institute/{instituteId}/members/{memberId}/toggleBlock")
+	public void toggleInstituteBlock(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId, @PathParam("memberId") long memberId,
+			@QueryParam("isBlocked") boolean isBlocked) {
+		logger.info("start : toggleInstituteBlock");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			InstituteMember member = instituteService.toggleInstituteBlock(instituteId, memberId, isBlocked);
+			GroupMemberTO to = new GroupMemberTO(member);
+			json.put(Constants.DATA_ITEM, to);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : toggleInstituteBlock");
+	}
+	
+	@GET
+	@Path("/institute/search")
+	public void searchInstitutes(@Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("start : searchInstitutes ");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			List<Institute> institutesList = instituteService.searchInstitutes( searchTO);
+			List<InstituteTO> institutes = new ArrayList<>();
+			InstituteTO instituteTO;
+			for (Institute institute : institutesList) {
+				instituteTO = new InstituteTO(institute);
+				institutes.add(instituteTO);
+			}
+			
+			json.put(Constants.DATA_ITEMS, institutes);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			if (!institutes.isEmpty()) {
+				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : searchInstitutes");
+	}
+	
+	/* institute methods end */
 }

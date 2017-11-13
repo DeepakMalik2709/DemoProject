@@ -11,6 +11,7 @@
 <section class="content">
 
 <!-- Small boxes (Stat box) -->
+{{!--
 <div class="row">
     <div class="col-lg-3 col-xs-6">
         <!-- small box -->
@@ -32,8 +33,48 @@
         </div>
     </div>
 </div>
+--}}
 <!-- /.row -->
 <div class="row">
+
+	<section class="col-lg-12 connectedSortable">    
+		<div class="box box-primary">
+              <div class="box-header" style="cursor: move;">
+                 <!-- tools box -->
+                 <div class="pull-right box-tools">                                        
+                 </div><!-- /. tools -->
+
+                 <i class="fa fa-calendar"></i>
+                 <h3 class="box-title">
+                     Today's Schedule
+                 </h3>
+             </div>
+             <div class="box-body no-padding">
+                 <div class="table-responsive">
+                     <!-- .table - Uses sparkline charts-->
+                     <table class="table table-striped">
+                         <tbody><tr>
+                             <th>Title</th>
+                             <th>Type</th>
+                             <th>Timing/Deadline</th>
+                         </tr>
+                         {{#each model.todaySchedules as |schedule|}}
+                         <tr>
+                             <td>{{schedule.title}}</td>
+                             <td>{{schedule.type}}</td>
+                             <td>{{schedule.timing}}</td>
+                         </tr>
+                         {{else}}
+						  Hey, You are free today.. :)
+						 {{/each}}
+                         
+                     </tbody></table><!-- /.table -->
+                 </div>
+             </div><!-- /.box-body-->
+         </div>    
+    </section>
+    
+    {{!--
     <section class="col-lg-6 connectedSortable">    
     	<div class="box box-primary">
             <div class="box-header">
@@ -79,64 +120,12 @@
            
         </div>           
     </section>
-    <section class="col-lg-6 connectedSortable">
-    	  <div class="box box-success">
-            <div class="box-header">
-                <h3 class="box-title"><i class="fa fa-comments-o"></i> Post</h3>
-                <div class="box-tools pull-right" data-toggle="tooltip" title="Status">
-                    <div class="btn-group" data-toggle="btn-toggle" >
-                        <button type="button" class="btn btn-default btn-sm active"><i class="fa fa-square text-green"></i></button>                                            
-                        <button type="button" class="btn btn-default btn-sm"><i class="fa fa-square text-red"></i></button>
-                    </div>
-                </div>
-            </div>
-            <div class="box-body chat" id="chat-box">
-                <!-- chat item -->
-               {{#each posts as |post|}}
-				 <div class="row">
-				{{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
-				</div>   
-				{{/each}}
-				
-{{#if noRecords}}
- <div class="row">
-
-  <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Posts
-                     
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <p>
-                                   There are no posts. Try posting in a group.
-                                    </p>
-                                </div>
-                                <!-- /.col-lg-4 (nested) -->
-                                <div class="col-lg-8">
-                                    <div id="morris-bar-chart"></div>
-                                </div>
-                                <!-- /.col-lg-8 (nested) -->
-                            </div>
-                            <!-- /.row -->
-                        </div>
-                        <!-- /.panel-body -->
-                    </div>
- </div>
- {{/if}}
-            </div><!-- /.chat -->
-            <div class="box-footer">
-                <div class="input-group">
-                    <input class="form-control" placeholder="Type message..."/>
-                    <div class="input-group-btn">
-                        <button class="btn btn-success"><i class="fa fa-plus"></i></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    
+    --}}
+    
+    
+    
+    
 </div>          <!-- /.row -->   
 
 

@@ -32,6 +32,10 @@ public class GroupTO {
 	private String icon;
 
 	private long id;
+	
+	private Long instituteId;
+	
+	private String instituteName;
 
 	boolean isAdmin;
 	boolean isMember;
@@ -79,6 +83,10 @@ public class GroupTO {
 				GroupMemberTO postReactionTO = new GroupMemberTO(member);
 				members.add(postReactionTO);
 			}
+		}
+		if(group.getInstitute() !=null){
+			this.instituteId = group.getInstitute().getId();
+			this.instituteName = group.getInstitute().getName();
 		}
 		if (CurrentContext.getAppUser() != null) {
 			isMember = CurrentContext.getAppUser().getGroupIds().contains(id);
@@ -237,6 +245,22 @@ public class GroupTO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Long getInstituteId() {
+		return instituteId;
+	}
+
+	public void setInstituteId(Long instituteId) {
+		this.instituteId = instituteId;
+	}
+
+	public String getInstituteName() {
+		return instituteName;
+	}
+
+	public void setInstituteName(String instituteName) {
+		this.instituteName = instituteName;
 	}
 
 }
