@@ -13,6 +13,9 @@ export default Ember.Route.extend(authenticationMixin, {
         this._super(controller, model);
         controller.set('pageTitle', 'Create Group');
         controller.set('buttonLabel', 'Create');
+        var context = this.contextService.fetchContext((result)=>{
+        	 controller.set('institutes', result.institutes);
+        });
     },
     renderTemplate() {
         this.render('group/upsert');

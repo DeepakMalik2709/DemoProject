@@ -19,7 +19,6 @@ import javax.persistence.Transient;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.notes.nicefact.entity.AppUser.AUTHORIZED_SCOPES;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.util.Constants;
 
@@ -125,6 +124,15 @@ public class AppUser extends CommonEntity {
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	Set<Long> groupIds;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<Long> instituteIds;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<Long> joinRequestGroups;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<Long> joinRequestInstitutes;
 
 	@Basic
 	@Enumerated(EnumType.STRING)
@@ -132,9 +140,18 @@ public class AppUser extends CommonEntity {
 	
 	String googleDriveFolderId;
 	
+	String googleDriveAttachmentsFolderId;
+	String googleDriveLibraryFolderId;
+	
+	String taskSubmissionFolderId;
+	String tutorialFolderId;
+	String scheduleFolderId;
 	@Basic
 	private Date googleDriveMsgDate;
 
+	@Basic
+	private Date addInstituteMsgDate; 
+	
 	public enum GENDER {
 		MALE, FEMALE
 	};
@@ -182,7 +199,9 @@ public class AppUser extends CommonEntity {
 		if(this.googleDriveMsgDate !=null){
 			map.put("googleDriveMsgDate", this.googleDriveMsgDate.getTime());
 		}
-		
+		if(this.addInstituteMsgDate !=null){
+			map.put("addInstituteMsgDate", this.addInstituteMsgDate.getTime());
+		}
 		
 		map.put("sendCommentMentiondEmail", getSendCommentMentiondEmail());
 		map.put("sendCommentOnMentiondPostEmail", getSendCommentOnMentiondPostEmail());
@@ -195,6 +214,13 @@ public class AppUser extends CommonEntity {
 		return map;
 	}
 
+	public String getScheduleFolderId() {
+		return scheduleFolderId;
+	}
+
+	public void setScheduleFolderId(String scheduleFolderId) {
+		this.scheduleFolderId = scheduleFolderId;
+	}
 	public Set<AUTHORIZED_SCOPES> getScopes() {
 		if(null == scopes){
 			scopes = new HashSet<>();
@@ -214,6 +240,14 @@ public class AppUser extends CommonEntity {
 		return getScopes().contains(AUTHORIZED_SCOPES.CALENDAR);
 	}
 	
+	public String getTutorialFolderId() {
+		return tutorialFolderId;
+	}
+
+	public void setTutorialFolderId(String tutorialFolderId) {
+		this.tutorialFolderId = tutorialFolderId;
+	}
+
 	public Date getGoogleDriveMsgDate() {
 		return googleDriveMsgDate;
 	}
@@ -316,6 +350,17 @@ public class AppUser extends CommonEntity {
 
 	public String getRefreshToken() {
 		return refreshToken;
+	}
+
+	public Set<Long> getInstituteIds() {
+		if (null == instituteIds) {
+			this.instituteIds = new HashSet<>();
+		}
+		return instituteIds;
+	}
+
+	public void setInstituteIds(Set<Long> instituteIds) {
+		this.instituteIds = instituteIds;
 	}
 
 	public Set<Long> getGroupIds() {
@@ -564,6 +609,61 @@ public class AppUser extends CommonEntity {
 		return displayName;
 	}
 
+	
+
+	public String getTaskSubmissionFolderId() {
+		return taskSubmissionFolderId;
+	}
+
+	public void setTaskSubmissionFolderId(String taskSubmissionFolderId) {
+		this.taskSubmissionFolderId = taskSubmissionFolderId;
+	}
+	public String getGoogleDriveAttachmentsFolderId() {
+		return googleDriveAttachmentsFolderId;
+	}
+
+	public void setGoogleDriveAttachmentsFolderId(String googleDriveAttachmentsFolderId) {
+		this.googleDriveAttachmentsFolderId = googleDriveAttachmentsFolderId;
+	}
+
+	public String getGoogleDriveLibraryFolderId() {
+		return googleDriveLibraryFolderId;
+	}
+
+	public void setGoogleDriveLibraryFolderId(String googleDriveLibraryFolderId) {
+		this.googleDriveLibraryFolderId = googleDriveLibraryFolderId;
+	}
+
+	public Date getAddInstituteMsgDate() {
+		return addInstituteMsgDate;
+	}
+
+	public void setAddInstituteMsgDate(Date addInstituteMsgDate) {
+		this.addInstituteMsgDate = addInstituteMsgDate;
+	}
+
+	public Set<Long> getJoinRequestGroups() {
+		if (null == joinRequestGroups) {
+			this.joinRequestGroups = new HashSet<>();
+		}
+		return joinRequestGroups;
+	}
+
+	public void setJoinRequestGroups(Set<Long> joinRequestGroups) {
+		this.joinRequestGroups = joinRequestGroups;
+	}
+
+	public Set<Long> getJoinRequestInstitutes() {
+		if (null == joinRequestInstitutes) {
+			this.joinRequestInstitutes = new HashSet<>();
+		}
+		return joinRequestInstitutes;
+	}
+
+	public void setJoinRequestInstitutes(Set<Long> joinRequestInstitutes) {
+		this.joinRequestInstitutes = joinRequestInstitutes;
+	}
+
 	@Override
 	public String toString() {
 		return "AppUser [email=" + email + ", photoUrl=" + photoUrl + ", uploadedPhotoPath=" + uploadedPhotoPath + ", getDisplayName()=" + getDisplayName() + "]";
@@ -575,5 +675,4 @@ public class AppUser extends CommonEntity {
 		email = email.toLowerCase().trim();
 		super.preStore();
 	}
-
 }

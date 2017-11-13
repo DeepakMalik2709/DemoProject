@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -26,6 +27,9 @@ public class Group extends CommonEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Institute institute;
+	
 	// members in group
 	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<GroupMember> members = new HashSet<>();
@@ -88,6 +92,38 @@ public class Group extends CommonEntity {
 	// description of group
 	@Column(columnDefinition = "TEXT")
 	String description;
+
+	String taskFolderId;
+	String postFolderId;
+	
+	String assignmentFolderId;
+	
+	
+	
+
+	public String getAssignmentFolderId() {
+		return assignmentFolderId;
+	}
+
+	public void setAssignmentFolderId(String assignmentFolderId) {
+		this.assignmentFolderId = assignmentFolderId;
+	}
+
+	public String getTaskFolderId() {
+		return taskFolderId;
+	}
+
+	public void setTaskFolderId(String taskFolderId) {
+		this.taskFolderId = taskFolderId;
+	}
+
+	public String getPostFolderId() {
+		return postFolderId;
+	}
+
+	public void setPostFolderId(String postFolderId) {
+		this.postFolderId = postFolderId;
+	}
 
 
 
@@ -240,6 +276,14 @@ public class Group extends CommonEntity {
 	public void setMemberGroupsIds(Set<Long> memberGroupsIds) {
 		this.memberGroupsIds = memberGroupsIds;
 	}
+	
+	public Institute getInstitute() {
+		return institute;
+	}
+
+	public void setInstitute(Institute institute) {
+		this.institute = institute;
+	}
 
 	public Group() {
 		super();
@@ -272,6 +316,4 @@ public class Group extends CommonEntity {
 		this.description = group.getDescription();
 		this.tagIds = new HashSet<>(group.getTagIds());
 	}
-
-	
 }

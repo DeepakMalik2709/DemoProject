@@ -19,48 +19,54 @@ public class SearchTO {
 		return first;
 	}
 
-	public void setFirst(int first) {
+	public SearchTO setFirst(int first) {
 		this.first = first;
+		return this;
 	}
 
 	public int getLimit() {
 		return limit;
 	}
 
-	public void setLimit(int limit) {
+	public SearchTO setLimit(int limit) {
 		this.limit = limit;
+		return this;
 	}
 
 	public String getSearchTerm() {
 		return searchTerm;
 	}
 
-	public void setSearchTerm(String searchTerm) {
+	public SearchTO setSearchTerm(String searchTerm) {
 		this.searchTerm = searchTerm;
+		return this;
 	}
 
 	public String getEmail() {
 		return email;
 	}
 
-	public void setEmail(String email) {
+	public SearchTO setEmail(String email) {
 		this.email = email;
+		return this;
 	}
 
 	public String getNextLink() {
 		return nextLink;
 	}
 
-	public void setNextLink(String nextLink) {
+	public SearchTO setNextLink(String nextLink) {
 		this.nextLink = nextLink;
+		return this;
 	}
 
 	public long getGroupId() {
 		return groupId;
 	}
 
-	public void setGroupId(long groupId) {
+	public SearchTO setGroupId(long groupId) {
 		this.groupId = groupId;
+		return this;
 	}
 
 	public SearchTO() {

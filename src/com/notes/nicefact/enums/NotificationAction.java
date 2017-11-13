@@ -24,8 +24,9 @@ public enum NotificationAction {
 	COMMENT_REPLY_MENTIONED(" mentioned you in a comment ", "notification_commented"),
 	/* general case of notification */
 	COMMENT_FOLLOWING( " commented on a post your following ", "notification_commented"),
-	/* someone added you to a group */
-	GROUP_ADDED(" added you to ", "notification_group_added");
+	/* someone added you to a group or institute*/
+	GROUP_ADDED(" added you to ", "notification_group_added"),
+	INSTITUTE_ADDED(" added you to ", "notification_institute_added");
 
 	String messageKey;
 	

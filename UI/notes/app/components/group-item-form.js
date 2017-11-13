@@ -5,16 +5,25 @@ export default Ember.Component.extend({
     userSearchTerm : '',
     languages : [{id :  "ENGLISH", label : "English"} ,{id: "HINDI", label : "Hindi" }],
     sharingOptions : [{ id : "PRIVATE" , label : "Private"},{ id : "PUBLIC" , label : "Public"}],
-    getYoutubeVideoId: function(url) {
-        var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        var match = url.match(regExp);
-
-        if (match && match[2].length == 11) {
-            return match[2];
-        } else {
-            return '';
-        }
-    },
+    institutes : [],
+    singleInstitute  : false,
+    hasInstitutes : false,
+    firstInstitute : null,
+    init() {
+	    this._super(...arguments);
+	    if(!this.item.id){
+	    	if(this.institutesList && this.institutesList.length){
+	    		this.hasInstitutes = true;
+	    		for(var i=0; i<this.institutesList.length ; i++){
+	    			var institute = this.institutesList[i];
+	    			this.institutes.pushObject({id :institute.id , label : institute.name });
+	    		}
+	    		this.singleInstitute = (this.institutes.length==1);
+	    		this.firstInstitute = this.institutes[0];
+	    	}
+	    }
+	  },
+	  
     actions: {
 
     	addLanguage(lang) {
@@ -68,5 +77,8 @@ export default Ember.Component.extend({
             var thisTags = this.item.get("tags");
             thisTags.removeObject(tag);
         },
+        setInstitute(institute){
+        	Ember.set(this.item, "instituteId" ,institute.id )
+        }
     }
 });

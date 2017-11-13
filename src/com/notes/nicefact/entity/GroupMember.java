@@ -36,6 +36,10 @@ public class GroupMember extends CommonEntity{
 	
 	private String folderPermissionId;
 	
+	private String libraryFolderId;
+	
+	private String taskSubmissionFolderId;
+	
 	private String error;
 	
 	String department;
@@ -72,6 +76,13 @@ public class GroupMember extends CommonEntity{
 		super();
 	}
 
+	public String getLibraryFolderId() {
+		return libraryFolderId;
+	}
+
+	public void setLibraryFolderId(String libraryFolderId) {
+		this.libraryFolderId = libraryFolderId;
+	}
 
 	public boolean getIsNotificationSent() {
 		return isNotificationSent;
@@ -173,9 +184,20 @@ public class GroupMember extends CommonEntity{
 		this.organization = organization;
 	}
 
+	public String getTaskSubmissionFolderId() {
+		return taskSubmissionFolderId;
+	}
+
+	public void setTaskSubmissionFolderId(String taskSubmissionFolderId) {
+		this.taskSubmissionFolderId = taskSubmissionFolderId;
+	}
+
+
 	@Override
 	public String toString() {
-		return "GroupMember [email=" + email + ", name=" + name + "]";
+		return "GroupMember [email=" + email + ", name=" + name + ", isAdmin=" + isAdmin + ", isBlocked=" + isBlocked + ", isAppUser=" + isAppUser + ", position=" + position + ", folderPermissionId="
+				+ folderPermissionId + ", libraryFolderId=" + libraryFolderId + ", taskSubmissionFolderId=" + taskSubmissionFolderId + ", error=" + error + ", department=" + department
+				+ ", organization=" + organization + ", isNotificationSent=" + isNotificationSent + "]";
 	}
 
 	@PreUpdate

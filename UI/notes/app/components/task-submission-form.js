@@ -21,9 +21,8 @@ export default Ember.Component.extend(postMixin , {
     		this.get("taskService").saveTaskSubmission(json).then((result)=>{
     			Ember.set(this, "isSaving", false)
     			if(result.code == 0){
-    				Ember.set(this.task , "isSubmitted" , true);
     				alert("Your submission has been saved");
-    				//Ember.get(this.item,'comments').pushObject(result.item);
+    				Ember.set(this.task , "isSubmitted" , true);
     			}else if(result.message){
     				alert(result.message);
     			}

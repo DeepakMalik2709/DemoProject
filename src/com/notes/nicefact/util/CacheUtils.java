@@ -19,9 +19,11 @@ import org.apache.log4j.Logger;
 
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.GroupService;
+import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.PostService;
 
 import net.spy.memcached.MemcachedClient;
@@ -45,9 +47,9 @@ public class CacheUtils {
 			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 			GroupService groupService = new GroupService(em);
 			group = groupService.get(id);
-			group.getMembers().size();
-			group.getMemberGroupsIds().size();
 			if (null!=group) {
+				group.getMembers().size();
+				group.getMemberGroupsIds().size();
 				em.detach(group);
 				putInCache(cacheKey, group);
 			}
@@ -151,6 +153,7 @@ public class CacheUtils {
 	public static void addUserToCache(AppUser user){
 		if (null!= user) {
 			user.getGroupIds().size();
+			user.getScopes().size();
 			String cacheKey = generateUserKey(user.getEmail());
 			putInCache(cacheKey, user);
 		}
@@ -165,6 +168,33 @@ public class CacheUtils {
 		}
 	}
 	
+	public static String generateInstituteKey(Long id) {
+		return "Institute_" + id;
+	}
+	
+	public static void addInstituteToCache(Institute institute ){
+		if (null!= institute) {
+			String cacheKey = generateInstituteKey(institute.getId());
+			putInCache(cacheKey, institute);
+		}
+	}
+	
+	public static Institute getInstitute(Long id) {
+		String cacheKey = generateInstituteKey(id);
+		Institute user = (Institute) getFromCache(cacheKey);
+		if (null == user) {
+			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+			InstituteService instituteService = new  InstituteService(em);
+			user = instituteService.get(id); 
+			if (null!=user) {
+				em.detach(user);
+				putInCache(cacheKey, user);
+			}
+			em.close();
+		}
+		return user;
+	}
+	
 	public static AppUser getAppUser(String email) {
 		String cacheKey = generateUserKey(email);
 		AppUser user = (AppUser) getFromCache(cacheKey);
@@ -173,6 +203,8 @@ public class CacheUtils {
 			AppUserService appUserService = new AppUserService(em);
 			user = appUserService.getAppUserByEmail(email);
 			if (null!=user) {
+				user.getScopes().size();
+				user.getGroupIds().size();
 				em.detach(user);
 				putInCache(cacheKey, user);
 			}
@@ -183,7 +215,7 @@ public class CacheUtils {
 	}
 
 	static String generateUserKey(String email) {
-		String cacheKey = "AppUser_" + email + "_1";
+		String cacheKey = "AppUser_" + email + "_2";
 		return cacheKey;
 	}
 

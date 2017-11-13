@@ -39,9 +39,11 @@ import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.GoogleCalendarService;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.TutorialService;
+import com.notes.nicefact.service.GoogleDriveService.FOLDER;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
+import com.notes.nicefact.to.MoveFileTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.Constants;
@@ -124,6 +126,17 @@ public class CalendarController extends CommonController {
 		logger.info("getPostGroupOrder exit");
 	}
 
+	
+	/* jkb : use following code to move files to shcedule foleer 
+	 * 
+	 * MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).addParents( FOLDER.Attachments, FOLDER.Schedule).setUser(user);
+	 * 
+	 * add all fiels to moveFileTO
+	 * moveFileTO.addFileIds(driveFile.getId());
+	 * 
+	 * after all files are added run 
+	 * driveService.moveFile(moveFileTO);
+	 */
 	@POST
 	@Path("/insertEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -233,7 +246,7 @@ public class CalendarController extends CommonController {
 							end = event.getEnd().getDate();
 						}						
 						
-						eventTos.add(new EventTO(event.getId(), event.getSummary(), start, end, Utils.getRandomColor(),Utils.getRandomColor()));
+						eventTos.add(new EventTO(event.getId(), event.getSummary(), "", start, end, Utils.getRandomColor(),Utils.getRandomColor()));
 						System.out.printf("%s (%s)\n", event.getSummary(), start);
 					}
 					EventsTO eventsTo = new EventsTO("1", eventTos);

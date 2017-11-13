@@ -22,6 +22,7 @@ export default Ember.Route.extend(authenticationMixin , {
         		sendCommentOnMentiondPostEmail : result.loginUser.sendCommentOnMentiondPostEmail  ,
         		sendCommentReplyEmail : result.loginUser.sendCommentReplyEmail  ,
         		sendCommentOnCommentEmail : result.loginUser.sendCommentOnCommentEmail  ,
+        		institutes : result.institutes ,
         		});
     		return user;
     	});
@@ -45,7 +46,7 @@ export default Ember.Route.extend(authenticationMixin , {
 	            	this.controller.set("isSaving", false);
 	            	if(result.code==0){
 	            		this.contextService.setLoginUser(result.item);
-	            		this.transitionTo('dashboard');
+	            		this.transitionTo('home');
 	            	}
 	            });
         	}
@@ -89,6 +90,38 @@ export default Ember.Route.extend(authenticationMixin , {
         toggleValue : function(attribute){
         	var model = this.controller.get('model');
         	model.toggleProperty(attribute);
-        }
+        },
+        addInstituteBtnClick:function(){
+        	Ember.$("#add-institute-modal").modal("show");
+        	this.get("controller").set("searchInstitutes", []);
+        	this.get("controller").set("instituteSearchTerm", '');
+        	this.controller.set( "showLoadingInstitutes", false);
+			this.controller.set("noInstitutes", false);
+        },
+        createNewInstitute:function(){
+        	this.transitionTo('institute.create' , { queryParams: { name: this.get("controller").get("instituteSearchTerm") }});
+        	
+        	// 
+        },
+        searchInstitutes:function(){
+        	this.controller.set( "showLoadingInstitutes", true);
+			this.controller.set("noInstitutes", false);
+        	this.get("controller").set("searchInstitutes", []);
+        	const adapter = this.store.adapterFor('institute');
+ 			adapter.searchByName(this.get("controller").get("instituteSearchTerm")).then((resp) => {
+ 				this.controller.set( "showLoadingInstitutes", false);
+ 				if(resp.length){
+ 					this.get("controller").set("searchInstitutes", resp);
+ 				}else{
+ 					this.controller.set("noInstitutes", true);
+ 				}
+	    			
+	    		});
+        },
+        joinInstituteClick(institute){
+        		const instituteAdapter = this.store.adapterFor('institute');
+        		instituteAdapter.joinInstitute(institute.id);
+        		alert("your request has been sent for approval.")
+        },
     }
 });

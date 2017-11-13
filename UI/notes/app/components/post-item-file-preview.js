@@ -36,14 +36,12 @@ export default Ember.Component.extend({
 			  if(this.useGoogleDrive){
 				  this.get("postService").addToLibrary(item).then((result)=>{
 					  Ember.set(this.item, "showLoading", false);
-					 
 		    		if(result.code == 0  ){
-		    			alert("file successfully add to your library.");
+		    			alert("file added to your library.");
 		    		}else{
 		    			alert("Error code "+result.code+" Message :"+result.message);
 		    		}
 		    	});
-				  console.log(item.name);
 			  }
 			  Ember.set(this.item, "showLoading", false);
 		 },
