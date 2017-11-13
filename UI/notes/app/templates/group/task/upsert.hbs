@@ -32,7 +32,7 @@
                         <div class="form-group overflow-hide">
                        {{post-comment-box controllerRef=controllerRef className="post-description" placeholder="Task details"   recipientList=model.recipients value=model.comment autoCompleteList=myList disabled=model.isSaving}}
                        </div>  
-                       {{task-item-deadline item=model}} 
+                       {{task-item-deadline item=model.deadlineTime}} 
                     {{new-file-upload files=model.files item=model}}
                     {{#unless model.id}}
                                      <div class="form-group">

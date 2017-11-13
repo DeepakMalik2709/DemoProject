@@ -14,7 +14,7 @@ export default Ember.Component.extend({
 		       this.set("minutesArray", minutesArray);
 		       this.set("hoursArray",hoursArray);
 		       this.set("dateValue",0);
-		      var deadlineTime = Ember.get(this.item, 'deadlineTime');
+		      var deadlineTime = this.item;
 		      if(deadlineTime){
 		    	  var now = moment(deadlineTime);
 		    	  var selectedHour = hoursArray.filterBy("id", now.hour())[0];
@@ -50,7 +50,7 @@ export default Ember.Component.extend({
 	     			if(selectedMinutes){
 	     				date += selectedMinutes* 60000;
 	     			}
-	     			Ember.set(this.item, 'deadlineTime', date)
+	     			this.item= date;
 	        	}
 		  },
     actions: {

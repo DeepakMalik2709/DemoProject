@@ -77,6 +77,12 @@ int noOfSubmissions;
 	
 	@Basic
 	Date deadline;
+
+	@Basic
+	Date fromDate;
+	
+	@Basic
+	Date toDate;
 	
 	@ElementCollection(fetch = FetchType.LAZY)
 	Set<String> submitters = new HashSet<>();
@@ -124,6 +130,12 @@ int noOfSubmissions;
 		}
 		if(post.getDeadlineTime()  >0){
 			this.deadline = new Date(post.getDeadlineTime());
+		}
+		if(post.getFromDate()  !=null){
+			this.fromDate =post.getFromDate();
+		}
+		if(post.getToDate()  !=null){
+			this.toDate =post.getToDate();
 		}
 		this.title = post.getTitle();
 	}
@@ -337,5 +349,21 @@ int noOfSubmissions;
 		}
 		accessList.addAll(accessSet);
 		
+	}
+
+	public Date getFromDate() {
+		return fromDate;
+	}
+
+	public void setFromDate(Date fromDate) {
+		this.fromDate = fromDate;
+	}
+
+	public Date getToDate() {
+		return toDate;
+	}
+
+	public void setToDate(Date toDate) {
+		this.toDate = toDate;
 	}
 }

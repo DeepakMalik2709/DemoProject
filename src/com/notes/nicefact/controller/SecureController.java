@@ -638,23 +638,7 @@ public class SecureController extends CommonController {
 			PostService postService = new PostService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
-			List<PostTO> postTos = postService.search(searchTO);
-			try {
-				com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-				// List the next 10 events from the primary calendar.
-				if (service != null) {
-					Events events = service.events().list("primary").execute();
-					List<Event> items = events.getItems();
-					AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-					if (items.size() > 0) {
-						for (Event event : items) {
-							postTos.add(new PostTO(event, user));
-						}
-					}
-				}
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-			}
+			List<PostTO> postTos = postService.search(searchTO);		
 			Collections.sort(postTos, new CreatedDateComparator());
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.TOTAL, postTos.size());

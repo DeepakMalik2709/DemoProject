@@ -1,6 +1,6 @@
  <div class="btn bg-navy btn-social" style="padding: 8px;"> 
     <a rel="popover" href="javascript:void(0)" style="padding: 8px;
-    color: white;" class="pointer span" {{action "hovered" on="mouseEnter"}}>{{item.name}}&nbsp;({{item.size}}) </a>
+    color: white;" class="pointer span h6" {{action "hovered" on="mouseEnter"}}>{{item.name}}&nbsp;({{item.size}}) </a>
   </div>
   
     <a class="{{if item.isDriveFile 'hide' 'show-inline' }}  btn bg-aqua btn-social"  data-toggle="tooltip" title="Download" style="float: right;margin-left: 2px;border-right: 1px solid rgba(255, 255, 255, 0.3);color: white;" target="blank" href="/a/secure/group/download?name={{item.serverName}}" download> <i class="fa fa-download" aria-hidden="true"></i></a>

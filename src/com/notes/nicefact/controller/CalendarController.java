@@ -34,6 +34,7 @@ import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.Utils;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
 @Path("/calendar")
 public class CalendarController extends CommonController {
@@ -78,17 +79,18 @@ public class CalendarController extends CommonController {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void createEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
 		logger.info("createEvent start , postId : ");
+		System.out.println("schedule :"+schedule);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
 			AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_100);
-			if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
+			/*if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
 				schedule.setAttendees(scheduleService.getGroupService().fetchMemberEmailFromGroup(schedule.getGroups(),searchTO));
-			}
+			}*/
 			Event createdEvent = scheduleService.createEvent(schedule,user);
-		
+			json.put("event",createdEvent);
 		}  catch (AllSchoolException e) {
 			logger.error(e.getMessage(), e);
 
@@ -119,7 +121,7 @@ public class CalendarController extends CommonController {
 
 	@GET
 	@Path("/calendars")
-	public void publicHome(@Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+	public void publicHome(@Context HttpServletRequest request, @Context HttpServletResponse response) {
 
 		System.out.println("in google event ");
 		Map<String, Object> json = new HashMap<>();

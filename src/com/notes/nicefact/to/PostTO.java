@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Basic;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttachment;
@@ -66,7 +68,9 @@ public class PostTO {
 	int reponseNo=0;
 	int reponseMaybe=0;
 	int totalAttendee=0;
+	Date fromDate;
 	
+	Date toDate;
 	int noOfSubmissions;
 
 	long deadlineTime;
@@ -77,11 +81,44 @@ public class PostTO {
 	Boolean isSubmitted = false;
 	
 	Boolean canSubmit = false;
-
+	
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
 	String title;
 	
-	public PostTO() {}
+	public PostTO(com.notes.nicefact.entity.Event schedule, AppUser user) {
+		this.id = schedule.getPostId();
+		this.groupId = schedule.getGroupId();
+		this.postType = POST_TYPE.SCHEDULE;
+		if(groupId !=null && groupId > 0){
+			Group group = CacheUtils.getGroup(this.groupId);
+			this.groupName =  group.getName();
+		}
+		this.comment = schedule.getComment();
+		if(this.comment ==null){
+			this.comment = schedule.getDescription();
+		}
+		this.fromDate = schedule.getStart();
+		this.toDate = schedule.getEnd();
+		this.createdByEmail = schedule.getCreatedByEmail();
+		this.createdByName = schedule.getCreatedByName();
+		this.updatedByEmail = schedule.getUpdatedByEmail();
+		this.updatedByName = schedule.getUpdatedByName();
+		this.createdTime = schedule.getCreatedTime();
+		this.updatedTime = schedule.getUpdatedTime();
+		this.numberOfReactions = schedule.getNumberOfReactions();
+		CommentTO commentTO;
+		for (PostComment comment : schedule.getComments()) {
+			commentTO = new CommentTO(comment);
+			this.comments.add(commentTO);
+		}
+		FileTO fileTO;
+		for(PostFile file : schedule.getFiles()){
+			fileTO= new FileTO(file);
+			this.files.add(fileTO);
+		}
+		this.title = schedule.getTitle();
+		
+	}
 	public PostTO(Post post) {
 		this.id = post.getId();
 		this.groupId = post.getGroupId();
@@ -435,6 +472,18 @@ public class PostTO {
 	}
 	public void setCanSubmit(Boolean canSubmit) {
 		this.canSubmit = canSubmit;
+	}
+	public Date getFromDate() {
+		return fromDate;
+	}
+	public void setFromDate(Date fromDate) {
+		this.fromDate = fromDate;
+	}
+	public Date getToDate() {
+		return toDate;
+	}
+	public void setToDate(Date toDate) {
+		this.toDate = toDate;
 	}
 	
 	

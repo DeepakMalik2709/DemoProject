@@ -5,6 +5,7 @@ const {
 } = Ember;
 export default Ember.Route.extend({
 
+	
     model() {
         return this.contextService.fetchContext();
     },

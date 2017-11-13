@@ -19,18 +19,23 @@ import com.notes.nicefact.controller.CalendarController;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.google.GoogleAppUtils;
+import com.notes.nicefact.to.PostTO;
+import com.notes.nicefact.util.Constants;
+import com.notes.nicefact.util.CurrentContext;
 import com.notes.nicefact.util.EntityManagerHelper;
 
 public class ScheduleService extends CommonService<Group> {
 	private final static Logger logger = Logger.getLogger(CalendarController.class.getName());
 	BackendTaskService backendTaskService ;
 	GroupService groupService ;
-	
+	PostService postService;
 	
 	public ScheduleService(EntityManager em) {
 		backendTaskService = new BackendTaskService(em);
 		groupService = new GroupService(em);
+		postService = new PostService(em);
 	}
 
 	public Event updateEvent(com.notes.nicefact.entity.Event schedule,AppUser user ) throws IOException, AllSchoolException {
@@ -56,6 +61,12 @@ public class ScheduleService extends CommonService<Group> {
 
 	public Event createEvent(com.notes.nicefact.entity.Event schedule,AppUser user) throws IOException, AllSchoolException {
 		com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
+		
+			PostTO postTo = new PostTO(schedule,user);
+			Post post = postService.upsert(postTo, CurrentContext.getAppUser());
+			PostTO savedTO = new PostTO(post);
+			
+		
 		logger.info("createEvent : "+schedule);
 		Event event= null;
 		if(service !=null){
@@ -100,7 +111,8 @@ public class ScheduleService extends CommonService<Group> {
 		
 		String calendarId = "primary";
 		event = service.events().insert(calendarId, event).execute();
-		System.out.printf("Event created: %s\n", event.getHtmlLink());		
+		System.out.printf("Event created: %s\n", event.getHtmlLink());
+		
 		}else{
 			throw new AllSchoolException(AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
 

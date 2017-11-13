@@ -32,7 +32,7 @@ Router.map(function() {
   this.route('calendar');
 
   this.route('new', function() {
-    this.route('event');
+    this.route('schedule');
   });
 });
 
