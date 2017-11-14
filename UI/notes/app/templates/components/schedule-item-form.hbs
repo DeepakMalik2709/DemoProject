@@ -1,31 +1,29 @@
 
                     <div class="box-body">
                    		
-                        <div class="form-group {{if titleValidation 'has-error'}}">                               	                                          
+                        <!-- <div class="form-group {{if titleValidation 'has-error'}}">                               	                                          
                             {{input type="text" value=model.title class="form-control" placeholder="Enter schedule  title" }}
                             {{#if titleValidation}}<label class="control-label"> Schedule title is mandatory.</label>{{/if}}  
+                        </div>  -->
+                        <div class="form-group ">                               	                                          
+                            {{input type="text" value=model.title class="form-control" placeholder="Enter schedule title" }}
                         </div> 
                        
-                        <div class="form-group {{if locationValidation 'has-error'}}">                                               
-                            {{input type="text" value=model.location class="form-control" placeholder="Enter schedule  location" }}
-                             {{#if locationValidation}}<label class="control-label"> Schedule location is mandatory.</label>{{/if}}  
+                        <div class="form-group">                                               
+                            {{input type="text" value=model.location class="form-control" placeholder="Enter schedule location" }}
                         </div>    
        
-                        <div class="form-group {{if startDateValidation 'has-error'}}">
-                    		{{task-item-deadline item=startDate}} 
-                 	   		{{#if startDateValidation}}<label class="control-label"> Start date must be less then end date.</label>{{/if}}  
+                        <div class="form-group">
+                    		{{task-item-deadline item= startDate}} 
                        </div> 
-                         <div class="form-group {{if endDateValidation 'has-error'}}">
-                           {{task-item-deadline item=endDate}}   
-                           {{#if endDateValidation}}<label class="control-label"> End date must be more then start date.</label>{{/if}}                    	 
+                         <div class="form-group">
+                           {{task-item-deadline item= endDate}}   
      				   </div>  
-                         <div class="form-group {{if attendeesValidation 'has-error'}}">
+                         <div class="form-group">
                          
 	                        {{#power-select selected=attendees  options=myGroups  placeholder="Please, select attendees"
   							  onchange=(action (mut attendees))  as |attendees| }}	  {{attendees.name}}   
   							  {{/power-select}}
-  							  
-  							{{#if attendeesValidation}}<label class="control-label"> Attendees are mandatory.</label>{{/if}}
 					  </div>                   
                         <div class="form-group">
                            {{new-file-upload files=model.files item=model}}
@@ -36,10 +34,10 @@
 	                    </div><!-- ./row -->
 	                    
                         <div class="box-footer">
-	                        <button  class="btn btn-primary" disabled="{{isDisabled}}" {{action 'saveEvent' model}}>{{buttonLabel}}</button>
+	                        <button  class="btn btn-primary" {{action 'saveEvent' model}}>{{buttonLabel}}</button>
 	                     
 	                        
-	                      <button  class="btn btn-default" {{action 'cancelClicked' item}}>Cancel</button>
+	                      <!-- <button  class="btn btn-default" {{action 'cancelClicked' item}}>Cancel</button> -->
 			              
 			            
 	                    </div>
