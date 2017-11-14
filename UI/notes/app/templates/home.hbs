@@ -19,7 +19,7 @@
 		{{else if post.isPost}}
 			{{post-item item=post updatePost="savePost" deletePost="deletePost"   }}
 		{{else if post.isSchedule}}
-			{{post-item item=post updatePost="savePost" deletePost="deletePost"  }}
+			{{schedule-item item=post updatePost="savePost" deletePost="deletePost"  }}
 		{{/if}}
 	</div>   
 {{/each}}
