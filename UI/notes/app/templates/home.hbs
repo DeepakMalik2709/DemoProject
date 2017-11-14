@@ -14,13 +14,13 @@
  <div class="row">
 {{#each posts as |post|}}
 	 <div class="col-md-12 col-lg-12  col-sm-12">
-	{{#if post.isTask}}
- {{task-item item=post editTask="editTask" deletePost="deletePost"   }}
- {{else if post.isPost}}
-{{post-item item=post updatePost="savePost" deletePost="deletePost"   }}
-{{else if post.isSchedule}}
-{{post-item item=post updatePost="savePost" deletePost="deletePost"  }}
-{{/if}}
+		{{#if post.isTask}}
+			{{task-item item=post editTask="editTask" deletePost="deletePost"   }}
+		{{else if post.isPost}}
+			{{post-item item=post updatePost="savePost" deletePost="deletePost"   }}
+		{{else if post.isSchedule}}
+			{{post-item item=post updatePost="savePost" deletePost="deletePost"  }}
+		{{/if}}
 	</div>   
 {{/each}}
 
