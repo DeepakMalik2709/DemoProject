@@ -7,7 +7,7 @@
                 <div class="col-md-9 col-sm-9 col-lg-9">
                 	<div class="row">
 	                    <div class="title h5 col-md-8 col-sm-8 col-lg-8"> 
-	                        <a href="javascript:void(0);"><b>{{item.createdByName}} hello</b></a>
+	                        <a href="javascript:void(0);"><b>{{item.createdByName}}</b></a>
 	                       posted in <b> {{#link-to 'group.posts' item.groupId tagName="a" class="text-muted cp"}}{{item.groupName}}{{/link-to}}</b>.
 	                    </div>
 	                   <div class="title h5 col-md-3 col-sm-3 col-lg-3 pull-right text-muted time"> {{item.createdDisplayTime}}</div>
@@ -33,8 +33,25 @@
 							</menu>
 						</footer>
 					</div>
+					<br>
 					<div class="row">
 					  	<div class="col-md-8 col-sm-8 col-lg-8"> 
+					  		<div>
+								{{#if isAttendee}}
+									<button class="btn btn-success" {{action 'updateResponse' "accepted"}}>Yes</button>
+									<button class="btn btn-info" {{action 'updateResponse' "tentative"}}>May Be</button>
+									<button class="btn btn-danger" {{action 'updateResponse' "declined"}}>No</button>
+								{{/if}}
+								{{#if isCreator}}
+									<span class="btn btn-success btn-flat disabled">Yes- {{schedule.reponseYes}}</span>
+									<span class="btn btn-info btn-flat disabled">May be- {{schedule.reponseMaybe}}</span>
+									<span class="btn btn-danger btn-flat disabled">No- {{schedule.reponseNo}}</span>
+								{{/if}}
+							</div>
+					  		
+					  		<div class="{{unless item.isEditing 'show' 'hide'}}"><h5><b>Marketing Class</b></h5></div> 
+					  		<div class="{{unless item.isEditing 'show' 'hide'}}"><h6><b>Room Number 201</b></h6></div>
+					  		<div class="{{unless item.isEditing 'show' 'hide'}}"><h6><b>Timing : 10/12/2017 09:00AM - 10/12/2017 11:00AM</b></h6></div>
 			                <div class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</div>
 			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box schedule=item className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">

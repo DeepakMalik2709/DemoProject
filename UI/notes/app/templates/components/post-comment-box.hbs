@@ -3,20 +3,8 @@ disabled={{disabled}}></div>   -->
 
 <div placeholder="{{placeholder}}" contenteditable="true" id="ember542" style=""
 class="col-md-8 col-sm-8 col-lg-8 contenteditable form-control {{className}}" disabled={{disabled}}></div> 
-{{#if isSchedule}}
-<div class="col-md-3 col-sm-3 col-lg-3">
-	{{#if isAttendee}}
-		<button class="btn btn-success" {{action 'updateResponse' "accepted"}}>Yes</button>
-		<button class="btn btn-info" {{action 'updateResponse' "tentative"}}>May Be</button>
-		<button class="btn btn-danger" {{action 'updateResponse' "declined"}}>No</button>
-	{{/if}}
-	{{#if isCreator}}
-		<span class="btn btn-success btn-flat disabled">Yes- {{schedule.reponseYes}}</span>
-		<span class="btn btn-info btn-flat disabled">May be- {{schedule.reponseMaybe}}</span>
-		<span class="btn btn-danger btn-flat disabled">No- {{schedule.reponseNo}}</span>
-	{{/if}}
-</div>
-{{/if}}
+
+
 
 
 

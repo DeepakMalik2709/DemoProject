@@ -6,9 +6,12 @@ export default Ember.Component.extend(postMixin ,{
 	disableReactButton : false,
 	recipientList : null,
 	originalComment : null,
+	isAttendee : false,
+	isCreator : true,
     init() {
 	    this._super(...arguments);
 	    this.cleanupPost(this.item);
+	    console.log(this.item.comment);
 	    this.initNewComment();
 	  },
 	initNewComment(){
