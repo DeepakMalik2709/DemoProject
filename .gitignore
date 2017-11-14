@@ -16,7 +16,7 @@
 /WebContent/analytics.js
 /WebContent/.classpath
 /war
-
+.classpath
 /.settings/com.google.appengine.eclipse.core.prefs
 /.settings/com.google.gdt.eclipse.core.prefs
 /.settings/com.google.gwt.eclipse.core.prefs
