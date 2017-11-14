@@ -46,18 +46,18 @@ public class CalendarController extends CommonController {
 
 	private final static Logger logger = Logger.getLogger(CalendarController.class.getName());
 
-		
 	@POST
 	@Path("/updateEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void updateEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+	public void updateEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,
+			@Context HttpServletRequest request) {
 		logger.info("reactToschedule start , postId : ");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
-			AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-			Event updatedEvent = scheduleService.updateEvent(schedule,user);
+			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+			Event updatedEvent = scheduleService.updateEvent(schedule, user);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEM, updatedEvent);
 		} catch (AllSchoolException e) {
@@ -70,7 +70,7 @@ public class CalendarController extends CommonController {
 
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
 			json.put(Constants.MESSAGE, e.getMessage());
-		}finally {
+		} finally {
 			if (em.isOpen()) {
 				em.close();
 			}
@@ -79,35 +79,38 @@ public class CalendarController extends CommonController {
 		logger.info("reactToschedule exit");
 	}
 
-	
-	/* jkb : use following code to move files to shcedule foleer 
+	/*
+	 * jkb : use following code to move files to shcedule foleer
 	 * 
-	 * MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).addParents( FOLDER.Attachments, FOLDER.Schedule).setUser(user);
+	 * MoveFileTO moveFileTO =
+	 * MoveFileTO.getInstances().setFileOwner(user.getEmail()).addParents(
+	 * FOLDER.Attachments, FOLDER.Schedule).setUser(user);
 	 * 
-	 * add all fiels to moveFileTO
-	 * moveFileTO.addFileIds(driveFile.getId());
+	 * add all fiels to moveFileTO moveFileTO.addFileIds(driveFile.getId());
 	 * 
-	 * after all files are added run 
-	 * driveService.moveFile(moveFileTO);
+	 * after all files are added run driveService.moveFile(moveFileTO);
 	 */
 	@POST
 	@Path("/insertEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void createEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+	public void createEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,
+			@Context HttpServletRequest request) {
 		logger.info("createEvent start , postId : ");
-		System.out.println("schedule :"+schedule);
+		System.out.println("schedule :" + schedule);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
-			AppUser user =(AppUser)  request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_100);
-			/*if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
-				schedule.setAttendees(scheduleService.getGroupService().fetchMemberEmailFromGroup(schedule.getGroups(),searchTO));
-			}*/
-			Event createdEvent = scheduleService.createEvent(schedule,user);
-			json.put("event",createdEvent);
-		}  catch (AllSchoolException e) {
+			/*
+			 * if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
+			 * schedule.setAttendees(scheduleService.getGroupService().
+			 * fetchMemberEmailFromGroup(schedule.getGroups(),searchTO)); }
+			 */
+			Event createdEvent = scheduleService.createEvent(schedule, user);
+			json.put("event", createdEvent);
+		} catch (AllSchoolException e) {
 			logger.error(e.getMessage(), e);
 
 			json.put(Constants.CODE, e.getErrorCode());
@@ -117,23 +120,23 @@ public class CalendarController extends CommonController {
 
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
 			json.put(Constants.MESSAGE, e.getMessage());
-		}finally {
+		} finally {
 			if (em.isOpen()) {
 				em.close();
 			}
 		}
 		renderResponseJson(json, response);
 		logger.info("createEvent exit");
-	    
+
 	}
-	
+
 	@GET
 	@Path(GoogleCalendarService.CALENDAR_CALLBACK)
-	public void googleDriveCallback(@QueryParam("code") String code, @QueryParam("error") String error, @Context HttpServletResponse response, @Context HttpServletRequest request) throws IOException,
+	public void googleDriveCallback(@QueryParam("code") String code, @QueryParam("error") String error,
+			@Context HttpServletResponse response, @Context HttpServletRequest request) throws IOException,
 			JSONException {
-		System.out.println("code :"+code+" error "+error+" response "+response.getStatus());
+		System.out.println("code :" + code + " error " + error + " response " + response.getStatus());
 	}
-	
 
 	@GET
 	@Path("/calendars")
@@ -143,17 +146,17 @@ public class CalendarController extends CommonController {
 		Map<String, Object> json = new HashMap<>();
 		try {
 			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-			if(service!=null){
+			if (service != null) {
 				// List the next 10 events from the primary calendar.
 				Events events = service.events().list("primary").execute();
 				List<Event> items = events.getItems();
 				List<EventTO> eventTos = new ArrayList<EventTO>();
-	
+
 				if (items.size() == 0) {
 					json.put(Constants.CODE, Constants.NO_RESULT);
 					System.out.println("No upcoming events found.");
 				} else {
-	
+
 					System.out.println("Upcoming events");
 					for (Event event : items) {
 						DateTime start = event.getStart().getDateTime();
@@ -163,16 +166,17 @@ public class CalendarController extends CommonController {
 						}
 						if (end == null) {
 							end = event.getEnd().getDate();
-						}						
-						
-						eventTos.add(new EventTO(event.getId(), event.getSummary(), "", start, end, Utils.getRandomColor(),Utils.getRandomColor()));
+						}
+
+						eventTos.add(new EventTO(event.getId(), event.getSummary(), "", start, end, Utils
+								.getRandomColor(), Utils.getRandomColor()));
 						System.out.printf("%s (%s)\n", event.getSummary(), start);
 					}
 					EventsTO eventsTo = new EventsTO("1", eventTos);
 					json.put(Constants.CODE, Constants.RESPONSE_OK);
 					json.put(Constants.DATA_ITEM, eventsTo);
 				}
-	
+
 				json.put(Constants.TOTAL, items.size());
 			}
 		} catch (Exception e) {
@@ -182,7 +186,5 @@ public class CalendarController extends CommonController {
 		}
 		renderResponseJson(json, response);
 	}
-		
-	
-	
+
 }
