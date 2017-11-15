@@ -26,12 +26,11 @@ import com.notes.nicefact.util.CurrentContext;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PostTO {
 
-	
-
 	Long id;
 	String eventId;
 	Long groupId;
 	String groupName;
+	String title;
 	String comment;
 	List<Long> groupIds = new ArrayList<>();
 	List<TagTO> tags = new ArrayList<>();
@@ -83,7 +82,6 @@ public class PostTO {
 	Boolean canSubmit = false;
 	
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
-	String title;
 	
 	public PostTO(com.notes.nicefact.entity.Event schedule, AppUser user) {
 		this.id = schedule.getPostId();
