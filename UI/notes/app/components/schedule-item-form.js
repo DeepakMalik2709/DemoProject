@@ -82,9 +82,7 @@ export default Ember.Component.extend({
 
             	//event.save().then(() => this.transitionTo('calendar'));
             	event.save(event).then((resp1) => {
- 	    			Ember.set(this, "isSaving", false);
- 	    			Ember.set(event, "isSaving", false);
- 	    			Ember.set(event, "showLoading", false);
+ 	    			
  	    			alert("Schedule posted.")
  	    			this.transitionTo('group.posts', event.groupId);
  	    			

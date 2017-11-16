@@ -63,9 +63,7 @@ export default Ember.Route.extend(authenticationMixin,{
 	    			 alert("Please select group to post task.")
 	    			 return;
 	    		 }
-	     		if(!Ember.get(this, "isSaving") ){
-	     			Ember.set(this, "isSaving", true);
-	     			Ember.set(task, "isSaving", true);
+	     	
 	     			Ember.set(task, "showLoading", true);
 	     			for(var i =0 ;i < selectedGroups.length ;i++){
 	     				Ember.get(task,"groupIds").pushObject(selectedGroups[i].id);
@@ -81,6 +79,6 @@ export default Ember.Route.extend(authenticationMixin,{
 	 	    			
 	 	    		});
 	     		}
-	     	}
+	     	
 	    }
 });

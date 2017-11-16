@@ -980,24 +980,7 @@ public class SecureController extends CommonController {
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, user);
-			try {
-				com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-				// List the next 10 events from the primary calendar.
-				if (service != null) {
-					Events events = service.events().list("primary").execute();
-					List<Event> items = events.getItems();
-					if (items.size() > 0) {
-						for (Event event : items) {
-							PostTO postto = new PostTO(event, user);
-							postto.setId(RandomUtils.nextLong());
-							postTos.add(postto);
-						}
-					}
-
-				}
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-			}
+			
 			Collections.sort(postTos, new CreatedDateComparator());
 			if (postTos.isEmpty()) {
 				json.put(Constants.CODE, Constants.NO_RESULT);

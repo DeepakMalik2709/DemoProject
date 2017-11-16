@@ -83,6 +83,10 @@ public class PostTO {
 	
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
 	
+	public PostTO(){
+		
+	}
+	
 	public PostTO(com.notes.nicefact.entity.Event schedule, AppUser user) {
 		this.id = schedule.getPostId();
 		this.groupId = schedule.getGroupId();

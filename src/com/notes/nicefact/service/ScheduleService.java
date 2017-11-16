@@ -22,9 +22,7 @@ import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.to.PostTO;
-import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
-import com.notes.nicefact.util.EntityManagerHelper;
 
 public class ScheduleService extends CommonService<Group> {
 	private final static Logger logger = Logger.getLogger(CalendarController.class.getName());
@@ -59,7 +57,7 @@ public class ScheduleService extends CommonService<Group> {
 		return updatedEvent;
 	}
 
-	public Event createEvent(com.notes.nicefact.entity.Event schedule,AppUser user) throws IOException, AllSchoolException {
+	public PostTO createEvent(com.notes.nicefact.entity.Event schedule,AppUser user) throws IOException, AllSchoolException {
 		com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 		
 			PostTO postTo = new PostTO(schedule,user);
@@ -93,7 +91,7 @@ public class ScheduleService extends CommonService<Group> {
 		
 		String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
 		event.setRecurrence(Arrays.asList(recurrence));
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		
 		
 		
 		
@@ -117,7 +115,7 @@ public class ScheduleService extends CommonService<Group> {
 			throw new AllSchoolException(AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
 
 		}
-		return event;
+		return savedTO;
 	}
 	
 	@Override
