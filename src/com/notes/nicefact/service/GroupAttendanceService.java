@@ -12,14 +12,14 @@ import org.apache.log4j.Logger;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.dao.GroupAttendenceDao;
 import com.notes.nicefact.entity.Group;
-import com.notes.nicefact.entity.GroupAttendence;
+import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.to.SearchTO;
 
 /**
  * @author user
  *
  */
-public class GroupAttendenceService extends CommonService<GroupAttendence> {
+public class GroupAttendanceService extends CommonService<GroupAttendance> {
 	private final static Logger logger = Logger.getLogger(GroupService.class.getName());
 	private GroupAttendenceDao groupAttendenceDao;
 	
@@ -27,7 +27,7 @@ public class GroupAttendenceService extends CommonService<GroupAttendence> {
 	
 	BackendTaskService backendTaskService;
 	EntityManager em ;
-	public GroupAttendenceService(EntityManager em) {
+	public GroupAttendanceService(EntityManager em) {
 		this.em = em;
 		groupAttendenceDao = new GroupAttendenceDao(em);
 		appUserService = new AppUserService(em);
@@ -35,25 +35,25 @@ public class GroupAttendenceService extends CommonService<GroupAttendence> {
 	}
 
 	@Override
-	protected CommonDAO<GroupAttendence> getDAO() {
+	protected CommonDAO<GroupAttendance> getDAO() {
 		return groupAttendenceDao;
 	}
 
-	public GroupAttendence upsert(GroupAttendence GroupAttendence) {
-		GroupAttendence db = super.upsert(GroupAttendence);
+	public GroupAttendance upsert(GroupAttendance GroupAttendence) {
+		GroupAttendance db = super.upsert(GroupAttendence);
 		return db;
 	}
 	
-	public GroupAttendence get(Long id) {
-		GroupAttendence GroupAttendence = super.get(id);
+	public GroupAttendance get(Long id) {
+		GroupAttendance GroupAttendence = super.get(id);
 		return GroupAttendence;
 	}
 
 	
 	
-	public List<GroupAttendence> fetchMyGroups(SearchTO searchTO, Group group) {
+	public List<GroupAttendance> fetchMyGroups(SearchTO searchTO, Group group) {
 		
-		List<GroupAttendence> list = groupAttendenceDao.getByGroup(group);
+		List<GroupAttendance> list = groupAttendenceDao.getByGroup(group);
 		
 		
 		return list;

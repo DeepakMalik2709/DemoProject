@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
  */
 
 @Entity
-public class GroupAttendence extends CommonEntity {
+public class GroupAttendance extends CommonEntity {
 
 	/**
 	 * 

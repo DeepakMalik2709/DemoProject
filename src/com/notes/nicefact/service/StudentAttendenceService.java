@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.dao.StudentAttendenceDao;
-import com.notes.nicefact.entity.GroupAttendence;
+import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.StudentAttendence;
 import com.notes.nicefact.to.SearchTO;
 
@@ -44,7 +44,7 @@ public class StudentAttendenceService  extends CommonService<StudentAttendence> 
 
 	
 	
-	public List<StudentAttendence> fetchMyGroups(SearchTO searchTO, GroupAttendence groupAttendence) {
+	public List<StudentAttendence> fetchMyGroups(SearchTO searchTO, GroupAttendance groupAttendence) {
 		
 		List<StudentAttendence> list = studentAttendenceDao.getByGroupAttendence(groupAttendence);
 		
