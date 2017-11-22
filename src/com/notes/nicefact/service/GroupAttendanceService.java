@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.dao.GroupAttendenceDao;
+import com.notes.nicefact.dao.StudentAttendenceDao;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.to.SearchTO;
@@ -20,15 +21,17 @@ import com.notes.nicefact.to.SearchTO;
  *
  */
 public class GroupAttendanceService extends CommonService<GroupAttendance> {
-	private final static Logger logger = Logger.getLogger(GroupService.class.getName());
+	private final static Logger logger = Logger.getLogger(GroupAttendanceService.class.getName());
 	private GroupAttendenceDao groupAttendenceDao;
 	
+	StudentAttendenceDao studentAttendenceDao;
 	AppUserService appUserService;
 	
 	BackendTaskService backendTaskService;
 	EntityManager em ;
 	public GroupAttendanceService(EntityManager em) {
 		this.em = em;
+		studentAttendenceDao = new StudentAttendenceDao(em);
 		groupAttendenceDao = new GroupAttendenceDao(em);
 		appUserService = new AppUserService(em);
 		backendTaskService  = new BackendTaskService(em);
@@ -57,5 +60,15 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 		
 		
 		return list;
+	}
+
+	public GroupAttendance createAttendance(GroupAttendance groupAttendance) {
+		
+		return null;
+	}
+
+	public GroupAttendance updateAttendance(GroupAttendance groupAttendance) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

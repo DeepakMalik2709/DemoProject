@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
+import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.service.GroupAttendanceService;
 import com.notes.nicefact.service.GroupService;
@@ -76,12 +77,17 @@ public class AttendanceController extends CommonController {
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
+			GroupAttendance groupAttendance =new GroupAttendance(groupAttendanceTO);
 			GroupAttendanceService groupAttendenceService = new GroupAttendanceService(em);
-			PostService postService = new PostService(em);
-			Post post = postService.upsert(postTo, CurrentContext.getAppUser());
-			PostTO savedTO = new PostTO(post);
+			if(groupAttendance.getId()==null){
+				groupAttendance = groupAttendenceService.createAttendance(groupAttendance);
+			}else{
+				groupAttendance = groupAttendenceService.updateAttendance(groupAttendance);
+			}
+			
+			
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, savedTO);
+			json.put(Constants.MESSAGE, "changes saved successfully.");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e );
 

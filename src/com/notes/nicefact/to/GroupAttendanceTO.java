@@ -3,11 +3,15 @@ package com.notes.nicefact.to;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GroupAttendanceTO {
 
+	private Long id;
+	
 	private Date attendenceDate;
 	
 	private String fromTime;
@@ -76,6 +80,14 @@ public class GroupAttendanceTO {
 
 	public void setStudentAttendances(List<StudentAttendanceTO> studentAttendances) {
 		this.studentAttendances = studentAttendances;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 }
