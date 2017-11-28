@@ -40,6 +40,14 @@ public class GroupAttendance extends CommonEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	private List<StudentAttendence> studentAttendences;
 
+	public List<StudentAttendence> getStudentAttendences() {
+		return studentAttendences;
+	}
+
+	public void setStudentAttendences(List<StudentAttendence> studentAttendences) {
+		this.studentAttendences = studentAttendences;
+	}
+
 	public GroupAttendance() {}
 	
 	public GroupAttendance(GroupAttendanceTO groupAttendanceTO) {

@@ -97,7 +97,16 @@ int noOfSubmissions;
 	
 	String title;
 	
+	String location;
 	
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	public Post() {
 		super();
 	}
@@ -137,6 +146,13 @@ int noOfSubmissions;
 		if(post.getToDate()  !=null){
 			this.toDate =post.getToDate();
 		}
+		if(post.getPostType()!=null){
+			this.postType=post.getPostType();
+		}
+		if(post.getLocation()!=null){
+			this.location = post.getLocation();
+		}
+		
 		this.title = post.getTitle();
 	}
 

@@ -79,12 +79,8 @@ public class AttendanceController extends CommonController {
 		try {
 			GroupAttendance groupAttendance =new GroupAttendance(groupAttendanceTO);
 			GroupAttendanceService groupAttendenceService = new GroupAttendanceService(em);
-			if(groupAttendance.getId()==null){
-				groupAttendance = groupAttendenceService.createAttendance(groupAttendance);
-			}else{
-				groupAttendance = groupAttendenceService.updateAttendance(groupAttendance);
-			}
 			
+			groupAttendance = groupAttendenceService.upsert(groupAttendance);
 			
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.MESSAGE, "changes saved successfully.");

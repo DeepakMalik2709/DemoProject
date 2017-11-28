@@ -106,7 +106,7 @@ public class CalendarController extends CommonController {
 		
 			
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEMS, createdEvent);
+			json.put(Constants.DATA_ITEM, createdEvent);
 		} catch (AllSchoolException e) {
 			logger.error(e.getMessage(), e);
 

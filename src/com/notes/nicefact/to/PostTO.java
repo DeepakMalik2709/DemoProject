@@ -32,6 +32,7 @@ public class PostTO {
 	String groupName;
 	String title;
 	String comment;
+	String location;
 	List<Long> groupIds = new ArrayList<>();
 	List<TagTO> tags = new ArrayList<>();
 	
@@ -77,6 +78,14 @@ public class PostTO {
 
 	Boolean isEdited = false;
 	
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	Boolean isSubmitted = false;
 	
 	Boolean canSubmit = false;
@@ -95,6 +104,7 @@ public class PostTO {
 			Group group = CacheUtils.getGroup(this.groupId);
 			this.groupName =  group.getName();
 		}
+		this.location = schedule.getLocation();
 		this.comment = schedule.getComment();
 		if(this.comment ==null){
 			this.comment = schedule.getDescription();

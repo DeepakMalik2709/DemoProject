@@ -14,6 +14,7 @@ import com.notes.nicefact.dao.GroupAttendenceDao;
 import com.notes.nicefact.dao.StudentAttendenceDao;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
+import com.notes.nicefact.entity.StudentAttendence;
 import com.notes.nicefact.to.SearchTO;
 
 /**
@@ -42,8 +43,11 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 		return groupAttendenceDao;
 	}
 
-	public GroupAttendance upsert(GroupAttendance GroupAttendence) {
-		GroupAttendance db = super.upsert(GroupAttendence);
+	public GroupAttendance upsert(GroupAttendance groupAttendence) {
+		GroupAttendance db = super.upsert(groupAttendence);
+		if(db.getId()!=null){
+			groupAttendence.setStudentAttendences((List<StudentAttendence>) studentAttendenceDao.upsertAll(groupAttendence.getStudentAttendences()));
+		}
 		return db;
 	}
 	
@@ -62,13 +66,4 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 		return list;
 	}
 
-	public GroupAttendance createAttendance(GroupAttendance groupAttendance) {
-		
-		return null;
-	}
-
-	public GroupAttendance updateAttendance(GroupAttendance groupAttendance) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

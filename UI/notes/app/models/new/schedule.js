@@ -5,8 +5,8 @@ export default DS.Model.extend({
 	
 	title: DS.attr(""),
 	location:DS.attr(""),
-	start:DS.attr('date',{defaultValue() { return new Date(); }}),
-	end:DS.attr('date',{defaultValue() { return new Date(); }}),
+	start:DS.attr('number'),
+	end:DS.attr('number'),
 	description: DS.attr('string'),
 	eventType:DS.attr('string'),
 	backgroundColor:DS.attr('string'),
