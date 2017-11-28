@@ -16,6 +16,7 @@ public class Constants {
 	public static final int RECORDS_5 = 5;
 	public static final int RECORDS_100 = 100;
 
+
 	public static final String DATA_MEMBER_GROUPS = "memberGroups";
 	
 	public static final String DATA_ITEMS = "items";

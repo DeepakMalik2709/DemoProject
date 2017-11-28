@@ -26,13 +26,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.fileupload.MultipartStream;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
 
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
 import com.notes.nicefact.comparator.CreatedDateComparator;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
@@ -48,7 +45,6 @@ import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.UnauthorizedException;
-import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
@@ -980,24 +976,7 @@ public class SecureController extends CommonController {
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
 			searchTO.setGroupId(groupId);
 			List<PostTO> postTos = postService.fetchMyPosts(searchTO, user);
-			try {
-				com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-				// List the next 10 events from the primary calendar.
-				if (service != null) {
-					Events events = service.events().list("primary").execute();
-					List<Event> items = events.getItems();
-					if (items.size() > 0) {
-						for (Event event : items) {
-							PostTO postto = new PostTO(event, user);
-							postto.setId(RandomUtils.nextLong());
-							postTos.add(postto);
-						}
-					}
-
-				}
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-			}
+			
 			Collections.sort(postTos, new CreatedDateComparator());
 			if (postTos.isEmpty()) {
 				json.put(Constants.CODE, Constants.NO_RESULT);

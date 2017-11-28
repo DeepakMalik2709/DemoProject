@@ -8,13 +8,15 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.notes.nicefact.to.GroupAttendanceTO;
+
 /**
  * @author user
  *
  */
 
 @Entity
-public class GroupAttendence extends CommonEntity {
+public class GroupAttendance extends CommonEntity {
 
 	/**
 	 * 
@@ -37,6 +39,20 @@ public class GroupAttendence extends CommonEntity {
 	
 	@OneToMany(fetch = FetchType.LAZY)
 	private List<StudentAttendence> studentAttendences;
+
+	public List<StudentAttendence> getStudentAttendences() {
+		return studentAttendences;
+	}
+
+	public void setStudentAttendences(List<StudentAttendence> studentAttendences) {
+		this.studentAttendences = studentAttendences;
+	}
+
+	public GroupAttendance() {}
+	
+	public GroupAttendance(GroupAttendanceTO groupAttendanceTO) {
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @return the attendenceDate

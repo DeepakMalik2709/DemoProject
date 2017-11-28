@@ -28,18 +28,12 @@ import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.GoogleCalendarService;
 import com.notes.nicefact.service.ScheduleService;
-import com.notes.nicefact.service.GroupService;
-import com.notes.nicefact.service.TutorialService;
-import com.notes.nicefact.service.GoogleDriveService.FOLDER;
-import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
-import com.notes.nicefact.to.MoveFileTO;
-import com.notes.nicefact.to.SearchTO;
+import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.Utils;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
 @Path("/calendar")
 public class CalendarController extends CommonController {
@@ -54,10 +48,11 @@ public class CalendarController extends CommonController {
 		logger.info("reactToschedule start , postId : ");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
 			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-			Event updatedEvent = scheduleService.updateEvent(schedule, user);
+			Event updatedEvent =  scheduleService.updateEvent(schedule, user);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEM, updatedEvent);
 		} catch (AllSchoolException e) {
@@ -102,14 +97,17 @@ public class CalendarController extends CommonController {
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
 			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_100);
+			
 			/*
 			 * if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
 			 * schedule.setAttendees(scheduleService.getGroupService().
 			 * fetchMemberEmailFromGroup(schedule.getGroups(),searchTO)); }
 			 */
-			Event createdEvent = scheduleService.createEvent(schedule, user);
-			json.put("event", createdEvent);
+			PostTO createdEvent = scheduleService.createEvent(schedule, user);
+		
+			
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, createdEvent);
 		} catch (AllSchoolException e) {
 			logger.error(e.getMessage(), e);
 

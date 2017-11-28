@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Basic;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttachment;
@@ -32,6 +30,7 @@ public class PostTO {
 	String groupName;
 	String title;
 	String comment;
+	String location;
 	List<Long> groupIds = new ArrayList<>();
 	List<TagTO> tags = new ArrayList<>();
 	
@@ -73,15 +72,33 @@ public class PostTO {
 	int noOfSubmissions;
 
 	long deadlineTime;
-
+	private String googleEventId;
+	public String getGoogleEventId() {
+		return googleEventId;
+	}
+	public void setGoogleEventId(String googleEventId) {
+		this.googleEventId = googleEventId;
+	}
 
 	Boolean isEdited = false;
 	
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	Boolean isSubmitted = false;
 	
 	Boolean canSubmit = false;
 	
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
+	
+	public PostTO(){
+		
+	}
 	
 	public PostTO(com.notes.nicefact.entity.Event schedule, AppUser user) {
 		this.id = schedule.getPostId();
@@ -91,6 +108,7 @@ public class PostTO {
 			Group group = CacheUtils.getGroup(this.groupId);
 			this.groupName =  group.getName();
 		}
+		this.location = schedule.getLocation();
 		this.comment = schedule.getComment();
 		if(this.comment ==null){
 			this.comment = schedule.getDescription();
@@ -109,13 +127,13 @@ public class PostTO {
 			commentTO = new CommentTO(comment);
 			this.comments.add(commentTO);
 		}
-		FileTO fileTO;
-		for(PostFile file : schedule.getFiles()){
-			fileTO= new FileTO(file);
-			this.files.add(fileTO);
+		
+		for(FileTO file : schedule.getFiles()){
+			
+			this.files.add(file);
 		}
 		this.title = schedule.getTitle();
-		
+		this.googleEventId=schedule.getGoogleEventId();
 	}
 	public PostTO(Post post) {
 		this.id = post.getId();
@@ -155,6 +173,10 @@ public class PostTO {
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
 		}
+		this.googleEventId = post.getGoogleEventId();
+		this.location = post.getLocation();
+		this.fromDate = post.getFromDate();
+		this.toDate = post.getToDate();
 	}
 
 	private POST_TYPE postType = POST_TYPE.SIMPLE;

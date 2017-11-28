@@ -97,7 +97,24 @@ int noOfSubmissions;
 	
 	String title;
 	
+	String location;
 	
+	private String googleEventId;
+	public String getGoogleEventId() {
+		return googleEventId;
+	}
+	public void setGoogleEventId(String googleEventId) {
+		this.googleEventId = googleEventId;
+	}
+	
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	public Post() {
 		super();
 	}
@@ -137,7 +154,15 @@ int noOfSubmissions;
 		if(post.getToDate()  !=null){
 			this.toDate =post.getToDate();
 		}
+		if(post.getPostType()!=null){
+			this.postType=post.getPostType();
+		}
+		if(post.getLocation()!=null){
+			this.location = post.getLocation();
+		}
+		
 		this.title = post.getTitle();
+		this.googleEventId = post.getGoogleEventId();
 	}
 
 	public void updateProps(Post post) {

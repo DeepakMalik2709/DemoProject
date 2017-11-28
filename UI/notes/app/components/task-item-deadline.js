@@ -1,8 +1,10 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+	 
 	 init() {
 		    this._super(...arguments);
+		    this.set('title',this.title);
 		    var hoursArray = [];
 		       for(var i = 0 ; i < 24; i++){
 		    	   hoursArray.push({label : (i) , id :i});
@@ -14,7 +16,7 @@ export default Ember.Component.extend({
 		       this.set("minutesArray", minutesArray);
 		       this.set("hoursArray",hoursArray);
 		       this.set("dateValue",0);
-		      var deadlineTime = this.item;
+		       var deadlineTime = Ember.get(this.item, this.fieldName);
 		      if(deadlineTime){
 		    	  var now = moment(deadlineTime);
 		    	  var selectedHour = hoursArray.filterBy("id", now.hour())[0];
@@ -40,6 +42,7 @@ export default Ember.Component.extend({
 		  },
 		  recalculate : function(){
 	        	var date = Ember.get(this,"dateValue");
+	        	
 	        	if(date){
 	        		date = date.getTime();
 	        		var selectedHour = this.get("selectedHour.id");
@@ -49,10 +52,10 @@ export default Ember.Component.extend({
 	     			}
 	     			if(selectedMinutes){
 	     				date += selectedMinutes* 60000;
-	     			}
-	     			this.item= date;
-	        	}
-		  },
+	     			}	     		
+	     			Ember.set(this.item, this.fieldName, date)	     			
+	        	}	      
+		  },		 
     actions: {
     	addDate() {
       		 this.recalculate();
