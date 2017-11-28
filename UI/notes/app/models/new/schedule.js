@@ -11,7 +11,8 @@ export default DS.Model.extend({
 	eventType:DS.attr('string'),
 	backgroundColor:DS.attr('string'),
 	borderColor:DS.attr('string'),
-	
+	 isSaving : DS.attr('boolean'),
+	  isSubmitted : DS.attr('boolean'),
 	attendees:DS.attr('string'),
 	
 	groups:DS.attr( ),
@@ -25,9 +26,9 @@ export default DS.Model.extend({
 	  updatedTime: DS.attr(""),
 	  numberOfReactions: DS.attr(""),
 	 comments : DS.attr(""),
-	  files : DS.attr(""),
-	
-	
+	  files: DS.attr( {
+		    defaultValue() { return []; }
+		  }),
 	
 	languagesUI: DS.attr( {
 			defaultValue() { return []; }

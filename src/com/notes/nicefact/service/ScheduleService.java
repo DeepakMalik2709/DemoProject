@@ -25,99 +25,104 @@ import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.CurrentContext;
 
 public class ScheduleService extends CommonService<Group> {
-	private final static Logger logger = Logger.getLogger(CalendarController.class.getName());
-	BackendTaskService backendTaskService ;
-	GroupService groupService ;
+	private final static Logger logger = Logger
+			.getLogger(CalendarController.class.getName());
+	BackendTaskService backendTaskService;
+	GroupService groupService;
 	PostService postService;
-	
+
 	public ScheduleService(EntityManager em) {
 		backendTaskService = new BackendTaskService(em);
 		groupService = new GroupService(em);
 		postService = new PostService(em);
 	}
 
-	public Event updateEvent(com.notes.nicefact.entity.Event schedule,AppUser user ) throws IOException, AllSchoolException {
+	public Event updateEvent(com.notes.nicefact.entity.Event schedule,
+			AppUser user) throws IOException, AllSchoolException {
 		String calendarId = "primary";
 		String eventId = schedule.getId();
-		Event updatedEvent  =null;
-	//	attendee.setId(user.getu);
-		com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-		if(service!=null){
-			Event event = service.events().get(calendarId, eventId).execute(); 
-			for(EventAttendee evAtt :  event.getAttendees()){
-				if(evAtt.getEmail().equalsIgnoreCase(user.getEmail())){
-					evAtt.setResponseStatus(schedule.getAttendees().get(0).getResponseStatus());
-				}				
+		Event updatedEvent = null;
+		// attendee.setId(user.getu);
+		com.google.api.services.calendar.Calendar service = GoogleAppUtils
+				.getCalendarService();
+		if (service != null) {
+			Event event = service.events().get(calendarId, eventId).execute();
+			for (EventAttendee evAtt : event.getAttendees()) {
+				if (evAtt.getEmail().equalsIgnoreCase(user.getEmail())) {
+					evAtt.setResponseStatus(schedule.getAttendees().get(0)
+							.getResponseStatus());
+				}
 			}
-			updatedEvent  = service.events().update(calendarId, event.getId(), event).execute();
-		}else{
-			throw new AllSchoolException(AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
+			updatedEvent = service.events()
+					.update(calendarId, event.getId(), event).execute();
+		} else {
+			throw new AllSchoolException(
+					AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE,
+					AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
 
 		}
 		return updatedEvent;
 	}
 
-	public PostTO createEvent(com.notes.nicefact.entity.Event schedule,AppUser user) throws IOException, AllSchoolException {
-		com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
+	public PostTO createEvent(com.notes.nicefact.entity.Event schedule,
+			AppUser user) throws IOException, AllSchoolException {
+		com.google.api.services.calendar.Calendar service = GoogleAppUtils
+				.getCalendarService();
+
 		
-			PostTO postTo = new PostTO(schedule,user);
-			Post post = postService.upsert(postTo, CurrentContext.getAppUser());
-			PostTO savedTO = new PostTO(post);
-			
-		
-		logger.info("createEvent : "+schedule);
-		Event event= null;
-		if(service !=null){
-		 event = new Event().set("sendNotifications", true)
-		    .setSummary(schedule.getTitle())
-		    .setLocation(schedule.getLocation())
-		    .setDescription(schedule.getDescription());
-		if(schedule.getStart() ==null){
-			schedule.setStart(new Date());
-		}
-		DateTime startDateTime = new DateTime(schedule.getStart());
-		EventDateTime start = new EventDateTime()
-		    .setDateTime(startDateTime)
-		    .setTimeZone("America/Los_Angeles");
-		event.setStart(start);
-		if(schedule.getEnd() ==null){
-			schedule.setEnd(new Date());
-		}
-		DateTime endDateTime = new DateTime(schedule.getEnd());
-		EventDateTime end = new EventDateTime()
-		    .setDateTime(endDateTime)
-		    .setTimeZone("America/Los_Angeles");
-		event.setEnd(end);
-		
-		String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
-		event.setRecurrence(Arrays.asList(recurrence));
-		
-		
-		
-		
-		
-		event.setAttendees(schedule.getAttendees());
-		
-		EventReminder[] reminderOverrides = new EventReminder[] {
-		    new EventReminder().setMethod("email").setMinutes(24 * 60),
-		    new EventReminder().setMethod("popup").setMinutes(10),
-		};
-		Event.Reminders reminders = new Event.Reminders()
-		    .setUseDefault(false)
-		    .setOverrides(Arrays.asList(reminderOverrides));
-		event.setReminders(reminders);
-		
-		String calendarId = "primary";
-		event = service.events().insert(calendarId, event).execute();
-		System.out.printf("Event created: %s\n", event.getHtmlLink());
-		
-		}else{
-			throw new AllSchoolException(AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
+		Event event = null;
+		if (service != null) {
+			event = new Event().set("sendNotifications", true)
+					.setSummary(schedule.getTitle())
+					.setLocation(schedule.getLocation())
+					.setDescription(schedule.getDescription());
+			if (schedule.getStart() == null) {
+				schedule.setStart(new Date());
+			}
+			DateTime startDateTime = new DateTime(schedule.getStart());
+			EventDateTime start = new EventDateTime()
+					.setDateTime(startDateTime).setTimeZone(
+							"America/Los_Angeles");
+			event.setStart(start);
+			if (schedule.getEnd() == null) {
+				schedule.setEnd(new Date());
+			}
+			DateTime endDateTime = new DateTime(schedule.getEnd());
+			EventDateTime end = new EventDateTime().setDateTime(endDateTime)
+					.setTimeZone("America/Los_Angeles");
+			event.setEnd(end);
+
+			String[] recurrence = new String[] { "RRULE:FREQ=DAILY;COUNT=2" };
+			event.setRecurrence(Arrays.asList(recurrence));
+
+			event.setAttendees(schedule.getAttendees());
+
+			EventReminder[] reminderOverrides = new EventReminder[] {
+					new EventReminder().setMethod("email").setMinutes(24 * 60),
+					new EventReminder().setMethod("popup").setMinutes(10), };
+			Event.Reminders reminders = new Event.Reminders().setUseDefault(
+					false).setOverrides(Arrays.asList(reminderOverrides));
+			event.setReminders(reminders);
+
+			String calendarId = "primary";
+			event = service.events().insert(calendarId, event).execute();
+			schedule.setGoogleEventId(event.getId());
+			System.out.printf("Event created: %s\n", event.getHtmlLink());
+
+		} else {
+			throw new AllSchoolException(
+					AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE,
+					AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
 
 		}
+		PostTO postTo = new PostTO(schedule, user);
+		Post post = postService.upsert(postTo, CurrentContext.getAppUser());
+		PostTO savedTO = new PostTO(post);
+
+		logger.info("createEvent : " + schedule);
 		return savedTO;
 	}
-	
+
 	@Override
 	protected CommonDAO<Group> getDAO() {
 		// TODO Auto-generated method stub

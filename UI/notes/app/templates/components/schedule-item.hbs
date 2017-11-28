@@ -49,9 +49,9 @@
 								{{/if}}
 							</div>
 					  		
-					  		<div class="{{unless item.isEditing 'show' 'hide'}}"><h5><b>Marketing Class</b></h5></div> 
-					  		<div class="{{unless item.isEditing 'show' 'hide'}}"><h6><b>Room Number 201</b></h6></div>
-					  		<div class="{{unless item.isEditing 'show' 'hide'}}"><h6><b>Timing : 10/12/2017 09:00AM - 10/12/2017 11:00AM</b></h6></div>
+					  		<div ><h5><b>Title </b>{{item.title}}</h5></div> 
+					  		<div ><h6><b>Location </b>{{item.location}}</h6></div>
+					  		<div ><h6><b>Timing </b>: {{item.fromDisplayTime}} - {{item.toDisplayTime}}</h6></div>
 			                <div class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</div>
 			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box schedule=item className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">

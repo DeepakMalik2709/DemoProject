@@ -99,6 +99,14 @@ int noOfSubmissions;
 	
 	String location;
 	
+	private String googleEventId;
+	public String getGoogleEventId() {
+		return googleEventId;
+	}
+	public void setGoogleEventId(String googleEventId) {
+		this.googleEventId = googleEventId;
+	}
+	
 	public String getLocation() {
 		return location;
 	}
@@ -154,6 +162,7 @@ int noOfSubmissions;
 		}
 		
 		this.title = post.getTitle();
+		this.googleEventId = post.getGoogleEventId();
 	}
 
 	public void updateProps(Post post) {

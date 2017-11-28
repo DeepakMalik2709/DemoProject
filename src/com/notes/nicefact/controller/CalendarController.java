@@ -48,10 +48,11 @@ public class CalendarController extends CommonController {
 		logger.info("reactToschedule start , postId : ");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
 			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-			Event updatedEvent = scheduleService.updateEvent(schedule, user);
+			Event updatedEvent =  scheduleService.updateEvent(schedule, user);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEM, updatedEvent);
 		} catch (AllSchoolException e) {

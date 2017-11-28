@@ -1,6 +1,7 @@
 import Ember from 'ember';
+import authenticationMixin from '../mixins/authentication';
 
-export default Ember.Component.extend({
+export default Ember.Component.extend(authenticationMixin,{
 
 	validationErrors:[],
 	attendees:null,
@@ -10,11 +11,11 @@ export default Ember.Component.extend({
 	locationValidation: Ember.computed.empty('model.location'),
 	attendeesValidation:Ember.computed.empty('attendees'),	 
 	useGoogleCalendar : false,
-	router: Ember.inject.service("-routing"),
+	router: Ember.inject.service('-routing'), 
 	 init() {
 	    this._super(...arguments);
 	    this.useGoogleCalendar = Ember.get(this.get("contextService").fetchContext().get("loginUser"), "useGoogleCalendar");
-	    this.set("controllerRef" , this.controllerRef);
+	    this.set("controllerRef" , this.controllerRef);	   
 	    this.initNewComment();
 	  },
 	initNewComment(){
@@ -63,17 +64,16 @@ export default Ember.Component.extend({
         		this.set("submitted", true);
             	event.groups=[];
             	event.groupId=this.attendees.id;
+            	Ember.set(event, "showLoading", true);
             	event.save(event).then((resp1) => {
- 	    			
+            		Ember.set(this, "isSaving", false);
+ 	    			Ember.set(event, "isSaving", false);
+ 	    			Ember.set(event, "showLoading", false);
  	    			alert("Schedule posted.");
- 	    			this.get("router").transitionTo('group.posts', event.groupId);
- 	    		//	this.transitionTo('group.posts', event.groupId);
+ 	    			  this.get('router').transitionTo('group.posts',[event.groupId]);
  	    			
  	    		});
         	}
-        },
-        willTransition(transition) {
-        
         }
     }
   

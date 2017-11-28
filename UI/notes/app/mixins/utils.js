@@ -28,6 +28,12 @@ export default Ember.Mixin.create({
 		if(item.deadlineTime){
 			Ember.set(item, "deadlineDisplayTime", this.getFullTime(Ember.get(item, 'deadlineTime')));
 		}
+		if(item.fromDate){
+			Ember.set(item, "fromDisplayTime", this.getFullTime(Ember.get(item, 'fromDate')));
+		}
+		if(item.toDate){
+			Ember.set(item, "toDisplayTime", this.getFullTime(Ember.get(item, 'toDate')));
+		}
     },
 	   getTimeDifference(time) {
         var diff = (new Date().getTime() - time) / 1000;
