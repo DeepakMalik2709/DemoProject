@@ -11,6 +11,9 @@ export default Ember.Component.extend(postMixin ,{
     init() {
 	    this._super(...arguments);
 	    this.cleanupPost(this.item);
+	    this.set('isSchedule',  (this.get('schedule.postType') =="SCHEDULE"));
+		 this.set('isAttendee',  (this.get('schedule.postPriv') =="attendee"));
+		 this.set('isCreator',  (this.get('schedule.postPriv') =="creator"));
 	    console.log(this.item.comment);
 	    this.initNewComment();
 	  },

@@ -33,9 +33,7 @@ export default Ember.Component.extend(utilsMixin,ajaxMixin,{
   init : function(){
 	 this._super(...arguments);
 	 this.set('value', '');
-	 this.set('isSchedule',  (this.get('schedule.postType') =="SCHEDULE"));
-	 this.set('isAttendee',  (this.get('schedule.postPriv') =="attendee"));
-	 this.set('isCreator',  (this.get('schedule.postPriv') =="creator"));
+	 
 	 if(this.controllerRef){
 		 this.controllerRef.component = this;
 	 }
