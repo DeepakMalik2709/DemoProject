@@ -1,0 +1,50 @@
+<section class="content-header">
+    <h1>
+       {{model.name}} - <small>Attendance</small> 
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/home"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Posts</li>
+    </ol>
+</section>
+<section class="content">
+  <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="page-header">
+                      {{#if model.isAdmin}}
+	                    <span class="pull-right">
+	                        
+	                       {{#link-to 'group.view' model.id tagName="button"  class="btn btn-default"}}
+	                  Group Details
+	                  {{/link-to}}
+	                  
+	                  </span>
+                   {{/if}}
+                  </h3>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+
+            <div class="row">
+  
+  
+  
+    </div>
+<hr/>
+ <div class="row">
+{{#each members as |member|}}
+ <div class="row">
+ 
+{{member.name}}
+</div>   
+{{/each}}
+
+{{#if noRecords}}
+ <div class="row">
+No group members to mark attendance
+ </div>
+ {{/if}}
+
+</div>     
+</section>       

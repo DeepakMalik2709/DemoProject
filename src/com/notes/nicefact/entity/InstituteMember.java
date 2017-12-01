@@ -62,6 +62,9 @@ public class InstituteMember extends CommonEntity {
 	}
 
 	public Set<UserPosition> getPositions() {
+		if(null == positions){
+			positions = new HashSet<>();
+		}
 		return positions;
 	}
 

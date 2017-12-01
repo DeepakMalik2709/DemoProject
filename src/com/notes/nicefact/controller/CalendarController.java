@@ -28,18 +28,12 @@ import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.GoogleCalendarService;
 import com.notes.nicefact.service.ScheduleService;
-import com.notes.nicefact.service.GroupService;
-import com.notes.nicefact.service.TutorialService;
-import com.notes.nicefact.service.GoogleDriveService.FOLDER;
-import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
-import com.notes.nicefact.to.MoveFileTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.Utils;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
 @Path("/calendar")
 public class CalendarController extends CommonController {

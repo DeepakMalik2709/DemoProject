@@ -60,6 +60,7 @@ import com.notes.nicefact.service.TagService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
+import com.notes.nicefact.to.AttendanceMemberTO;
 import com.notes.nicefact.to.CommentTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GroupChildrenTO;
@@ -374,6 +375,14 @@ public class SecureController extends CommonController {
 			} else {
 				CacheUtils.addGroupToCache(group);
 				GroupTO savedTO = new GroupTO(group, false);
+				if(savedTO.getIsAdmin()){
+					savedTO.setCanMarkAttendance(true);
+				}
+				boolean isTeacher = groupService.isUserTeacher(group.getId(), user.getEmail());
+				if(isTeacher){
+					savedTO.setCanMarkAttendance(true);
+					savedTO.setIsTeacher(true);
+				}
 				json.put(Constants.CODE, Constants.RESPONSE_OK);
 				json.put(Constants.DATA_ITEM, savedTO);
 			}
@@ -448,6 +457,31 @@ public class SecureController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("exit : fetchGroupMembers");
 	}
+	
+	@GET
+	@Path("/group/{groupId}/attendance/members")
+	public void fetchGroupAttendanceMembers(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("groupId") long groupId) {
+		logger.info("start : fetchGroupAttendanceMembers");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			List<AttendanceMemberTO> members = groupService.fetchGroupAttendanceMembers(groupId, searchTO);
+			json.put(Constants.DATA_ITEMS, members);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : fetchGroupAttendanceMembers");
+	}
 
 	@DELETE
 	@Path("/group/{groupId}/members/{memberId}")
@@ -497,6 +531,34 @@ public class SecureController extends CommonController {
 		logger.info("exit : deleteGroupMemberGroup");
 	}
 
+	@POST
+	@Path("/group/{groupId}/member/update")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void updateGroupMembers(@Context HttpServletResponse response, @Context HttpServletRequest request,  @PathParam("groupId") long groupId, GroupMemberTO memberTO) {
+		logger.info("start : updateGroupMembers");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			GroupMemberTO member = groupService.updateGroupMember(groupId, memberTO, CurrentContext.getAppUser());
+			json.put(Constants.DATA_ITEM, member);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : updateGroupMembers");
+	}
+
+	
 	@POST
 	@Path("/group/{groupId}/members/{memberId}/toggleAdmin")
 	public void toggleGroupAdmin(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("groupId") long groupId, @PathParam("memberId") long memberId,

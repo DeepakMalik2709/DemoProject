@@ -3,17 +3,17 @@ package com.notes.nicefact.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
+
+import org.apache.log4j.Logger;
 
 import com.google.api.services.calendar.model.EventAttendee;
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
-import com.notes.nicefact.entity.Tag;
+import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.to.SearchTO;
 
 public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
@@ -27,10 +27,24 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 	public List<GroupMember> fetchGroupMembersByGroupId(long groupId, SearchTO searchTO) {
 		List<GroupMember> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t from GroupMember t where  t.group.id = :groupId order by t.email");
+		Query query = pm.createQuery("select t from GroupMember t where  t.group.id = :groupId order by t.name");
 		query.setParameter("groupId", groupId);
 		query.setFirstResult(searchTO.getFirst());
 		query.setMaxResults(searchTO.getLimit());
+		try {
+			results = (List<GroupMember>) query.getResultList();
+		} catch (NoResultException nre) {
+			logger.warn(nre.getMessage());
+		}
+		return results;
+	}
+	
+	public List<GroupMember> fetchGroupAttendanceMembers(long groupId, SearchTO searchTO) {
+		List<GroupMember> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from GroupMember t where t.isBlocked = false and :position MEMBER OF t.positions and   t.group.id = :groupId order by t.name");
+		query.setParameter("groupId", groupId);
+		query.setParameter("position", UserPosition.STUDENT.toString());
 		try {
 			results = (List<GroupMember>) query.getResultList();
 		} catch (NoResultException nre) {

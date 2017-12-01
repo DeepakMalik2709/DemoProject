@@ -20,6 +20,7 @@ export default Ember.Component.extend({
 	    		}
 	    		this.singleInstitute = (this.institutes.length==1);
 	    		this.firstInstitute = this.institutes[0];
+	    		Ember.set(this.item, "instituteId" ,this.firstInstitute.id )
 	    	}
 	    }
 	  },
@@ -43,12 +44,6 @@ export default Ember.Component.extend({
         	  this.item.set("sharing", Ember.get( sharing , "id"));
         },
         saveGroup(param) {
-            if (this.item.get("convertToEmbed")) {
-                var videoId = this.getYoutubeVideoId(this.item.get("url"));
-                if (videoId) {
-                    this.item.set("url", "https://www.youtube.com/embed/" + videoId);
-                }
-            }
            this.sendAction('saveGroup', param);
         },
 

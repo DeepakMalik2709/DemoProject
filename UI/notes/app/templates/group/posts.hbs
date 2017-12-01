@@ -11,8 +11,16 @@
   <div class="row">
                 <div class="col-lg-12">
                     <h3 class="page-header">
-                      {{#if model.isAdmin}}
+                     
 	                    <span class="pull-right">
+	                     {{#if model.canMarkAttendance}}
+	                   {{#link-to 'group.attendance' model.id  tagName="button"  class="btn btn-default"}}
+	                 Attendance
+	                  {{/link-to}}
+	                  {{/if}}
+	                   {{#if model.isAdmin}}
+	                     
+	                  
 	                    {{#link-to 'group.task.create'  tagName="button"  class="btn btn-default"}}
 	                 Create Task
 	                  {{/link-to}}
@@ -24,8 +32,9 @@
 	                     {{#link-to 'group.edit' model.id tagName="button"  class="btn btn-default"}}
 	                  Edit Group
 	                  {{/link-to}}
+	                   {{/if}}
 	                  </span>
-                   {{/if}}
+                  
                   </h3>
                 </div>
                 <!-- /.col-lg-12 -->

@@ -156,6 +156,8 @@
  
  
 <!-- view members in  group Popup-->
+{{group-item-view-members model=model   updateMember="updateMember" deleteMember="deleteMember" toggleBlockMember="toggleBlockMember"}}
+<!-- 
 <div class="modal vcenter" id="members-list-modal" tabindex="-1" role="dialog" aria-labelledby="PopUp" data-backdrop="static" >
   <div class="modal-dialog modal-md" role="document">
     <div class="modal-content">
@@ -190,9 +192,9 @@
           </div>
         </div>
         
-        <!-- user list end -->
+        user list end
         
-        <!-- group list start -->
+        group list start
         <div class="form-box group-form mtop-15"  class="{{if model.showGroupMembers 'show' 'hide'}}">
           <div class="form-group">
             <div class="ol-user-list"> 
@@ -208,14 +210,14 @@
             </div>
           </div>
         </div>
-        <!-- group list end -->
+        group list end
       </div>
- <!--      <div class="modal-footer" >
+      <div class="modal-footer" >
       	<div class="footer-btn-box">
             <button type="button" class="btn btn-lg btn-default mr-5" data-dismiss="modal"><i class="fa fa-chevron-left" aria-hidden="true"></i>Cancel</button>
             <button type="button"  class="btn btn-lg btn-primary" {{action "saveGroupMembers"}} data-dismiss="modal"><i class="fa fa-plus" aria-hidden="true"></i>Add</button>
           </div>
-      </div> -->
+      </div>
  	</div>
  </div>
-</div>
+</div> -->

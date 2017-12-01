@@ -11,7 +11,6 @@ export default Ember.Component.extend(postMixin ,{
     init() {
 	    this._super(...arguments);
 	    this.cleanupPost(this.item);
-	    console.log(this.item.comment);
 	    this.initNewComment();
 	  },
 	initNewComment(){

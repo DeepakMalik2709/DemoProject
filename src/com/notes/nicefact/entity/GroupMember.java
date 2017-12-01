@@ -1,11 +1,18 @@
 package com.notes.nicefact.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
+import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.to.AppUserTO;
 
 /**
@@ -47,6 +54,10 @@ public class GroupMember extends CommonEntity{
 	String organization;
 	
 	boolean isNotificationSent = false;
+	
+	@Enumerated(EnumType.STRING)
+	@ElementCollection(fetch = FetchType.EAGER  )
+	private Set<UserPosition> positions = new HashSet<>();
 
 	public GroupMember(String email, String name) {
 		super();
@@ -74,6 +85,17 @@ public class GroupMember extends CommonEntity{
 	
 	public GroupMember() {
 		super();
+	}
+	
+	public Set<UserPosition> getPositions() {
+		if(null == positions){
+			positions = new HashSet<>();
+		}
+		return positions;
+	}
+
+	public void setPositions(Set<UserPosition> positions) {
+		this.positions = positions;
 	}
 
 	public String getLibraryFolderId() {
@@ -121,9 +143,6 @@ public class GroupMember extends CommonEntity{
 		return isAdmin;
 	}
 
-	public void setIsAdmin(Boolean isAdmin) {
-		this.isAdmin = isAdmin;
-	}
 
 	public Boolean getIsBlocked() {
 		if(null == isBlocked){

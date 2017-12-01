@@ -40,6 +40,9 @@ public class GroupTO {
 	boolean isAdmin;
 	boolean isMember;
 	boolean isBlocked;
+	
+	boolean isTeacher;
+	boolean canMarkAttendance;
 
 	private String bgImageId;
 
@@ -261,6 +264,22 @@ public class GroupTO {
 
 	public void setInstituteName(String instituteName) {
 		this.instituteName = instituteName;
+	}
+
+	public boolean getIsTeacher() {
+		return isTeacher;
+	}
+
+	public void setIsTeacher(boolean isTeacher) {
+		this.isTeacher = isTeacher;
+	}
+
+	public boolean getCanMarkAttendance() {
+		return canMarkAttendance;
+	}
+
+	public void setCanMarkAttendance(boolean canMarkAttendance) {
+		this.canMarkAttendance = canMarkAttendance;
 	}
 
 }

@@ -134,6 +134,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     		this.initCreatePost();
     	},
         error(reason){
+    		console.log(reason)
         	this.transitionTo('home');
         },
         showCreatePostAction(){

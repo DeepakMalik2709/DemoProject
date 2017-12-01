@@ -85,6 +85,7 @@ public class GroupMemberTO {
 		this.department = member.getDepartment();
 		this.organization = member.getOrganization();
 		this.isBlocked = member.getIsBlocked();
+		this.positions = member.getPositions();
 		this.id = member.getId();
 		
 	}

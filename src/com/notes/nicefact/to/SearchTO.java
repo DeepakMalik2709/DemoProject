@@ -69,10 +69,15 @@ public class SearchTO {
 		return this;
 	}
 
-	public SearchTO() {
+	private SearchTO() {
 		super();
 	}
 
+	public static SearchTO getInstances(){
+		SearchTO x = new SearchTO();
+		return x;
+	}
+	
 	public SearchTO(HttpServletRequest request, int max) {
 		super();
 		searchTerm = request.getParameter("q");
