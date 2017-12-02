@@ -13,5 +13,9 @@ public class UnauthorizedException extends AppException{
 	public UnauthorizedException( String arg0) {
 		super(401, arg0);
 	}
+	public UnauthorizedException(int errorCode,
+			String errorMessage) {
+		super(errorCode, errorMessage);
+	}
 
 }

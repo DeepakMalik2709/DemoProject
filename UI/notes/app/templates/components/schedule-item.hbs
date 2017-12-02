@@ -33,27 +33,13 @@
 							</menu>
 						</footer>
 					</div>
-					<br>
 					<div class="row">
-					  	<div class="col-md-8 col-sm-8 col-lg-8"> 
-					  		<div>
-								{{#if isAttendee}}
-									<button class="btn btn-success" {{action 'updateResponse' "accepted"}}>Yes</button>
-									<button class="btn btn-info" {{action 'updateResponse' "tentative"}}>May Be</button>
-									<button class="btn btn-danger" {{action 'updateResponse' "declined"}}>No</button>
-								{{/if}}
-								{{#if isCreator}}
-									<span class="btn btn-success btn-flat disabled">Yes- {{schedule.reponseYes}}</span>
-									<span class="btn btn-info btn-flat disabled">May be- {{schedule.reponseMaybe}}</span>
-									<span class="btn btn-danger btn-flat disabled">No- {{schedule.reponseNo}}</span>
-								{{/if}}
-							</div>
-					  		
-					  		<div ><h5><b>Title </b>{{item.title}}</h5></div> 
+					  	<div class="col-md-6 col-sm-6 col-lg-6"> 
+					  		<div ><h5><b>Invitation </b>{{item.title}}</h5></div> 
 					  		<div ><h6><b>Location </b>{{item.location}}</h6></div>
 					  		<div ><h6><b>Timing </b>: {{item.fromDisplayTime}} - {{item.toDisplayTime}}</h6></div>
 			                <div class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</div>
-			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box schedule=item className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
+			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
 						        <ol class="file-list">
 						        {{#each item.files as |file|}}
@@ -62,19 +48,39 @@
 						        </li>
 						        {{/each}}
 						        </ol>
-			       			</div>
-			                <div   class="stats {{unless item.isEditing 'show' 'hide'}}">
+			       			</div>			                
+			       	 	</div>
+			       	 	<div class="col-md-6 col-sm-6 col-lg-6"> 
+			       	 			{{#if isCreator}} You have created this invitation.
+			       	 			{{else if postRecipient.scheduleResponse}} You have replied <b>" {{postRecipient.scheduleResponse}} "</b> to this invitation.
+			       	 			{{else}} Yet no response from your side on this event.
+			       	 			{{/if}}
+			       	 	</div>
+			       	 </div>
+			       	 <div class="row">
+			       		 <div class="col-md-4 col-sm-4 col-lg-4"  class="stats {{unless item.isEditing 'show' 'hide'}}">
 			                    <a href="javascript:void(0);" class="btn btn-default stat-item" disabled={{disableReactButton}} {{action "reactToPost"}}>
 			                        <i class="fa fa-thumbs-up icon"></i>{{item.numberOfReactions}}
 			                    </a>
-			           	 	</div>
-			       	 	</div>
+			           	 </div>
+			       	 	<div class="col-md-6 col-sm-6 col-lg-6">								
+							{{#if isCreator}}
+								<span class="btn btn-success btn-flat disabled">Yes- {{item.reponseYes}}</span>
+								<span class="btn btn-info btn-flat disabled">May be- {{item.reponseMaybe}}</span>
+								<span class="btn btn-danger btn-flat disabled">No- {{item.reponseNo}}</span>
+							{{else}}
+								<button class="btn  btn-{{if isAccepted 'success disabled' 'default' }}" {{action 'updateRecipientRes' "ACCEPTED"}}>Yes</button>
+								<button class="btn  btn-{{if isTentative 'info disabled' 'default' }}" {{action 'updateRecipientRes' "TENTATIVE"}}>May Be</button>
+								<button class="btn  btn-{{if isDeclined 'danger disabled' 'default' }}" {{action 'updateRecipientRes' "DECLINED"}}>No</button>
+							{{/if}}
+						</div>
 					</div>
+					
                 </div>
          </div> 
        <div class="post-footer {{if item.isEditing 'hideBorder' ''}}">
               <div class="input-group contenteditable-input-group" > 
-                    {{post-comment-box schedule=item className="" placeholder="Add a comment"  save='saveComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
+                    {{post-comment-box className="" placeholder="Add a comment"  save='saveComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
                 </div>
                 <ul class="comments-list" style="padding-left: 1%;">                
                 {{#each item.comments as |comment|}}
