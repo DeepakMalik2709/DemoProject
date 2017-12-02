@@ -58,7 +58,7 @@
  {{else if post.isPost}}
 {{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
 {{else if post.isSchedule}}
-{{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
+{{schedule-item item=post updatePost="savePost" deletePost="deletePost"  }}
 {{/if}}
 </div>   
 {{/each}}

@@ -29,13 +29,12 @@ import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.CurrentContext;
 
 public class ScheduleService extends CommonService<Group> {
-	private final static Logger logger = Logger
-			.getLogger(CalendarController.class.getName());
+	private final static Logger logger = Logger.getLogger(CalendarController.class.getName());
 	BackendTaskService backendTaskService;
 	GroupService groupService;
 	PostService postService;
 	PostRecipientDAO postRecipientDAO;
-	
+
 	public ScheduleService(EntityManager em) {
 		backendTaskService = new BackendTaskService(em);
 		groupService = new GroupService(em);
@@ -43,71 +42,53 @@ public class ScheduleService extends CommonService<Group> {
 		postRecipientDAO = new PostRecipientDAO(em);
 	}
 
-	public Event updateEvent(com.notes.nicefact.entity.Event schedule,
-			AppUser user) throws IOException, AllSchoolException {
+	public Event updateEvent(com.notes.nicefact.entity.Event schedule, AppUser user) throws IOException, AllSchoolException {
 		String calendarId = "primary";
 		String eventId = schedule.getId();
 		Event updatedEvent = null;
 		// attendee.setId(user.getu);
-		com.google.api.services.calendar.Calendar service = GoogleAppUtils
-				.getCalendarService();
+		com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 		if (service != null) {
 			Event event = service.events().get(calendarId, eventId).execute();
 			for (EventAttendee evAtt : event.getAttendees()) {
 				if (evAtt.getEmail().equalsIgnoreCase(user.getEmail())) {
-					evAtt.setResponseStatus(schedule.getAttendees().get(0)
-							.getResponseStatus());
+					evAtt.setResponseStatus(schedule.getAttendees().get(0).getResponseStatus());
 				}
 			}
-			updatedEvent = service.events()
-					.update(calendarId, event.getId(), event).execute();
+			updatedEvent = service.events().update(calendarId, event.getId(), event).execute();
 		} else {
-			throw new AllSchoolException(
-					AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE,
-					AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
+			throw new AllSchoolException(AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
 
 		}
 		return updatedEvent;
 	}
 
-	public PostTO createEvent(com.notes.nicefact.entity.Event schedule,
-			AppUser user) throws IOException, AllSchoolException {
-		com.google.api.services.calendar.Calendar service = GoogleAppUtils
-				.getCalendarService();
+	public PostTO createEvent(com.notes.nicefact.entity.Event schedule, AppUser user) throws IOException, AllSchoolException {
+		com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
 
-		
 		Event event = null;
 		if (service != null) {
-			event = new Event().set("sendNotifications", true)
-					.setSummary(schedule.getTitle())
-					.setLocation(schedule.getLocation())
-					.setDescription(schedule.getDescription());
+			event = new Event().set("sendNotifications", true).setSummary(schedule.getTitle()).setLocation(schedule.getLocation()).setDescription(schedule.getDescription());
 			if (schedule.getStart() == null) {
 				schedule.setStart(new Date());
 			}
 			DateTime startDateTime = new DateTime(schedule.getStart());
-			EventDateTime start = new EventDateTime()
-					.setDateTime(startDateTime).setTimeZone(
-							"America/Los_Angeles");
+			EventDateTime start = new EventDateTime().setDateTime(startDateTime)/*.setTimeZone("Asia/Kolkata")*/;
 			event.setStart(start);
 			if (schedule.getEnd() == null) {
 				schedule.setEnd(new Date());
 			}
 			DateTime endDateTime = new DateTime(schedule.getEnd());
-			EventDateTime end = new EventDateTime().setDateTime(endDateTime)
-					.setTimeZone("America/Los_Angeles");
+			EventDateTime end = new EventDateTime().setDateTime(endDateTime)/*.setTimeZone("Asia/Kolkata")*/;
 			event.setEnd(end);
 
-			String[] recurrence = new String[] { "RRULE:FREQ=DAILY;COUNT=2" };
-			event.setRecurrence(Arrays.asList(recurrence));
+			/*String[] recurrence = new String[] { "RRULE:FREQ=DAILY;COUNT=2" };
+			event.setRecurrence(Arrays.asList(recurrence));*/
 
 			event.setAttendees(schedule.getAttendees());
 
-			EventReminder[] reminderOverrides = new EventReminder[] {
-					new EventReminder().setMethod("email").setMinutes(24 * 60),
-					new EventReminder().setMethod("popup").setMinutes(10), };
-			Event.Reminders reminders = new Event.Reminders().setUseDefault(
-					false).setOverrides(Arrays.asList(reminderOverrides));
+			EventReminder[] reminderOverrides = new EventReminder[] { new EventReminder().setMethod("email").setMinutes(24 * 60), new EventReminder().setMethod("popup").setMinutes(10), };
+			Event.Reminders reminders = new Event.Reminders().setUseDefault(false).setOverrides(Arrays.asList(reminderOverrides));
 			event.setReminders(reminders);
 
 			String calendarId = "primary";
@@ -116,9 +97,7 @@ public class ScheduleService extends CommonService<Group> {
 			System.out.printf("Event created: %s\n", event.getHtmlLink());
 
 		} else {
-			throw new AllSchoolException(
-					AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE,
-					AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
+			throw new AllSchoolException(AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
 
 		}
 		PostTO postTo = new PostTO(schedule, user);
@@ -151,20 +130,20 @@ public class ScheduleService extends CommonService<Group> {
 		this.groupService = groupService;
 	}
 
-	public PostRecipient updateScheduleResponse(PostRecipientTO postRecipientTO, AppUser user)  {
-		PostRecipient postRecipientDB =null;
+	public PostRecipient updateScheduleResponse(PostRecipientTO postRecipientTO, AppUser user) {
+		PostRecipient postRecipientDB = null;
 		if (null == postRecipientTO.getId() || postRecipientTO.getId() <= 0) {
 			postRecipientTO.setEmail(user.getEmail());
 			Post post = postService.get(postRecipientTO.getPostId());
 			postRecipientTO.setType("USER");
-			postRecipientDB = new PostRecipient(postRecipientTO);	
+			postRecipientDB = new PostRecipient(postRecipientTO);
 			postRecipientDB.setPost(post);
 		} else {
 			postRecipientDB = postRecipientDAO.get(postRecipientTO.getId());
 			if (postRecipientDB.getCreatedBy().equals(user.getEmail())) {
-				postRecipientDB.updateProps(postRecipientTO);	
+				postRecipientDB.updateProps(postRecipientTO);
 			} else {
-				throw new UnauthorizedException(AllSchoolError.EDIT_PERMISSION_ERROR_CODE ,AllSchoolError.EDIT_PERMISSION_ERROR_MESSAGE );
+				throw new UnauthorizedException(AllSchoolError.EDIT_PERMISSION_ERROR_CODE, AllSchoolError.EDIT_PERMISSION_ERROR_MESSAGE);
 			}
 		}
 		postRecipientDB = postRecipientDAO.upsert(postRecipientDB);
