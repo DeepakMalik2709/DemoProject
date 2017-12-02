@@ -82,6 +82,7 @@ public class PostTO {
 	Boolean canSubmit = false;
 	
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
+	public PostTO(){}
 	
 	public PostTO(com.notes.nicefact.entity.Event schedule, AppUser user) {
 		this.id = schedule.getPostId();
