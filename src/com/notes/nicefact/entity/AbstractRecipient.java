@@ -1,7 +1,11 @@
 package com.notes.nicefact.entity;
 
 import javax.persistence.Basic;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
+
+import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 
 @MappedSuperclass
 public class AbstractRecipient extends CommonEntity {
@@ -22,9 +26,10 @@ public class AbstractRecipient extends CommonEntity {
 
 	String organization;
 
-	@Basic
+	@Enumerated(EnumType.STRING)
 	RecipientType type;
-
+	
+	public AbstractRecipient(){}
 	public String getEmail() {
 		return email;
 	}

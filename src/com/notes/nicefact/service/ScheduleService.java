@@ -17,10 +17,14 @@ import com.notes.nicefact.content.AllSchoolError;
 import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.controller.CalendarController;
 import com.notes.nicefact.dao.CommonDAO;
+import com.notes.nicefact.dao.PostRecipientDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Post;
+import com.notes.nicefact.entity.PostRecipient;
+import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.google.GoogleAppUtils;
+import com.notes.nicefact.to.PostRecipientTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.CurrentContext;
 
@@ -30,11 +34,13 @@ public class ScheduleService extends CommonService<Group> {
 	BackendTaskService backendTaskService;
 	GroupService groupService;
 	PostService postService;
-
+	PostRecipientDAO postRecipientDAO;
+	
 	public ScheduleService(EntityManager em) {
 		backendTaskService = new BackendTaskService(em);
 		groupService = new GroupService(em);
 		postService = new PostService(em);
+		postRecipientDAO = new PostRecipientDAO(em);
 	}
 
 	public Event updateEvent(com.notes.nicefact.entity.Event schedule,
@@ -143,5 +149,25 @@ public class ScheduleService extends CommonService<Group> {
 
 	public void setGroupService(GroupService groupService) {
 		this.groupService = groupService;
+	}
+
+	public PostRecipient updateScheduleResponse(PostRecipientTO postRecipientTO, AppUser user)  {
+		PostRecipient postRecipientDB =null;
+		if (null == postRecipientTO.getId() || postRecipientTO.getId() <= 0) {
+			postRecipientTO.setEmail(user.getEmail());
+			Post post = postService.get(postRecipientTO.getPostId());
+			postRecipientTO.setType("USER");
+			postRecipientDB = new PostRecipient(postRecipientTO);	
+			postRecipientDB.setPost(post);
+		} else {
+			postRecipientDB = postRecipientDAO.get(postRecipientTO.getId());
+			if (postRecipientDB.getCreatedBy().equals(user.getEmail())) {
+				postRecipientDB.updateProps(postRecipientTO);	
+			} else {
+				throw new UnauthorizedException(AllSchoolError.EDIT_PERMISSION_ERROR_CODE ,AllSchoolError.EDIT_PERMISSION_ERROR_MESSAGE );
+			}
+		}
+		postRecipientDB = postRecipientDAO.upsert(postRecipientDB);
+		return postRecipientDB;
 	}
 }

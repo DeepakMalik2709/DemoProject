@@ -97,5 +97,5 @@ public class AttendanceController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("upsertGroupPost exit");
 	}
-	
+
 }

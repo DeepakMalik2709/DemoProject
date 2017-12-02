@@ -14,6 +14,7 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
+import com.notes.nicefact.entity.PostRecipient;
 import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CurrentContext;
@@ -49,7 +50,7 @@ public class PostTO {
 	String postPriv;
 
 	// List<GoogleDriveFileTO> files = new ArrayList<>() ;
-
+	
 	List<PostRecipientTO> recipients = new ArrayList<>();
 	
 	List<PostReactionTO> reactions = new ArrayList<>();
@@ -152,7 +153,34 @@ public class PostTO {
 		this.createdTime = post.getCreatedTime().getTime();
 		this.updatedTime = post.getUpdatedTime().getTime();
 		this.numberOfComments = post.getNumberOfComments();
-		this.numberOfReactions = post.getNumberOfReactions();
+		this.numberOfReactions = post.getNumberOfReactions();	
+		if(post.getPostType().equals(POST_TYPE.SCHEDULE) ){						
+			AppUser user =  CurrentContext.getAppUser();
+			if(this.createdByEmail.equalsIgnoreCase(user.getEmail())){
+				this.postPriv="creator";		
+				if(post.getRecipients()!=null  ){
+					this.totalAttendee = post.getRecipients().size();
+					for (PostRecipient postRecipient :  post.getRecipients()) {				
+							if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.ACCEPTED)){
+								this.reponseYes++;
+							}else if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.TENTATIVE)){
+								this.reponseMaybe++;
+							}else if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.DECLINED)){
+								this.reponseNo++;
+							}
+					}
+				}
+			}else{
+				this.postPriv="attendee";	
+				if(post.getRecipients()!=null  ){					
+					for (PostRecipient postRecipient :  post.getRecipients()) {		
+						if(postRecipient.getEmail().equalsIgnoreCase(user.getEmail())){
+							recipients.add(new PostRecipientTO(postRecipient));
+						}
+					}
+				}
+			}
+		}
 		CommentTO commentTO;
 		for (PostComment comment : post.getComments()) {
 			commentTO = new CommentTO(comment);
@@ -194,9 +222,7 @@ public class PostTO {
 		this.createdTime = event.getCreated().getValue();
 		this.updatedTime = event.getUpdated().getValue();
 		if(this.createdByEmail.equalsIgnoreCase(user.getEmail())){
-			postPriv="creator";
-		}else{
-			postPriv="attendee";
+			this.postPriv="creator";
 		}
 		if(event.getAttendees()!=null){
 			this.totalAttendee = event.getAttendees().size();

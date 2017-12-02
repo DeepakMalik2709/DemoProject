@@ -21,6 +21,7 @@ import javax.persistence.Transient;
 
 import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
 import com.notes.nicefact.enums.SHARING;
+import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.to.PostRecipientTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.CacheUtils;
@@ -127,6 +128,7 @@ int noOfSubmissions;
 		for (PostRecipientTO postRecipientTO : post.getRecipients()) {
 			recipient = new PostRecipient();
 			recipient.setEmail(postRecipientTO.getEmail());
+			recipient.setScheduleResponse(ScheduleAttendeeResponseType.valueOf(postRecipientTO.getScheduleResponse()) );
 			recipient.setName(postRecipientTO.getLabel());
 			recipient.setPost(this);
 			AppUser hr = CacheUtils.getAppUser(postRecipientTO.getEmail());
