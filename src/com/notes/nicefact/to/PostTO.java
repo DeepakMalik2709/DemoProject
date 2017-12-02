@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Basic;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttachment;
@@ -16,6 +14,7 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
+import com.notes.nicefact.entity.PostRecipient;
 import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CurrentContext;
@@ -32,6 +31,7 @@ public class PostTO {
 	String groupName;
 	String title;
 	String comment;
+	String location;
 	List<Long> groupIds = new ArrayList<>();
 	List<TagTO> tags = new ArrayList<>();
 	
@@ -50,7 +50,7 @@ public class PostTO {
 	String postPriv;
 
 	// List<GoogleDriveFileTO> files = new ArrayList<>() ;
-
+	
 	List<PostRecipientTO> recipients = new ArrayList<>();
 	
 	List<PostReactionTO> reactions = new ArrayList<>();
@@ -73,15 +73,34 @@ public class PostTO {
 	int noOfSubmissions;
 
 	long deadlineTime;
-
+	private String googleEventId;
+	public String getGoogleEventId() {
+		return googleEventId;
+	}
+	public void setGoogleEventId(String googleEventId) {
+		this.googleEventId = googleEventId;
+	}
 
 	Boolean isEdited = false;
 	
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	Boolean isSubmitted = false;
 	
 	Boolean canSubmit = false;
 	
 	List<TaskSubmissionTO> submissions = new ArrayList<>();
+
+	
+	public PostTO(){
+		
+	}
 	
 	public PostTO(com.notes.nicefact.entity.Event schedule, AppUser user) {
 		this.id = schedule.getPostId();
@@ -91,6 +110,7 @@ public class PostTO {
 			Group group = CacheUtils.getGroup(this.groupId);
 			this.groupName =  group.getName();
 		}
+		this.location = schedule.getLocation();
 		this.comment = schedule.getComment();
 		if(this.comment ==null){
 			this.comment = schedule.getDescription();
@@ -109,13 +129,13 @@ public class PostTO {
 			commentTO = new CommentTO(comment);
 			this.comments.add(commentTO);
 		}
-		FileTO fileTO;
-		for(PostFile file : schedule.getFiles()){
-			fileTO= new FileTO(file);
-			this.files.add(fileTO);
+		
+		for(FileTO file : schedule.getFiles()){
+			
+			this.files.add(file);
 		}
 		this.title = schedule.getTitle();
-		
+		this.googleEventId=schedule.getGoogleEventId();
 	}
 	public PostTO(Post post) {
 		this.id = post.getId();
@@ -133,7 +153,34 @@ public class PostTO {
 		this.createdTime = post.getCreatedTime().getTime();
 		this.updatedTime = post.getUpdatedTime().getTime();
 		this.numberOfComments = post.getNumberOfComments();
-		this.numberOfReactions = post.getNumberOfReactions();
+		this.numberOfReactions = post.getNumberOfReactions();	
+		if(post.getPostType().equals(POST_TYPE.SCHEDULE) ){						
+			AppUser user =  CurrentContext.getAppUser();
+			if(this.createdByEmail.equalsIgnoreCase(user.getEmail())){
+				this.postPriv="creator";		
+				if(post.getRecipients()!=null  ){
+					this.totalAttendee = post.getRecipients().size();
+					for (PostRecipient postRecipient :  post.getRecipients()) {				
+							if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.ACCEPTED)){
+								this.reponseYes++;
+							}else if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.TENTATIVE)){
+								this.reponseMaybe++;
+							}else if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.DECLINED)){
+								this.reponseNo++;
+							}
+					}
+				}
+			}else{
+				this.postPriv="attendee";	
+				if(post.getRecipients()!=null  ){					
+					for (PostRecipient postRecipient :  post.getRecipients()) {		
+						if(postRecipient.getEmail().equalsIgnoreCase(user.getEmail())){
+							recipients.add(new PostRecipientTO(postRecipient));
+						}
+					}
+				}
+			}
+		}
 		CommentTO commentTO;
 		for (PostComment comment : post.getComments()) {
 			commentTO = new CommentTO(comment);
@@ -155,6 +202,10 @@ public class PostTO {
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
 		}
+		this.googleEventId = post.getGoogleEventId();
+		this.location = post.getLocation();
+		this.fromDate = post.getFromDate();
+		this.toDate = post.getToDate();
 	}
 
 	private POST_TYPE postType = POST_TYPE.SIMPLE;
@@ -171,9 +222,7 @@ public class PostTO {
 		this.createdTime = event.getCreated().getValue();
 		this.updatedTime = event.getUpdated().getValue();
 		if(this.createdByEmail.equalsIgnoreCase(user.getEmail())){
-			postPriv="creator";
-		}else{
-			postPriv="attendee";
+			this.postPriv="creator";
 		}
 		if(event.getAttendees()!=null){
 			this.totalAttendee = event.getAttendees().size();

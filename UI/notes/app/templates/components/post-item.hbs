@@ -36,7 +36,7 @@
 					<div class="row">
 					  	<div class="col-md-8 col-sm-8 col-lg-8"> 
 			                <div class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</div>
-			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box schedule=item className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
+			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box  className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
 						        <ol class="file-list">
 						        {{#each item.files as |file|}}
@@ -57,7 +57,7 @@
          </div> 
        <div class="post-footer {{if item.isEditing 'hideBorder' ''}}">
               <div class="input-group contenteditable-input-group" > 
-                    {{post-comment-box schedule=item className="" placeholder="Add a comment"  save='saveComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
+                    {{post-comment-box className="" placeholder="Add a comment"  save='saveComment'  recipientList=recipientList value=postComment autoCompleteList=myList disabled=isSaving}}
                 </div>
                 <ul class="comments-list" style="padding-left: 1%;">                
                 {{#each item.comments as |comment|}}

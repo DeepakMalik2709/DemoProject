@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.services.calendar.model.EventAttendee;
+import com.notes.nicefact.to.FileTO;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
@@ -32,8 +33,14 @@ public class Event {
 	private long updatedTime;
 	private int numberOfReactions;
 	private List<PostComment> comments = new ArrayList<>();
-	protected List<PostFile> files  = new ArrayList<>();
-	
+	private List<FileTO> files = new ArrayList<>();
+	private String googleEventId;
+	public String getGoogleEventId() {
+		return googleEventId;
+	}
+	public void setGoogleEventId(String googleEventId) {
+		this.googleEventId = googleEventId;
+	}
 	public String getTitle() {
 		return title;
 	}
@@ -174,10 +181,10 @@ public class Event {
 	public void setComments(List<PostComment> comments) {
 		this.comments = comments;
 	}
-	public List<PostFile> getFiles() {
+	public List<FileTO> getFiles() {
 		return files;
 	}
-	public void setFiles(List<PostFile> files) {
+	public void setFiles(List<FileTO> files) {
 		this.files = files;
 	}
 	@Override

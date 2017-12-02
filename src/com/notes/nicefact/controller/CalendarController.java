@@ -25,12 +25,14 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.PostRecipient;
 import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.GoogleCalendarService;
 import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
-import com.notes.nicefact.to.SearchTO;
+import com.notes.nicefact.to.PostRecipientTO;
+import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.Utils;
@@ -48,10 +50,11 @@ public class CalendarController extends CommonController {
 		logger.info("reactToschedule start , postId : ");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
 			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-			Event updatedEvent = scheduleService.updateEvent(schedule, user);
+			Event updatedEvent =  scheduleService.updateEvent(schedule, user);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEM, updatedEvent);
 		} catch (AllSchoolException e) {
@@ -96,14 +99,17 @@ public class CalendarController extends CommonController {
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
 			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_100);
+			
 			/*
 			 * if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
 			 * schedule.setAttendees(scheduleService.getGroupService().
 			 * fetchMemberEmailFromGroup(schedule.getGroups(),searchTO)); }
 			 */
-			Event createdEvent = scheduleService.createEvent(schedule, user);
-			json.put("event", createdEvent);
+			PostTO createdEvent = scheduleService.createEvent(schedule, user);
+		
+			
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, createdEvent);
 		} catch (AllSchoolException e) {
 			logger.error(e.getMessage(), e);
 
@@ -181,4 +187,33 @@ public class CalendarController extends CommonController {
 		renderResponseJson(json, response);
 	}
 
+	
+	@POST
+	@Path("/scheduleResponse")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void scheduleResponse(PostRecipientTO postRecipientTO, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+		logger.info("reactToschedule start , postId : ");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		
+		try {
+			ScheduleService scheduleService = new ScheduleService(em);
+			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
+			PostRecipient postRecipient =  scheduleService.updateScheduleResponse(postRecipientTO, user);
+			PostRecipientTO saved=new PostRecipientTO(postRecipient);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, saved);
+		}  catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("reactToschedule exit");
+	}
 }

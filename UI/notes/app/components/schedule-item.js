@@ -5,13 +5,42 @@ export default Ember.Component.extend(postMixin ,{
 	originalFiles : '',
 	disableReactButton : false,
 	recipientList : null,
-	originalComment : null,
-	isAttendee : false,
+	originalComment : null,	
 	isCreator : true,
+	postRecipient :null,
+	replyBtn:'default',
+	isAccepted:false,
+	isTentative:false,
+	isDeclined:false,
+
+	scheduleService: Ember.inject.service('new.schedule'),
     init() {
 	    this._super(...arguments);
 	    this.cleanupPost(this.item);
+	    this.initScheduleResponse();
+	    console.log(this.item.comment);
 	    this.initNewComment();
+	  },
+	  initScheduleResponse(){
+			this.set('isAccepted',  false);
+			this.set('isTentative', false);
+			this.set('isDeclined',  false);
+		  if(this.get('item.postPriv') =='creator'){
+				this.set('isCreator',  true);
+			}else{
+				this.set('isCreator',  false);
+				if(this.get('item.recipients').length>0){
+					var response = this.get('item.recipients')[0];
+					this.set('postRecipient',response);
+					if(response.scheduleResponse == 'ACCEPTED'){
+						this.set('isAccepted',  true);
+					}else if(response.scheduleResponse == 'TENTATIVE'){
+						this.set('isTentative',  true);
+					}else{
+						this.set('isDeclined',  true);
+					}
+				}
+			}
 	  },
 	initNewComment(){
 		  this.set("recipientList" , []);
@@ -50,6 +79,21 @@ export default Ember.Component.extend(postMixin ,{
 	    		});
     		}
     	},
+    	updateRecipientRes(response){
+    		var json = {   
+    				id : this.get('postRecipient.id'),
+        			scheduleResponse : response,
+        			postId :  this.item.id
+        		}
+    		this.get("scheduleService").updateRecipientRes(json).then((result)=>{    			
+    			if(result.code == 0){
+    				var response =[];
+    				response.push(result.item);
+    				this.set('item.recipients',response)
+    				this.initScheduleResponse();    				
+    			}
+    		});
+        },
         removeFile(itemToRemove) {
         	  var items = Ember.get(this.item, "files");
         	  items.removeObject(itemToRemove);
@@ -77,6 +121,7 @@ export default Ember.Component.extend(postMixin ,{
 		    	});
         	}
         },
+       
     	updatePost(){
         	if(!Ember.get(this, "item.isUploading")){
 	    		this.updateRecipients(this.item);

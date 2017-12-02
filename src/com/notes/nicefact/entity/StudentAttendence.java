@@ -26,7 +26,7 @@ public class StudentAttendence extends CommonEntity {
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	private GroupAttendence groupAttendence;
+	private GroupAttendance groupAttendence;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	private AppUser student;
@@ -37,14 +37,14 @@ public class StudentAttendence extends CommonEntity {
 	/**
 	 * @return the groupAttendence
 	 */
-	public GroupAttendence getGroupAttendence() {
+	public GroupAttendance getGroupAttendence() {
 		return groupAttendence;
 	}
 
 	/**
 	 * @param groupAttendence the groupAttendence to set
 	 */
-	public void setGroupAttendence(GroupAttendence groupAttendence) {
+	public void setGroupAttendence(GroupAttendance groupAttendence) {
 		this.groupAttendence = groupAttendence;
 	}
 

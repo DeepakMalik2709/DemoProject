@@ -14,7 +14,7 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
-import com.notes.nicefact.entity.GroupAttendence;
+import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.StudentAttendence;
 
 /**
@@ -44,7 +44,7 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendence> {
 		return results;
 	}
 
-	public List<StudentAttendence> getByGroupAttendence(GroupAttendence groupAttendence) {
+	public List<StudentAttendence> getByGroupAttendence(GroupAttendance groupAttendence) {
 		
 			List<StudentAttendence> results = new ArrayList<>();
 			if (null !=groupAttendence) {

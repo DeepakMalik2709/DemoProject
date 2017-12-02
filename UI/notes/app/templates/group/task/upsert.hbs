@@ -32,7 +32,7 @@
                         <div class="form-group overflow-hide">
                        {{post-comment-box controllerRef=controllerRef className="post-description" placeholder="Task details"   recipientList=model.recipients value=model.comment autoCompleteList=myList disabled=model.isSaving}}
                        </div>  
-                       {{task-item-deadline item=model.deadlineTime}} 
+                       {{task-item-deadline item=model title="Click to add deadline" fieldName='deadlineTime' }} 
                     {{new-file-upload files=model.files item=model}}
                     {{#unless model.id}}
                                      <div class="form-group">
@@ -45,8 +45,8 @@
 					  </div> 
 					 {{/unless}} 
 					  
-	                    <div class="box-footer {{if model.isSaving 'hide' 'show'}}">
-	                        <button type="submit" class="btn btn-primary" {{action 'saveTask' model}} >{{saveButtonLabel}}</button>
+	                    <div class="box-footer">
+	                        <button type="submit"  class="btn btn-primary" {{action 'saveTask' model}} >{{saveButtonLabel}}</button>
 	                    </div>
                    </div><!-- /.box-body -->
                 </form>

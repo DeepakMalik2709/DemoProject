@@ -21,6 +21,7 @@ import javax.persistence.Transient;
 
 import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
 import com.notes.nicefact.enums.SHARING;
+import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.to.PostRecipientTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.CacheUtils;
@@ -97,7 +98,24 @@ int noOfSubmissions;
 	
 	String title;
 	
+	String location;
 	
+	private String googleEventId;
+	public String getGoogleEventId() {
+		return googleEventId;
+	}
+	public void setGoogleEventId(String googleEventId) {
+		this.googleEventId = googleEventId;
+	}
+	
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	public Post() {
 		super();
 	}
@@ -110,6 +128,7 @@ int noOfSubmissions;
 		for (PostRecipientTO postRecipientTO : post.getRecipients()) {
 			recipient = new PostRecipient();
 			recipient.setEmail(postRecipientTO.getEmail());
+			recipient.setScheduleResponse(ScheduleAttendeeResponseType.valueOf(postRecipientTO.getScheduleResponse()) );
 			recipient.setName(postRecipientTO.getLabel());
 			recipient.setPost(this);
 			AppUser hr = CacheUtils.getAppUser(postRecipientTO.getEmail());
@@ -137,7 +156,15 @@ int noOfSubmissions;
 		if(post.getToDate()  !=null){
 			this.toDate =post.getToDate();
 		}
+		if(post.getPostType()!=null){
+			this.postType=post.getPostType();
+		}
+		if(post.getLocation()!=null){
+			this.location = post.getLocation();
+		}
+		
 		this.title = post.getTitle();
+		this.googleEventId = post.getGoogleEventId();
 	}
 
 	public void updateProps(Post post) {
