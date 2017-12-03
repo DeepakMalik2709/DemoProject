@@ -111,13 +111,12 @@ public class GroupMemberTO {
 		this.id = id;
 	}
 
+	@Deprecated 
+	/**use positions and check for admin */
 	public boolean getIsAdmin() {
 		return isAdmin;
 	}
 
-	public void setAdmin(boolean isAdmin) {
-		this.isAdmin = isAdmin;
-	}
 
 	public Set<UserPosition> getPositions() {
 		return positions;

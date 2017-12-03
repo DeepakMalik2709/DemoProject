@@ -11,9 +11,12 @@ public class SearchTO {
 	int limit = 10;
 
 	String searchTerm;
-	String nextLink;
 	String email;
 	long groupId;
+	long date;
+	String fromTime;
+	
+	HttpServletRequest request;
 
 	public int getFirst() {
 		return first;
@@ -51,13 +54,49 @@ public class SearchTO {
 		return this;
 	}
 
-	public String getNextLink() {
-		return nextLink;
+	public long getDate() {
+		return date;
 	}
 
-	public SearchTO setNextLink(String nextLink) {
-		this.nextLink = nextLink;
+	public SearchTO setDate(long date) {
+		this.date = date;
 		return this;
+	}
+
+	public String getFromTime() {
+		return fromTime;
+	}
+
+	public SearchTO setFromTime(String fromTime) {
+		this.fromTime = fromTime;
+		return this;
+	}
+
+	public HttpServletRequest getRequest() {
+		return request;
+	}
+	
+	public SearchTO setRequest(HttpServletRequest request){
+		this.request = request;
+		searchTerm = request.getParameter("q");
+		if (StringUtils.isNotBlank(request.getParameter("offset"))) {
+			first = Integer.parseInt(request.getParameter("offset"));
+		}
+		if(null !=request.getParameter("date")){
+			this.date = Long.parseLong(request.getParameter("date"));
+		}
+		return this;
+	}
+
+	public String getNextLink() {
+		String nextLink = null;
+		if (null != request) {
+			nextLink = request.getRequestURI() + "?offset=" + (first + limit);
+			if (StringUtils.isNotBlank(searchTerm)) {
+				nextLink += "&q=" + searchTerm;
+			}
+		}
+		return nextLink;
 	}
 
 	public long getGroupId() {
@@ -71,27 +110,19 @@ public class SearchTO {
 
 	private SearchTO() {
 		super();
-	}
-
-	public static SearchTO getInstances(){
-		SearchTO x = new SearchTO();
-		return x;
-	}
-	
-	public SearchTO(HttpServletRequest request, int max) {
-		super();
-		searchTerm = request.getParameter("q");
-		this.limit = max;
-		if (StringUtils.isNotBlank(request.getParameter("offset"))) {
-			first = Integer.parseInt(request.getParameter("offset"));
-		}
 		if (CurrentContext.getAppUser() != null) {
 			this.email = CurrentContext.getEmail();
 		}
+	}
 
-		this.nextLink = request.getRequestURI() + "?offset=" + (first + max);
-		if (StringUtils.isNotBlank(searchTerm)) {
-			this.nextLink += "&q=" + searchTerm;
-		}
+	public static SearchTO getInstances() {
+		SearchTO x = new SearchTO();
+		return x;
+	}
+
+	public SearchTO(HttpServletRequest request, int max) {
+		super();
+		this.limit = max;
+		setRequest(request);
 	}
 }

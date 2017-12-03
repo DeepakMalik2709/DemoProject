@@ -16,14 +16,15 @@ import com.notes.nicefact.dao.GroupMemberDAO;
 import com.notes.nicefact.dao.TagDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.UserPosition;
-import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.to.AttendanceMemberTO;
+import com.notes.nicefact.to.GroupAttendanceTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
 import com.notes.nicefact.to.GroupTO;
@@ -137,6 +138,7 @@ public class GroupService extends CommonService<Group> {
 					} else {
 						member = new GroupMember(userHr);
 					}
+					member.getPositions().add(UserPosition.STUDENT);
 					member.setGroup(group);
 					group.getMembers().add(member);
 				}
@@ -160,6 +162,7 @@ public class GroupService extends CommonService<Group> {
 					} else {
 						member = new GroupMember(userHr);
 					}
+					member.getPositions().add(UserPosition.STUDENT);
 					member.setGroup(group);
 					if (group.getMembers().add(member)) {
 						allNewMembers.add(memberTO.getEmail());
@@ -221,15 +224,27 @@ public class GroupService extends CommonService<Group> {
 		return memberTos;
 	}
 
-	public List<AttendanceMemberTO> fetchGroupAttendanceMembers(long groupId, SearchTO searchTO) {
-		List<GroupMember> members = groupMemberDAO.fetchGroupAttendanceMembers(groupId, searchTO);
-		List<AttendanceMemberTO> memberTos = new ArrayList<>();
-		AttendanceMemberTO memberTO;
-		for (GroupMember groupMember : members) {
-			memberTO = new AttendanceMemberTO(groupMember);
-			memberTos.add(memberTO);
+	public GroupAttendanceTO fetchGroupAttendanceMembers(SearchTO searchTO) {
+		GroupAttendanceTO attendance = null;
+		StudentAttendenceService attendenceService = new StudentAttendenceService(em);
+		GroupAttendance groupAttendance = attendenceService.getGroupAttendance(searchTO);
+		if(null == groupAttendance){
+			attendance = new GroupAttendanceTO();
+			attendance.setDate(searchTO.getDate());
+			attendance.setFromTime(searchTO.getFromTime());
+			attendance.setGroupId(searchTO.getGroupId());
+			List<AttendanceMemberTO> memberTos = new ArrayList<>();
+			AttendanceMemberTO memberTO;
+			List<GroupMember> members = groupMemberDAO.fetchGroupAttendanceMembers( searchTO);
+			for (GroupMember groupMember : members) {
+				memberTO = new AttendanceMemberTO(groupMember);
+				memberTos.add(memberTO);
+			}
+			attendance.setMembers(memberTos);
+		}else{
+			attendance = new GroupAttendanceTO(groupAttendance);
 		}
-		return memberTos;
+		return attendance;
 	}
 	
 	public void deleteGroupMember(long groupId, long memberId, AppUser appUser) {
@@ -258,11 +273,18 @@ public class GroupService extends CommonService<Group> {
 					dbmember.getPositions().clear();
 					dbmember.getPositions().addAll(memberTO.getPositions());
 				}
-				boolean isAdmin = dbmember.getIsAdmin();
+				boolean isAdmin = memberTO.getPositions().contains(UserPosition.ADMIN);
+				boolean isTeacher = memberTO.getPositions().contains(UserPosition.TEACHER);
 				if (isAdmin) {
 					group.getAdmins().add(memberTO.getEmail());
 				} else {
 					group.getAdmins().remove(memberTO.getEmail());
+				}
+				
+				if(isTeacher){
+					group.getTeachers().add(memberTO.getEmail());
+				}else{
+					group.getTeachers().remove(memberTO.getEmail());
 				}
 			}
 			
@@ -276,28 +298,6 @@ public class GroupService extends CommonService<Group> {
 		return updatedMember;
 	}
 
-	public GroupMember toggleGroupAdmin(long groupId, long memberId, boolean isAdmin) {
-		GroupMember member = groupMemberDAO.get(memberId);
-		if (member != null) {
-			Group group = member.getGroup();
-			if (group.getAdmins().contains(CurrentContext.getEmail())) {
-				if (!isAdmin && group.getAdmins().contains(member.getEmail()) && group.getAdmins().size() == 1) {
-					throw new ServiceException("Cannot remove only admin");
-				}
-				member.getPositions().add(UserPosition.ADMIN);
-				member = groupMemberDAO.upsert(member);
-				if (isAdmin) {
-					group.getAdmins().add(member.getEmail());
-				} else {
-					group.getAdmins().remove(member.getEmail());
-				}
-				groupDao.upsert(group);
-			} else {
-				throw new UnauthorizedException("You cannot update this group");
-			}
-		}
-		return member;
-	}
 
 	public GroupMember toggleGroupBlock(long groupId, long memberId, boolean isBlocked) {
 		GroupMember member = groupMemberDAO.get(memberId);

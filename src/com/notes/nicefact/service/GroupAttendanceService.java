@@ -3,6 +3,7 @@
  */
 package com.notes.nicefact.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -10,12 +11,17 @@ import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 
 import com.notes.nicefact.dao.CommonDAO;
-import com.notes.nicefact.dao.GroupAttendenceDao;
+import com.notes.nicefact.dao.GroupAttendanceDao;
 import com.notes.nicefact.dao.StudentAttendenceDao;
+import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
-import com.notes.nicefact.entity.StudentAttendence;
+import com.notes.nicefact.entity.StudentAttendance;
+import com.notes.nicefact.exception.UnauthorizedException;
+import com.notes.nicefact.to.AttendanceMemberTO;
+import com.notes.nicefact.to.GroupAttendanceTO;
 import com.notes.nicefact.to.SearchTO;
+import com.notes.nicefact.util.CacheUtils;
 
 /**
  * @author user
@@ -23,7 +29,7 @@ import com.notes.nicefact.to.SearchTO;
  */
 public class GroupAttendanceService extends CommonService<GroupAttendance> {
 	private final static Logger logger = Logger.getLogger(GroupAttendanceService.class.getName());
-	private GroupAttendenceDao groupAttendenceDao;
+	private GroupAttendanceDao groupAttendenceDao;
 	
 	StudentAttendenceDao studentAttendenceDao;
 	AppUserService appUserService;
@@ -33,7 +39,7 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 	public GroupAttendanceService(EntityManager em) {
 		this.em = em;
 		studentAttendenceDao = new StudentAttendenceDao(em);
-		groupAttendenceDao = new GroupAttendenceDao(em);
+		groupAttendenceDao = new GroupAttendanceDao(em);
 		appUserService = new AppUserService(em);
 		backendTaskService  = new BackendTaskService(em);
 	}
@@ -43,12 +49,37 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 		return groupAttendenceDao;
 	}
 
-	public GroupAttendance upsert(GroupAttendance groupAttendence) {
-		GroupAttendance db = super.upsert(groupAttendence);
-		if(db.getId()!=null){
-			groupAttendence.setStudentAttendences((List<StudentAttendence>) studentAttendenceDao.upsertAll(groupAttendence.getStudentAttendences()));
+	public GroupAttendance upsert(GroupAttendanceTO groupAttendanceTO, AppUser user) {
+		GroupAttendance groupAttendance ;
+		Group group = CacheUtils.getGroup(groupAttendanceTO.getGroupId());
+		if(group == null || !group.getTeachers().contains(user.getEmail())){
+			throw new UnauthorizedException("You cannot mark attendance for this group");
 		}
-		return db;
+		if(groupAttendanceTO.getId() == null){
+			groupAttendance =new GroupAttendance(groupAttendanceTO);
+			groupAttendance.setGroup(group);
+		}else{
+			groupAttendance = get(groupAttendanceTO.getId());
+			groupAttendance.updateProps(groupAttendanceTO);
+			studentAttendenceDao.removeAll(groupAttendance.getStudentAttendances());
+			groupAttendance.getStudentAttendances().clear();
+		}
+		
+		if(null !=groupAttendance){
+			super.upsert(groupAttendance);
+			List<StudentAttendance> list = new ArrayList<>();
+			StudentAttendance studentAttendance;
+			for(AttendanceMemberTO member : groupAttendanceTO.getMembers()){
+				studentAttendance = new StudentAttendance(member, groupAttendance);
+				list.add(studentAttendance);
+			}
+			studentAttendenceDao.upsertAll(list);
+			groupAttendance.setStudentAttendances(list);
+			super.upsert(groupAttendance);
+		}
+		
+		
+		return groupAttendance;
 	}
 	
 	public GroupAttendance get(Long id) {
@@ -57,13 +88,5 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 	}
 
 	
-	
-	public List<GroupAttendance> fetchMyGroups(SearchTO searchTO, Group group) {
-		
-		List<GroupAttendance> list = groupAttendenceDao.getByGroup(group);
-		
-		
-		return list;
-	}
 
 }

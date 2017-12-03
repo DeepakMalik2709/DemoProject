@@ -2,24 +2,41 @@ import Ember from 'ember';
 import ajaxMixin from '../../mixins/ajax';
 import authenticationMixin from '../../mixins/authentication';
 import instituteMixin from '../../mixins/institute';
-
-export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, {
+import utilsMixin from '../../mixins/utils';
+export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin,utilsMixin, {
 
 
     model(params) {
         return this.store.findRecord('group', params.groupId);
     },
     groupService: Ember.inject.service('group'),
+    attendance : {
+    	fromHour : 0,
+    	fromMinutes : 0,
+    },
     init() {
 	    this._super(...arguments);
 	  },
     setupController: function(controller, model) {
         this._super(controller, model);
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
-        this.fetchGroupAttendanceMembers(model);
+        var hoursArray = [];
+	       for(var i = 0 ; i < 24; i++){
+	    	   hoursArray.push({label : (i) , id :i});
+	       }
+	       var minutesArray = [];
+	       for(var i = 0 ; i < 50; i = i+15){
+	    	   minutesArray.push({label : i , id :i});
+	       }
+	       controller.set("fromMinutesArray", minutesArray);
+	       controller.set("fromHoursArray",hoursArray);
+	       controller.set("toMinutesArray", Ember.copy(minutesArray, true));
+	       controller.set("toHoursArray", Ember.copy(hoursArray, true));
+	       controller.set("attendance", this.attendance);
+	       controller.set("editAttendanceDate" , true);
     },
 
-    fetchGroupAttendanceMembers (){
+    fetchGroupAttendanceMembers (json){
     	var controller = this.get("controller");
     	controller.set("noRecords" , false);
     	if(typeof controller.get("members") == 'undefined'){
@@ -27,12 +44,30 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
 		}
 		var model = controller.get('model');
 		controller.set("isLoading" , true);
+		controller.set("editAttendanceDate" , false);
 		var	url = "/rest/secure/group/" + model.get("id") + "/attendance/members";
-		this.doGet(url).then((result)=>{
+		this.doPost(url, json).then((result)=>{
 			controller.set("isLoading" , false);
 			if(result.code ==0){
-				if(result.items && result.items.length){
-					controller.get("members").pushObjects( result.items);
+				if(result.item ){
+					var attendanceUI = result.item;
+					attendanceUI.dateUI = moment(attendanceUI.date).format("Do MMM YYYY");
+					controller.set("attendanceUI", attendanceUI);
+					if( attendanceUI.toTime ){
+						var time = attendanceUI.toTime.split(":");
+						 var selectedHour = this.controller.get("toHoursArray").filterBy("id", parseInt(time[0]))[0];
+				    	  if(selectedHour){
+					    	  Ember.set(selectedHour, 'selected', true)
+					      }
+				    	  
+				    	  var selectedMinutes = this.controller.get("toMinutesArray").filterBy("id", parseInt(time[1]))[0];
+				    	  if(selectedMinutes){
+					    	  Ember.set(selectedMinutes, 'selected', true)
+					      }
+					}
+					
+					
+					this.cleanupAttendanceMembers(attendanceUI.members);
 				}else{
 					controller.set("noRecords" , true);
 				}
@@ -42,37 +77,135 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
 		})
     	
     },
-
+    cleanupAttendanceMembers(members){
+    	for(var i =0 ;i<members.length ;i++){
+    		var member = members[i];
+    		 Ember.defineProperty(member, 'isAbsent', Ember.computed("status", function(member) {
+ 	            return  Ember.get(this,'status') == 'ABSENT';
+ 	        }));
+    		 Ember.defineProperty(member, 'isLeave', Ember.computed("status", function(member) {
+ 	            return  Ember.get(this,'status') == 'LEAVE';
+ 	        }));
+    		 Ember.defineProperty(member, 'isPresent', Ember.computed("status", function(member) {
+    	            return  Ember.get(this,'status') == 'PRESENT';
+    	        }));
+    	}
+    },
     actions: {
-
-        confirmAndDeleteGroup() {
-        	var group = this.controller.get("model");
-            let confirmation = confirm(`Are you sure you want to delete ${group.get("name")} ?`);
-
-            if (confirmation) {
-            	this.get("groupService.myGroups").removeObject(group); 
-            	group.destroyRecord();
-            	this.transitionTo('dashboard');
-            }
-        },
-      
-        saveGroupMembers(){
-        	var members =  this.controller.get("newMembers");
-        	var addedGroups =  this.controller.get("addedGroups");
-        	if(members.length>0 || addedGroups.length > 0){
-        		var model = this.controller.get('model');
-        		var url =  "/rest/secure/group/" + model.id +"/members";
-        		var json = {
-        				members : members,
-        				groups : addedGroups
-        		}
-        		this.doPost(url , json).then((result)=>{
-        			  this.controller.set("newMembers", []);
-        			  this.addMembersToGroup( result.item.members, addedGroups);
-        			   this.send('showMembers');
-        		});
+    	setFromHour(hour){
+    		this.set("attendance.fromHour", hour.id);
+    	},
+    	setFromMinutes(minutes) {
+      		 this.set("attendance.fromMinutes", minutes.id);
+          },
+      	setToHour(hour){
+        	  this.controller.set("attendanceUI.toHour", hour.id);
+      	},
+      	setToMinutes(minutes) {
+      		 this.controller.set("attendanceUI.toMinutes", minutes.id);
+            },
+            changeDate(){
+            	this.controller.set("editAttendanceDate" , true);
+            	 var selectedHour = this.controller.get("fromHoursArray").filterBy("id", this.get("attendance.fromHour"))[0];
+		    	  if(selectedHour){
+			    	  Ember.set(selectedHour, 'selected', true)
+			      }
+		    	  
+		    	  var selectedMinutes = this.controller.get("fromMinutesArray").filterBy("id", this.get("attendance.fromMinutes"))[0];
+		    	  if(selectedMinutes){
+			    	  Ember.set(selectedMinutes, 'selected', true)
+			      }
+            },
+          fetchAttendance(){
+        	  var group = this.controller.get("model");
+        	  var attendance = this.attendance;
+        	var json = {
+        		date : attendance.date.getTime(),
+        		fromTime :this.get("attendance.fromHour") + ":" +this.get("attendance.fromMinutes"),
+        		groupId : group.get("id"),
         	}
-        },
+        	this.fetchGroupAttendanceMembers(json);
+        	
+          },
+          markPresent(member) {
+        	  if(Ember.get(member,"isPresent")){
+        		  Ember.set(member, "status", ""); 
+        	  }else{
+        		  Ember.set(member, "status", "PRESENT");
+        	  }
+       		 
+             },
+             markAbsent(member) {
+            	 if(Ember.get(member,"isAbsent")){
+           		  Ember.set(member, "status", ""); 
+           	  }else{
+           		  Ember.set(member, "status", "ABSENT");
+           	  }
+                 },
+                 markLeave(member) {
+                	 if(Ember.get(member,"isLeave")){
+               		  Ember.set(member, "status", ""); 
+               	  }else{
+               		  Ember.set(member, "status", "LEAVE");
+               	  }
+                     },
+                     
+            markAllPresent() {
+              var members = this.controller.get("attendanceUI.members");
+              members.forEach(function(member) {
+            	  Ember.set(member, "status", "PRESENT");
+            	  });
+            },  
+            
+            markAllAbsent() {
+                var members = this.controller.get("attendanceUI.members");
+                members.forEach(function(member) {
+              	  Ember.set(member, "status", "ABSENT");
+              	  });
+              },  
+              markAllLeave() {
+                  var members = this.controller.get("attendanceUI.members");
+                  members.forEach(function(member) {
+                	  Ember.set(member, "status", "LEAVE");
+                	  });
+                },                
+          saveAttendance(){
+        	  var attendance = this.controller.get("attendanceUI");
+        	 var toTime =  this.controller.get("attendanceUI.toHour");
+             var members = this.controller.get("attendanceUI.members");
+             var model = this.controller.get("model");
+             var msg = "";
+             members.forEach(function(member) {
+            	 if(!Ember.get(member,"status")){
+            		 msg = msg + member.name + "\n";
+            	 }
+           	  });
+             if(msg){
+            	 alert("Please mark attendance for \n" + msg);
+            	 return;
+             }
+        	 if(toTime){
+        		 if( this.controller.get("attendanceUI.toHour")){
+        			 toTime = toTime + ":" +  this.controller.get("attendanceUI.toMinutes");
+        		 }else{
+        			 toTime = toTime + ":00"; 
+        		 }
+        	 }
+        	 attendance.toTime = toTime; 
+        	  		var	url = "/rest/secure/group/" + model.get("id") + "/attendance/upsert";
+        	  this.controller.set("isLoading" , true);
+		this.doPost(url, attendance).then((result)=>{
+			this.controller.set("isLoading" , false);
+			if(result.code ==0){
+				if(result.item ){
+					console.log(result);
+				}
+			}else if(result.message){
+				alert(result.message);
+			}
+		})
+          },
+       
         error(reason){
         	this.transitionTo('dashboard');
         },

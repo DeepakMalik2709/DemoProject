@@ -4,7 +4,8 @@
     </h1>
     <ol class="breadcrumb">
         <li><a href="/home"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Posts</li>
+       {{#nav-link-to 'group.posts' model.id   tagName="li"}}{{model.name}}{{/nav-link-to}}
+        <li class="active">Attendance</li>
     </ol>
 </section>
 <section class="content">
@@ -33,18 +34,125 @@
     </div>
 <hr/>
  <div class="row">
-{{#each members as |member|}}
- <div class="row">
  
-{{member.name}}
-</div>   
-{{/each}}
-
-{{#if noRecords}}
+  <div class="row">
+   {{#if editAttendanceDate}}
+      <div class="form-group">
+        <label class="col-sm-4 control-label">Attendance date*</label>
+        <div class="col-sm-8">
+          <div class="row">    		     <div class="col-md-5">
+          {{bootstrap-datepicker autoclose=true placeholder="Select"  class="form-control" value=attendance.date readonly=true format='dd-M-yyyy'}}
+          </div></div>
+        </div>
+    </div>
+    
+          <div class="form-group">
+        <label class="col-sm-4 control-label">From time</label>
+        <div class="col-sm-8">
+                         <div class="row">    		     <div class="col-md-3">
+								{{select-box content=fromHoursArray 
+								className='form-control' didChangeAction='setFromHour' }} 
+                    		     </div>
+                    		      <div class="col-md-3">
+								{{select-box content=fromMinutesArray 
+								className='form-control' didChangeAction='setFromMinutes' }} 
+                    		     </div>
+                    		     </div>
+        </div>
+    </div>
+ 
+            <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+        <span class="{{if isLoading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
+            <button type="submit"  class="btn btn-default {{if isLoading 'nodisplay' '' }}" {{action 'fetchAttendance' }} disabled={{unless attendance.date true}}>Fetch students</button>
+        </div>
+    </div>
+    {{else}}
+    
+      <div class="form-group" >
+    <label for="inputEmail3" class="col-sm-4 control-label">Attendance date</label>
+    <div class="col-sm-8">
+   <p class="form-control-static">  {{attendanceUI.dateUI}}</p>
+    </div>
+  </div>
+  
+          <div class="form-group" >
+    <label for="inputEmail3" class="col-sm-4 control-label">From time</label>
+    <div class="col-sm-8">
+   <p class="form-control-static">   {{attendanceUI.fromTime}} Hours</p>
+    </div>
+  </div>
+    
+          <div class="form-group">
+        <label class="col-sm-4 control-label">To time</label>
+        <div class="col-sm-8">
+                         <div class="row">    		     <div class="col-md-3">
+								{{select-box content=toHoursArray 
+								className='form-control' didChangeAction='setToHour' }} 
+                    		     </div>
+                    		      <div class="col-md-3">
+								{{select-box content=toMinutesArray 
+								className='form-control' didChangeAction='setToMinutes' }} 
+                    		     </div>
+                    		     </div>
+        </div>
+    </div>
+    
+           <div class="form-group">
+        <label class="col-sm-4 control-label">Comments</label>
+        <div class="col-sm-8">
+           {{textarea type="text" class="form-control" placeholder="Comments" value=attendanceUI.comments   }}
+        </div>
+    </div>
+       
+           <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+        <span class="{{if isLoading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
+            <button type="button" disabled={{if isLoading true}} class="btn btn-default" {{action 'saveAttendance' }} >Save attendance</button>
+            
+             <button type="button" disabled={{if isLoading true}} class="btn btn-default" {{action 'changeDate' }} >Change date</button>
+        </div>
+    </div>
+    
+     {{/if}}
+     
+  </div>
+  <Br><Br>
+     {{#unless editAttendanceDate}}
+  {{#if noRecords}}
  <div class="row">
 No group members to mark attendance
  </div>
+ {{else }}
+ 
+  
+ <div class="row mtop10 ">
+            <div class="form-group">
+        <label class="col-sm-6 control-label text-bold">Name (Email)</label>
+        <div class="col-sm-6">
+           <button type="button"  class='attendance-box btn btn-primary' {{action 'markAllPresent'}}>P</button>
+           <button type="button"  class='attendance-box btn btn-danger' {{action 'markAllAbsent'}}>A</button>
+            <button type="button"  class='attendance-box btn btn-default' {{action 'markAllLeave'}} >L</button>
+        </div>
+    </div>
+</div>   
+<hr>
+{{#each attendanceUI.members as |member|}}
+ <div class="row mtop10 mbot10">
+            <div class="form-group">
+        <label class="col-sm-6 control-label">{{member.name}} ({{member.email}})</label>
+        <div class="col-sm-6">
+           <button type="button" {{action 'markPresent' member}}  class='attendance-box btn btn-primary {{if member.isPresent "active"}}'>P</button>
+           <button type="button" {{action 'markAbsent' member}}  class='attendance-box btn btn-danger {{if member.isAbsent "active"}}'>A</button>
+            <button type="button" {{action 'markLeave' member}}  class='attendance-box btn btn-default {{if member.isLeave "active"}}'>L</button>
+        </div>
+    </div>
+
+</div>   
+{{/each}}
+
  {{/if}}
+ {{/unless}}
 
 </div>     
 </section>       

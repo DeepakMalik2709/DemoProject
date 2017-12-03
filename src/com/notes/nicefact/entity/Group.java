@@ -75,6 +75,9 @@ public class Group extends CommonEntity {
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	Set<String> admins = new HashSet<>();
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	Set<String> teachers = new HashSet<>();
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	Set<String> blocked = new HashSet<>();
@@ -207,9 +210,20 @@ public class Group extends CommonEntity {
 		this.icon = icon;
 	}
 
+	public Set<String> getTeachers() {
+		if(null == teachers){
+			teachers = new HashSet<>();
+		}
+		return teachers;
+	}
+
+	public void setTeachers(Set<String> teachers) {
+		this.teachers = teachers;
+	}
+
 	public Set<String> getAdmins() {
 		if(null == admins){
-			return new HashSet<>();
+			admins = new HashSet<>();
 		}
 		return admins;
 	}
@@ -220,7 +234,7 @@ public class Group extends CommonEntity {
 
 	public Set<String> getBlocked() {
 		if(null == blocked){
-			return new HashSet<>();
+			blocked = new HashSet<>();
 		}
 		return blocked;
 	}
@@ -249,7 +263,7 @@ public class Group extends CommonEntity {
 	}
 	public Set<LANGUAGE> getLanguages() {
 		if(null == languages){
-			return new HashSet<>();
+			languages = new HashSet<>();
 		}
 		return languages;
 	}

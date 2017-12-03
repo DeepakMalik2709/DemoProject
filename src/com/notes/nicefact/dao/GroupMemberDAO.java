@@ -39,11 +39,11 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 		return results;
 	}
 	
-	public List<GroupMember> fetchGroupAttendanceMembers(long groupId, SearchTO searchTO) {
+	public List<GroupMember> fetchGroupAttendanceMembers( SearchTO searchTO) {
 		List<GroupMember> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
 		Query query = pm.createQuery("select t from GroupMember t where t.isBlocked = false and :position MEMBER OF t.positions and   t.group.id = :groupId order by t.name");
-		query.setParameter("groupId", groupId);
+		query.setParameter("groupId", searchTO.getGroupId());
 		query.setParameter("position", UserPosition.STUDENT.toString());
 		try {
 			results = (List<GroupMember>) query.getResultList();

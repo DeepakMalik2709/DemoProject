@@ -2,6 +2,7 @@ package com.notes.nicefact.to;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.GroupMember;
+import com.notes.nicefact.entity.StudentAttendance;
 import com.notes.nicefact.enums.AttendanceStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,6 +30,28 @@ public class AttendanceMemberTO {
 		this.name = member.getName();
 		this.id = member.getId();
 	}
+	
+	public AttendanceMemberTO(StudentAttendance sa) {
+		super();
+		this.email = sa.getEmail();
+		this.name = sa.getName();
+		this.id = sa.getId();
+		this.status = sa.getStatus();
+	}
+	
+	public boolean getIsPresent(){
+		return AttendanceStatus.PRESENT.equals(status);
+	}
+	
+	public boolean getIsAbsent(){
+		return AttendanceStatus.ABSENT.equals(status);
+	}
+	
+	
+	public boolean getIsLeave(){
+		return AttendanceStatus.LEAVE.equals(status);
+	}
+	
 	
 	public String getEmail() {
 		return email;

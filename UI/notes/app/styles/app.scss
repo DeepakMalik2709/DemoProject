@@ -26,6 +26,12 @@
      }
  .mtop{
  margin-top : 15px;}
+  .mtop10{
+ margin-top : 10px;}
+  .mbot10{
+ margin-top : 10px;}
+ 
+ 
 .tooltip.top-tooltip {
     top: auto;
     left: 50%;
@@ -3218,4 +3224,7 @@ footer.page-footer{
 	display:inline-block;
 	widht:100px;
 	vertical-align: bottom;
+}
+.attendance-box.active{
+	border : 3px solid black !important;
 }
