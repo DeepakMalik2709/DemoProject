@@ -17,21 +17,21 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin,u
     init() {
 	    this._super(...arguments);
 	  },
+	  hoursArray : [],
+	  minutesArray: [],
     setupController: function(controller, model) {
         this._super(controller, model);
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
-        var hoursArray = [];
 	       for(var i = 0 ; i < 24; i++){
-	    	   hoursArray.push({label : (i) , id :i});
+	    	   this.hoursArray.push({label : (i) , id :i});
 	       }
-	       var minutesArray = [];
 	       for(var i = 0 ; i < 50; i = i+15){
-	    	   minutesArray.push({label : i , id :i});
+	    	   this.minutesArray.push({label : i , id :i});
 	       }
-	       controller.set("fromMinutesArray", minutesArray);
-	       controller.set("fromHoursArray",hoursArray);
-	       controller.set("toMinutesArray", Ember.copy(minutesArray, true));
-	       controller.set("toHoursArray", Ember.copy(hoursArray, true));
+	       controller.set("fromMinutesArray", Ember.copy(this.minutesArray, true));
+	       controller.set("fromHoursArray", Ember.copy(this.hoursArray, true));
+	       controller.set("toMinutesArray", Ember.copy(this.minutesArray, true));
+	       controller.set("toHoursArray", Ember.copy(this.hoursArray, true));
 	       controller.set("attendance", this.attendance);
 	       controller.set("editAttendanceDate" , true);
     },
@@ -55,6 +55,8 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin,u
 					controller.set("attendanceUI", attendanceUI);
 					if( attendanceUI.toTime ){
 						var time = attendanceUI.toTime.split(":");
+						 this.controller.set("toMinutesArray", Ember.copy(this.minutesArray, true));
+					       this.controller.set("toHoursArray", Ember.copy(this.hoursArray, true));
 						 var selectedHour = this.controller.get("toHoursArray").filterBy("id", parseInt(time[0]))[0];
 				    	  if(selectedHour){
 					    	  Ember.set(selectedHour, 'selected', true)
@@ -106,6 +108,9 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin,u
             },
             changeDate(){
             	this.controller.set("editAttendanceDate" , true);
+
+  			  this.controller.set("fromMinutesArray", Ember.copy(this.minutesArray, true));
+  	       this.controller.set("fromHoursArray", Ember.copy(this.hoursArray, true));
             	 var selectedHour = this.controller.get("fromHoursArray").filterBy("id", this.get("attendance.fromHour"))[0];
 		    	  if(selectedHour){
 			    	  Ember.set(selectedHour, 'selected', true)
@@ -194,18 +199,38 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin,u
         	 attendance.toTime = toTime; 
         	  		var	url = "/rest/secure/group/" + model.get("id") + "/attendance/upsert";
         	  this.controller.set("isLoading" , true);
-		this.doPost(url, attendance).then((result)=>{
-			this.controller.set("isLoading" , false);
-			if(result.code ==0){
-				if(result.item ){
-					console.log(result);
+			this.doPost(url, attendance).then((result)=>{
+				this.controller.set("isLoading" , false);
+				if(result.code ==0){
+					if(result.item ){
+						alert(result.message);
+						//this.transitionTo('group.attendance',model.get("id"));
+					//	this.refresh();
+						this.send('changeDate');
+					}
+				}else if(result.message){
+					alert(result.message);
 				}
-			}else if(result.message){
-				alert(result.message);
-			}
-		})
+			});
           },
        
+          deleteAttendance(){
+          	if(confirm("Delete this attendance ?")){
+          		var model = this.controller.get("model");
+          		 var attendance = this.controller.get("attendanceUI");
+          		var	url = "/rest/secure/group/" + model.get("id") + "/attendance/delete";
+          	  this.controller.set("isLoading" , true);
+          		this.doPost(url, attendance).then((result)=>{
+        			this.controller.set("isLoading" , false);
+        			if(result.code ==0){
+    					alert(result.message);
+    					this.send('changeDate');
+        			}else if(result.message){
+        				alert(result.message);
+        			}
+        		});
+          	}
+          },
         error(reason){
         	this.transitionTo('dashboard');
         },

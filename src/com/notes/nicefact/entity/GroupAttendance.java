@@ -1,5 +1,6 @@
 package com.notes.nicefact.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class GroupAttendance extends CommonEntity {
 	
 	private String teacherEmail;
 	
-	@OneToMany(mappedBy = "groupAttendance", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "groupAttendance", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval=true)
 	private List<StudentAttendance> studentAttendances;
 	
 	public GroupAttendance() {}
@@ -86,6 +87,9 @@ public class GroupAttendance extends CommonEntity {
 
 
 	public List<StudentAttendance> getStudentAttendances() {
+		if(null == studentAttendances){
+			studentAttendances = new ArrayList<>();
+		}
 		return studentAttendances;
 	}
 

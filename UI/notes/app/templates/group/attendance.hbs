@@ -100,7 +100,7 @@
     
            <div class="form-group">
         <label class="col-sm-4 control-label">Comments</label>
-        <div class="col-sm-8">
+        <div class="col-sm-5">
            {{textarea type="text" class="form-control" placeholder="Comments" value=attendanceUI.comments   }}
         </div>
     </div>
@@ -109,8 +109,11 @@
         <div class="col-sm-offset-2 col-sm-10">
         <span class="{{if isLoading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
             <button type="button" disabled={{if isLoading true}} class="btn btn-default" {{action 'saveAttendance' }} >Save attendance</button>
-            
              <button type="button" disabled={{if isLoading true}} class="btn btn-default" {{action 'changeDate' }} >Change date</button>
+            {{#if attendanceUI.id}}
+               <button type="button" disabled={{if isLoading true}} class="btn btn-default" {{action 'deleteAttendance' }} >Delete attendance</button>
+               {{/if}}
+            
         </div>
     </div>
     

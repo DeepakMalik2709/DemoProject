@@ -496,7 +496,7 @@ public class SecureController extends CommonController {
 			GroupAttendanceTO groupAttendanceTO2 = new GroupAttendanceTO(groupAttendance);
 			json.put(Constants.DATA_ITEM, groupAttendanceTO2);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.MESSAGE, "changes saved successfully.");
+			json.put(Constants.MESSAGE, "Attendance saved.");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e );
 
@@ -509,6 +509,34 @@ public class SecureController extends CommonController {
 		}
 		renderResponseJson(json, response);
 		logger.info("upsertGroupAttendance exit");
+	}
+	
+	@POST
+	@Path("/group/{groupId}/attendance/delete")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void deleteGroupAttendance(GroupAttendanceTO groupAttendanceTO, @Context HttpServletResponse response) {
+		logger.info("deleteGroupAttendance start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			AppUser user = CurrentContext.getAppUser();
+			GroupAttendanceService groupAttendenceService = new GroupAttendanceService(em);
+			
+			groupAttendenceService.deleteAttendance(groupAttendanceTO, user);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.MESSAGE, "Attendance deleted.");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e );
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("deleteGroupAttendance exit");
 	}
 	
 	@DELETE

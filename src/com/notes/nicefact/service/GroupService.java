@@ -243,6 +243,7 @@ public class GroupService extends CommonService<Group> {
 			attendance.setMembers(memberTos);
 		}else{
 			attendance = new GroupAttendanceTO(groupAttendance);
+			attendance.setGroupId(searchTO.getGroupId());
 		}
 		return attendance;
 	}

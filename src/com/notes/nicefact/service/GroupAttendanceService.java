@@ -17,6 +17,7 @@ import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.StudentAttendance;
+import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.to.AttendanceMemberTO;
 import com.notes.nicefact.to.GroupAttendanceTO;
@@ -48,7 +49,22 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 	protected CommonDAO<GroupAttendance> getDAO() {
 		return groupAttendenceDao;
 	}
-
+	
+	public boolean deleteAttendance(GroupAttendanceTO groupAttendanceTO, AppUser user) {
+		Group group = CacheUtils.getGroup(groupAttendanceTO.getGroupId());
+		if(group == null || !group.getTeachers().contains(user.getEmail())){
+			throw new UnauthorizedException("You cannot mark attendance for this group");
+		}
+		
+		if(groupAttendanceTO.getId() == null){
+			throw new AppException("Attendance id is required.");
+		}else{
+			GroupAttendance groupAttendance = get(groupAttendanceTO.getId());
+			studentAttendenceDao.removeAll(groupAttendance.getStudentAttendances());
+			remove(groupAttendance);
+		}
+		return true;
+	}
 	public GroupAttendance upsert(GroupAttendanceTO groupAttendanceTO, AppUser user) {
 		GroupAttendance groupAttendance ;
 		Group group = CacheUtils.getGroup(groupAttendanceTO.getGroupId());
@@ -61,6 +77,9 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 		}else{
 			groupAttendance = get(groupAttendanceTO.getId());
 			groupAttendance.updateProps(groupAttendanceTO);
+			for(StudentAttendance sa : groupAttendance.getStudentAttendances()){
+				sa.setGroupAttendance(null);
+			}
 			studentAttendenceDao.removeAll(groupAttendance.getStudentAttendances());
 			groupAttendance.getStudentAttendances().clear();
 		}
@@ -74,7 +93,7 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 				list.add(studentAttendance);
 			}
 			studentAttendenceDao.upsertAll(list);
-			groupAttendance.setStudentAttendances(list);
+			groupAttendance.getStudentAttendances().addAll(list);
 			super.upsert(groupAttendance);
 		}
 		

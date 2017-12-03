@@ -156,17 +156,25 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 		return success;
 	}
 
-	// TODO
-	public boolean removeAll(Collection<E> object) {
+	public boolean removeAll(Collection<E> objects) {
 		boolean success = false;
-		/*
-		 * EntityManager pm = getEntityManager(); try {
-		 * pm.deletePersistentAll(object); success = true; } finally {
-		 *  }
-		 */
+		EntityManager pm = getEntityManager();
+		try {
+			pm.getTransaction().begin();
+			for(E object : objects){
+				pm.remove(object);
+			}
+			pm.getTransaction().commit();
+			success = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			pm.getTransaction().rollback();
+		} finally {
+			
+		}
 		return success;
 	}
-
+	
 	public boolean softDeleteAll(List<Long> ids) {
 		boolean success = true;
 		E object = null;
