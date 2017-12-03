@@ -12,6 +12,9 @@ export default Ember.Component.extend(authenticationMixin,{
 	attendeesValidation:Ember.computed.empty('attendees'),	 
 	useGoogleCalendar : false,
 	router: Ember.inject.service('-routing'), 
+	days:[ {id:0,name:'Sun',value:'SUNDAY'},{id:1,name:'Mon',value:'MONDAY'},{id:2,name:'Tues',value:'TUESDAY'},
+	              {id:3,name:'Wed',value:'WEDNESDAY'},{id:4,name:'Thurs',value:'THURSDAY'},{id:5,name:'Fri',value:'FRIDAY'},
+	              {id:6,name:'Sat',value:'SATURDAY'}],
 	 init() {
 	    this._super(...arguments);
 	    this.useGoogleCalendar = Ember.get(this.get("contextService").fetchContext().get("loginUser"), "useGoogleCalendar");
@@ -58,6 +61,25 @@ export default Ember.Component.extend(authenticationMixin,{
 	  
 	  
     actions: {
+    	addAllDays(){
+			if($scope.selectedDay.length>6){
+				$scope.selectedDay=[];
+			}else{
+				$.each($scope.days,function(){
+					if(!_.contains($scope.selectedDay, this, 0)){
+						$scope.selectedDay.push(this);
+					}
+				});
+			}
+		};
+		addDay(day){
+			if(_.contains($scope.selectedDay, day, 0)){
+				var index=$scope.selectedDay.indexOf(day)
+				$scope.selectedDay.splice(index,1);
+			}else{
+				$scope.selectedDay.push(day);
+			}
+		};
         saveEvent(event) {
         	console.log( event.toJSON());
         	if(this.validation(event)){

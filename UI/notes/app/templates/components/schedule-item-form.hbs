@@ -19,6 +19,12 @@
                          <div class="form-group">
                            {{task-item-deadline item= model fieldName='end' title="Click to add end date"}}   
      				   </div>  
+     				   <div>	
+     				   		<span  class="btn btn-round btn-white"  ng-click="addAllDays()" >All</label>
+     				     {{#each days as |day|}}
+     				     	<span class="btn btn-round btn-white">{{day.label}}</span>
+     				      {{/each}}
+						</div>			
                          <div class="form-group">
                          
 	                        {{#power-select selected=attendees  options=myGroups  placeholder="Please, select attendees"
