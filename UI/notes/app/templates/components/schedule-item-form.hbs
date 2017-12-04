@@ -19,10 +19,10 @@
                          <div class="form-group">
                            {{task-item-deadline item= model fieldName='end' title="Click to add end date"}}   
      				   </div>  
-     				   <div>	
-     				   		<span  class="btn btn-round btn-white"  ng-click="addAllDays()" >All</label>
+     				    <div class="form-group">	
+     				   		<button  class="btn btn-round btn-white"  {{action 'addAllDays' }}  >All</button>
      				     {{#each days as |day|}}
-     				     	<span class="btn btn-round btn-white">{{day.label}}</span>
+     				     	<button class="btn btn-round btn-white btn-{{if day.isActive 'success' 'default'}}" {{action 'addDay' day }}>{{day.name}}</button>
      				      {{/each}}
 						</div>			
                          <div class="form-group">

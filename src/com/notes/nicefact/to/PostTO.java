@@ -71,6 +71,13 @@ public class PostTO {
 	
 	Date toDate;
 	int noOfSubmissions;
+	String weekDay;
+	public String getWeekDay() {
+		return weekDay;
+	}
+	public void setWeekDay(String weekDay) {
+		this.weekDay = weekDay;
+	}
 
 	long deadlineTime;
 	private String googleEventId;
@@ -154,32 +161,9 @@ public class PostTO {
 		this.updatedTime = post.getUpdatedTime().getTime();
 		this.numberOfComments = post.getNumberOfComments();
 		this.numberOfReactions = post.getNumberOfReactions();	
-		if(post.getPostType().equals(POST_TYPE.SCHEDULE) ){						
-			AppUser user =  CurrentContext.getAppUser();
-			if(this.createdByEmail.equalsIgnoreCase(user.getEmail())){
-				this.postPriv="creator";		
-				if(post.getRecipients()!=null  ){
-					this.totalAttendee = post.getRecipients().size();
-					for (PostRecipient postRecipient :  post.getRecipients()) {				
-							if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.ACCEPTED)){
-								this.reponseYes++;
-							}else if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.TENTATIVE)){
-								this.reponseMaybe++;
-							}else if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.DECLINED)){
-								this.reponseNo++;
-							}
-					}
-				}
-			}else{
-				this.postPriv="attendee";	
-				if(post.getRecipients()!=null  ){					
-					for (PostRecipient postRecipient :  post.getRecipients()) {		
-						if(postRecipient.getEmail().equalsIgnoreCase(user.getEmail())){
-							recipients.add(new PostRecipientTO(postRecipient));
-						}
-					}
-				}
-			}
+		if(post.getPostType().equals(POST_TYPE.SCHEDULE) ){	
+			this.setScheduleAttribute(post);
+			
 		}
 		CommentTO commentTO;
 		for (PostComment comment : post.getComments()) {
@@ -201,6 +185,35 @@ public class PostTO {
 		}
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
+		}		
+	}
+
+	private void setScheduleAttribute(Post post) {
+		
+		AppUser user =  CurrentContext.getAppUser();
+		if(this.createdByEmail.equalsIgnoreCase(user.getEmail())){
+			this.postPriv="creator";		
+			if(post.getRecipients()!=null  ){
+				this.totalAttendee = post.getRecipients().size();
+				for (PostRecipient postRecipient :  post.getRecipients()) {				
+						if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.ACCEPTED)){
+							this.reponseYes++;
+						}else if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.TENTATIVE)){
+							this.reponseMaybe++;
+						}else if(postRecipient.getScheduleResponse().equals(ScheduleAttendeeResponseType.DECLINED)){
+							this.reponseNo++;
+						}
+				}
+			}
+		}else{
+			this.postPriv="attendee";	
+			if(post.getRecipients()!=null  ){					
+				for (PostRecipient postRecipient :  post.getRecipients()) {		
+					if(postRecipient.getEmail().equalsIgnoreCase(user.getEmail())){
+						recipients.add(new PostRecipientTO(postRecipient));
+					}
+				}
+			}
 		}
 		this.googleEventId = post.getGoogleEventId();
 		this.location = post.getLocation();

@@ -28,18 +28,7 @@ public class EventTO {
 		this.borderColor = borderColor;
 		this.end =new Date(end.getValue());
 	}
-	
-	public EventTO(String id,String title,String eventType, Date start, Date end, String backgroundColor,
-			String borderColor) {
-		super();
-		this.id = id;
-		this.title = title;
-		this.eventType = eventType;
-		this.start = start;
-		this.backgroundColor = backgroundColor;
-		this.borderColor = borderColor;
-		this.end = end;
-	}
+
 	public String getTitle() {
 		return title;
 	}

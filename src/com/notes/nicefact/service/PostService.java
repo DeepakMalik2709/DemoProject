@@ -49,22 +49,22 @@ public class PostService extends CommonService<Post> {
 	private GroupMemberDAO groupMemberDAO;
 	private PostDAO postDAO;
 	TaskService taskService;
-	
+
 	private PostCommentDAO postCommentDAO;
 	PostReactionDAO postReactionDAO;
 	private PostFileDAO postFileDAO;
-	BackendTaskService backendTaskService ;
-	NotificationService notificationService ;
-	
+	BackendTaskService backendTaskService;
+	NotificationService notificationService;
+
 	public PostService(EntityManager em) {
 		groupDao = new GroupDAO(em);
 		groupMemberDAO = new GroupMemberDAO(em);
 		postDAO = new PostDAO(em);
 		postCommentDAO = new PostCommentDAO(em);
 		postReactionDAO = new PostReactionDAO(em);
-		postFileDAO  = new PostFileDAO(em);
+		postFileDAO = new PostFileDAO(em);
 		backendTaskService = new BackendTaskService(em);
-		notificationService = new  NotificationService(em);
+		notificationService = new NotificationService(em);
 		taskService = new TaskService(em);
 	}
 
@@ -81,7 +81,8 @@ public class PostService extends CommonService<Post> {
 		if (appUser.getGroupIds().contains(postTo.getGroupId())) {
 			Group group = CacheUtils.getGroup(postTo.getGroupId());
 			if (group.getBlocked().contains(appUser.getEmail())) {
-				throw new UnauthorizedException("User has been blocked by group admin.");
+				throw new UnauthorizedException(
+						"User has been blocked by group admin.");
 			}
 			if (postTo.getId() > 0) {
 				Post postDB = get(postTo.getId());
@@ -92,11 +93,13 @@ public class PostService extends CommonService<Post> {
 					backendTaskService.savePostTask(postDB);
 					return postDB;
 				} else {
-					throw new UnauthorizedException("You cannot edit this post.");
+					throw new UnauthorizedException(
+							"You cannot edit this post.");
 				}
 			} else {
 
-				if (group == null || group.getBlocked().contains(appUser.getEmail())) {
+				if (group == null
+						|| group.getBlocked().contains(appUser.getEmail())) {
 					throw new ServiceException("User cannot post to this group");
 				} else {
 					updateAttachedFiles(post, postTo);
@@ -104,7 +107,7 @@ public class PostService extends CommonService<Post> {
 					backendTaskService.savePostTask(post);
 				}
 			}
-			
+
 		} else {
 			throw new UnauthorizedException("You cannot post to this group.");
 		}
@@ -113,53 +116,65 @@ public class PostService extends CommonService<Post> {
 
 	void updateAttachedFiles(Post post, PostTO postTo) {
 		try {
-			String fileBasePath = AppProperties.getInstance().getGroupUploadsFolder() + post.getGroupId();
+			String fileBasePath = AppProperties.getInstance()
+					.getGroupUploadsFolder() + post.getGroupId();
 			if (Files.notExists(Paths.get(fileBasePath))) {
 				Files.createDirectories(Paths.get(fileBasePath));
 			}
 			fileBasePath += "/";
-			String serverFilePath ; 
-			String tempFilePath ;
-			
+			String serverFilePath;
+			String tempFilePath;
+
 			/* set of file ids that were not delted on UI */
-			Set<Long> filesToKeppIds = new HashSet<>(); 
+			Set<Long> filesToKeppIds = new HashSet<>();
 			for (FileTO fileTO : postTo.getFiles()) {
 				if (fileTO.getId() > 0) {
 					filesToKeppIds.add(fileTO.getId());
 				}
 			}
 			/* delete files from filesystem and db that were delted on UI */
-			for(Iterator<PostFile> postFileIter = post.getFiles().iterator();postFileIter.hasNext();){
+			for (Iterator<PostFile> postFileIter = post.getFiles().iterator(); postFileIter
+					.hasNext();) {
 				PostFile postFile = postFileIter.next();
-				if(!filesToKeppIds.contains(postFile.getId())){
+				if (!filesToKeppIds.contains(postFile.getId())) {
 					Files.deleteIfExists(Paths.get(postFile.getPath()));
 					postFileIter.remove();
 				}
 			}
-			
+
 			for (FileTO fileTO : postTo.getFiles()) {
 				if (fileTO.getId() <= 0) {
 					serverFilePath = fileBasePath + fileTO.getServerName();
-					tempFilePath = AppProperties.getInstance().getTempUploadsFolder() + fileTO.getServerName();
+					tempFilePath = AppProperties.getInstance()
+							.getTempUploadsFolder() + fileTO.getServerName();
 					if (Files.exists(Paths.get(tempFilePath))) {
-						Files.copy(Paths.get(tempFilePath), Paths.get(serverFilePath));
+						Files.copy(Paths.get(tempFilePath),
+								Paths.get(serverFilePath));
 						PostFile postFile = new PostFile(fileTO, serverFilePath);
 						postFile.setPost(post);
 						post.getFiles().add(postFile);
-					} 
+					}
 				}
 			}
 		} catch (IOException e) {
-			logger.error("error for post Id : " + post.getId() + " , " +  e.getMessage(), e);
+			logger.error(
+					"error for post Id : " + post.getId() + " , "
+							+ e.getMessage(), e);
 		}
 	}
-	
 
 	public List<PostTO> search(SearchTO searchTO) {
 		List<Post> posts = postDAO.search(searchTO);
 		List<PostTO> toList = new ArrayList<>();
 		PostTO postTO;
+		Date today = new Date();
 		for (Post post : posts) {
+			if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
+				if (!post.getFromDate().before(today)
+						|| !post.getToDate().after(today)) {
+					continue;
+				}
+			}
 			postTO = new PostTO(post);
 			toList.add(postTO);
 		}
@@ -176,21 +191,24 @@ public class PostService extends CommonService<Post> {
 
 		Post post = get(commentTO.getPostId());
 		if (post == null) {
-			throw new NotFoundException("No post found with id " + commentTO.getPostId());
+			throw new NotFoundException("No post found with id "
+					+ commentTO.getPostId());
 		}
 		PostComment postComment = new PostComment(commentTO);
 		if (appUser.getGroupIds().contains(post.getGroupId())) {
 			Group group = CacheUtils.getGroup(post.getGroupId());
 			if (group.getBlocked().contains(appUser.getEmail())) {
-				throw new UnauthorizedException("User has been blocked by group admin.");
+				throw new UnauthorizedException(
+						"User has been blocked by group admin.");
 			}
 			if (commentTO.getCommentId() < 0) {
 				postComment.setPost(post);
 				post.getComments().add(postComment);
 				postCommentDAO.upsert(postComment);
-				backendTaskService.postCommentedTask(post,postComment);
+				backendTaskService.postCommentedTask(post, postComment);
 			} else {
-				PostComment dbComment = postCommentDAO.get(commentTO.getCommentId());
+				PostComment dbComment = postCommentDAO.get(commentTO
+						.getCommentId());
 				dbComment.updateProps(postComment);
 				postComment = postCommentDAO.upsert(dbComment);
 			}
@@ -202,9 +220,10 @@ public class PostService extends CommonService<Post> {
 		return postComment;
 	}
 
-	public PostComment getPostCommentById(long id){
+	public PostComment getPostCommentById(long id) {
 		return postCommentDAO.get(id);
 	}
+
 	public PostComment upsertCommentReply(CommentTO commentTO, AppUser appUser) {
 		logger.info("start : addPostComment ," + commentTO);
 		if (commentTO.getPostId() <= 0) {
@@ -216,22 +235,26 @@ public class PostService extends CommonService<Post> {
 		}
 		PostComment dbComment = postCommentDAO.get(commentTO.getCommentId());
 		if (dbComment == null) {
-			throw new NotFoundException("No Comment found with id " + commentTO.getCommentId());
+			throw new NotFoundException("No Comment found with id "
+					+ commentTO.getCommentId());
 		}
 		Post post = dbComment.getPost();
 		PostComment subComment = new PostComment(commentTO);
 		if (appUser.getGroupIds().contains(post.getGroupId())) {
 			Group group = CacheUtils.getGroup(post.getGroupId());
 			if (group.getBlocked().contains(appUser.getEmail())) {
-				throw new UnauthorizedException("User has been blocked by group admin.");
+				throw new UnauthorizedException(
+						"User has been blocked by group admin.");
 			}
 			if (commentTO.getSubCommentId() <= 0) {
 				subComment.setParent(dbComment);
 				dbComment.getComments().add(subComment);
 				postCommentDAO.upsert(subComment);
-				backendTaskService.postCommentReplyTask(post,dbComment, subComment);
+				backendTaskService.postCommentReplyTask(post, dbComment,
+						subComment);
 			} else {
-				PostComment dbSubComment = postCommentDAO.get(commentTO.getSubCommentId());
+				PostComment dbSubComment = postCommentDAO.get(commentTO
+						.getSubCommentId());
 				dbSubComment.updateProps(subComment);
 				subComment = postCommentDAO.upsert(dbSubComment);
 			}
@@ -255,7 +278,8 @@ public class PostService extends CommonService<Post> {
 
 	public void deletePostComment(long postId, long commentId, AppUser appUser) {
 		PostComment comment = postCommentDAO.get(commentId);
-		if (comment != null && comment.getCreatedBy().equals(appUser.getEmail())) {
+		if (comment != null
+				&& comment.getCreatedBy().equals(appUser.getEmail())) {
 			postCommentDAO.remove(commentId);
 		} else {
 			throw new UnauthorizedException("You cannot delete this comment.");
@@ -270,7 +294,8 @@ public class PostService extends CommonService<Post> {
 			throw new NotFoundException("No post found with id " + postId);
 		} else {
 			if (!appUser.getGroupIds().contains(post.getGroupId())) {
-				throw new UnauthorizedException("You do not have permission to view this post");
+				throw new UnauthorizedException(
+						"You do not have permission to view this post");
 			}
 			post = get(postId);
 			PostReaction postGood = new PostReaction(appUser);
@@ -278,17 +303,20 @@ public class PostService extends CommonService<Post> {
 			boolean isNew = post.getReactions().add(postGood);
 			if (isNew) {
 				notificationService.savePostReactionNotification(post, appUser);
-			}else{
-				for (Iterator<PostReaction> reactIter = post.getReactions().iterator(); reactIter.hasNext();) {
+			} else {
+				for (Iterator<PostReaction> reactIter = post.getReactions()
+						.iterator(); reactIter.hasNext();) {
 					PostReaction reaction = reactIter.next();
 					if (reaction.getEmail().equals(appUser.getEmail())) {
-						notificationService.deletePostReactionNotification(post, reaction.getEmail(), NotificationAction.POST_LIKE);
+						notificationService.deletePostReactionNotification(
+								post, reaction.getEmail(),
+								NotificationAction.POST_LIKE);
 						reactIter.remove();
 						break;
 					}
 				}
 			}
-			
+
 			post.setUpdatedTime(new Date());
 			upsert(post);
 		}
@@ -303,7 +331,14 @@ public class PostService extends CommonService<Post> {
 		List<Post> posts = postDAO.fetchMyPosts(searchTO, appUser);
 		List<PostTO> toList = new ArrayList<>();
 		PostTO postTO;
+		Date today = new Date();
 		for (Post post : posts) {
+			if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
+				if (!post.getFromDate().before(today)
+						|| !post.getToDate().after(today)) {
+					continue;
+				}
+			}
 			postTO = new PostTO(post);
 			toList.add(postTO);
 		}
@@ -316,13 +351,14 @@ public class PostService extends CommonService<Post> {
 	}
 
 	public List<PostFile> getDrivePostFilesWithoutThumbnail(int offset) {
-		List<PostFile> files = postDAO.getDrivePostFilesWithoutThumbnail(offset);
+		List<PostFile> files = postDAO
+				.getDrivePostFilesWithoutThumbnail(offset);
 		return files;
 	}
 
-
-public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
-		if (StringUtils.isBlank(postTo.getComment()) && postTo.getFiles().isEmpty()) {
+	public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
+		if (StringUtils.isBlank(postTo.getComment())
+				&& postTo.getFiles().isEmpty()) {
 			throw new ServiceException(" Task details cannot be empty");
 		}
 		if (postTo.getGroupId() == null && postTo.getGroupIds().isEmpty()) {
@@ -339,7 +375,8 @@ public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
 			Group group = CacheUtils.getGroup(groupId);
 			if (group.getAdmins().contains(appUser.getEmail())) {
 				if (group.getBlocked().contains(appUser.getEmail())) {
-					throw new UnauthorizedException("User has been blocked by group admin.");
+					throw new UnauthorizedException(
+							"User has been blocked by group admin.");
 				}
 
 				if (null == postTo.getId() || postTo.getId() <= 0) {
@@ -356,15 +393,34 @@ public List<Post> upsertTask(PostTO postTo, AppUser appUser) {
 						backendTaskService.saveTaskTask(postDB);
 						posts.add(postDB);
 					} else {
-						throw new UnauthorizedException("You cannot edit this post.");
+						throw new UnauthorizedException(
+								"You cannot edit this post.");
 					}
 				}
 
 			} else {
-				throw new UnauthorizedException("You cannot create task for this group.");
+				throw new UnauthorizedException(
+						"You cannot create task for this group.");
 			}
 		}
 		return posts;
+	}
+
+	public List<PostTO> fetchScheduleByDate(SearchTO searchTO,Date date) {
+		List<Post> posts = postDAO.fetchScheduleByDate(searchTO,date);
+		List<PostTO> toList = new ArrayList<>();
+		PostTO postTO;
+		Date today = new Date();
+		for (Post post : posts) {			
+			postTO = new PostTO(post);
+			toList.add(postTO);
+		}
+		return toList;
+
+	}
+
+	public int countScheduleByDateAndDay(Date date) {		
+		return  postDAO.countScheduleByDateAndDay(date);
 	}
 
 }

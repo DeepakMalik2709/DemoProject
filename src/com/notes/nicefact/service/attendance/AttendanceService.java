@@ -60,67 +60,6 @@ public class AttendanceService extends CommonService<Group> {
 		}
 		return updatedEvent;
 	}
-
-	public PostTO createEvent(com.notes.nicefact.entity.Event schedule,AppUser user) throws IOException, AllSchoolException {
-		com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-		
-			PostTO postTo = new PostTO(schedule,user);
-			Post post = postService.upsert(postTo, CurrentContext.getAppUser());
-			PostTO savedTO = new PostTO(post);
-			
-		
-		logger.info("createEvent : "+schedule);
-		Event event= null;
-		if(service !=null){
-		 event = new Event().set("sendNotifications", true)
-		    .setSummary(schedule.getTitle())
-		    .setLocation(schedule.getLocation())
-		    .setDescription(schedule.getDescription());
-		if(schedule.getStart() ==null){
-			schedule.setStart(new Date());
-		}
-		DateTime startDateTime = new DateTime(schedule.getStart());
-		EventDateTime start = new EventDateTime()
-		    .setDateTime(startDateTime)
-		    .setTimeZone("America/Los_Angeles");
-		event.setStart(start);
-		if(schedule.getEnd() ==null){
-			schedule.setEnd(new Date());
-		}
-		DateTime endDateTime = new DateTime(schedule.getEnd());
-		EventDateTime end = new EventDateTime()
-		    .setDateTime(endDateTime)
-		    .setTimeZone("America/Los_Angeles");
-		event.setEnd(end);
-		
-		String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
-		event.setRecurrence(Arrays.asList(recurrence));
-		
-		
-		
-		
-		
-		event.setAttendees(schedule.getAttendees());
-		
-		EventReminder[] reminderOverrides = new EventReminder[] {
-		    new EventReminder().setMethod("email").setMinutes(24 * 60),
-		    new EventReminder().setMethod("popup").setMinutes(10),
-		};
-		Event.Reminders reminders = new Event.Reminders()
-		    .setUseDefault(false)
-		    .setOverrides(Arrays.asList(reminderOverrides));
-		event.setReminders(reminders);
-		
-		String calendarId = "primary";
-		event = service.events().insert(calendarId, event).execute();
-		System.out.printf("Event created: %s\n", event.getHtmlLink());
-		
-		}else{
-			throw new AllSchoolException(AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_CODE	, AllSchoolError.GOOGLE_CALENDAR_AUTHORIZATION_NULL_MESSAGE);
-
-		}
-		return savedTO;
-	}
 	
 	@Override
 	protected CommonDAO<Group> getDAO() {

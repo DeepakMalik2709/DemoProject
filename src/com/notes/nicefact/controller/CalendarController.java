@@ -1,7 +1,7 @@
 package com.notes.nicefact.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,22 +20,19 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
 import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.PostRecipient;
-import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.GoogleCalendarService;
 import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
 import com.notes.nicefact.to.PostRecipientTO;
 import com.notes.nicefact.to.PostTO;
+import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
-import com.notes.nicefact.util.Utils;
 
 @Path("/calendar")
 public class CalendarController extends CommonController {
@@ -99,17 +96,9 @@ public class CalendarController extends CommonController {
 		try {
 			ScheduleService scheduleService = new ScheduleService(em);
 			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-			
-			/*
-			 * if(schedule.getGroups() !=null && schedule.getGroups().size()>0){
-			 * schedule.setAttendees(scheduleService.getGroupService().
-			 * fetchMemberEmailFromGroup(schedule.getGroups(),searchTO)); }
-			 */
-			PostTO createdEvent = scheduleService.createEvent(schedule, user);
-		
-			
+			List<PostTO> createdEvents = scheduleService.createEvent(schedule, user);		
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, createdEvent);
+			json.put(Constants.DATA_ITEMS, createdEvents);
 		} catch (AllSchoolException e) {
 			logger.error(e.getMessage(), e);
 
@@ -141,44 +130,51 @@ public class CalendarController extends CommonController {
 	@GET
 	@Path("/calendars")
 	public void publicHome(@Context HttpServletRequest request, @Context HttpServletResponse response) {
-
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		System.out.println("in google event ");
 		Map<String, Object> json = new HashMap<>();
 		try {
-			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-			if (service != null) {
-				// List the next 10 events from the primary calendar.
-				Events events = service.events().list("primary").execute();
-				List<Event> items = events.getItems();
-				List<EventTO> eventTos = new ArrayList<EventTO>();
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
+			ScheduleService scheduleService = new ScheduleService(em);
+			List<EventTO> eventTos = scheduleService.getEventFromGoogleCalendar();
+			eventTos.addAll(scheduleService.fetchScheduleByDate(searchTO,new Date()));
+			EventsTO eventsTo = new EventsTO("1", eventTos);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, eventsTo);
+			
+			
+		}catch (AllSchoolException e) {
+			logger.error(e.getMessage(), e);
 
-				if (items.size() == 0) {
-					json.put(Constants.CODE, Constants.NO_RESULT);
-					System.out.println("No upcoming events found.");
-				} else {
+			json.put(Constants.CODE, e.getErrorCode());
+			json.put(Constants.MESSAGE, e.getErrorMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		}
+		renderResponseJson(json, response);
+	}
+	
+	@GET
+	@Path("/todayScheduleCount")
+	public void fetchtodayScheduleCount(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		System.out.println("in google event ");
+		Map<String, Object> json = new HashMap<>();
+		try {
+			ScheduleService scheduleService = new ScheduleService(em);
+			int eventCount = scheduleService.countTodaysGoogleEvent();
+			int scheduleCount = scheduleService.countScheduleByDateAndDay(new Date());			
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.TOTAL, scheduleCount+eventCount);
+			
+			
+		}catch (AllSchoolException e) {
+			logger.error(e.getMessage(), e);
 
-					System.out.println("Upcoming events");
-					for (Event event : items) {
-						DateTime start = event.getStart().getDateTime();
-						DateTime end = event.getEnd().getDateTime();
-						if (start == null) {
-							start = event.getStart().getDate();
-						}
-						if (end == null) {
-							end = event.getEnd().getDate();
-						}
-
-						eventTos.add(new EventTO(event.getId(), event.getSummary(), "", start, end, Utils
-								.getRandomColor(), Utils.getRandomColor()));
-						System.out.printf("%s (%s)\n", event.getSummary(), start);
-					}
-					EventsTO eventsTo = new EventsTO("1", eventTos);
-					json.put(Constants.CODE, Constants.RESPONSE_OK);
-					json.put(Constants.DATA_ITEM, eventsTo);
-				}
-
-				json.put(Constants.TOTAL, items.size());
-			}
+			json.put(Constants.CODE, e.getErrorCode());
+			json.put(Constants.MESSAGE, e.getErrorMessage());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);

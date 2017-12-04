@@ -14,7 +14,15 @@ export default DS.Adapter.extend(ajaxMixin ,{
 	    return new Ember.RSVP.Promise((resolve, reject) =>{
 	   	var url = '/rest/calendar/insertEvent';
 	   	this.doPost(url , json).then(function(data) {
-	    	  Ember.run(null, resolve, data.item);
+	   		if(data.code ==0){
+	   			var records={
+	   					id:'schedules',
+	   					data:data.items
+	   			}
+	   			Ember.run(null, resolve, records);
+	   		}else{
+	   			Ember.run(null, reject, jqXHR);
+	    	}	   		
 	     }, function(jqXHR) {
 	        jqXHR.then = null; // tame jQuery's ill mannered promises
 	        Ember.run(null, reject, jqXHR);

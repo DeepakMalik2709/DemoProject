@@ -14,7 +14,7 @@ export default DS.Model.extend({
 	 isSaving : DS.attr('boolean'),
 	  isSubmitted : DS.attr('boolean'),
 	attendees:DS.attr('string'),
-	
+	weekdays:DS.attr( ),
 	groups:DS.attr( ),
 	groupId: DS.attr(""),
 	  comment: DS.attr(""),

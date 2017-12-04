@@ -29,6 +29,7 @@ public class Event {
 	private String createdByName;
 	private String updatedByEmail;
 	private String updatedByName;
+	private List<String> weekdays;
 	private long createdTime;
 	private long updatedTime;
 	private int numberOfReactions;
@@ -201,6 +202,12 @@ public class Event {
 				+ ", createdTime=" + createdTime + ", updatedTime="
 				+ updatedTime + ", numberOfReactions=" + numberOfReactions
 				+ ", comments=" + comments + ", files=" + files + "]";
+	}
+	public List<String> getWeekdays() {
+		return weekdays;
+	}
+	public void setWeekdays(List<String> weekdays) {
+		this.weekdays = weekdays;
 	}
 
 }

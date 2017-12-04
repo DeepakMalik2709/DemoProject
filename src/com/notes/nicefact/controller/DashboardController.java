@@ -1,10 +1,7 @@
 package com.notes.nicefact.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,43 +10,27 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
-import org.json.JSONException;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.notes.nicefact.entity.AppUser;
-import com.notes.nicefact.entity.Tutorial;
-import com.notes.nicefact.entity.TutorialFile;
-import com.notes.nicefact.exception.AppException;
-import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.AppUserService;
-import com.notes.nicefact.service.CommonEntityService;
-import com.notes.nicefact.service.TutorialService;
-import com.notes.nicefact.to.AppUserTO;
+import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.to.EventTO;
-import com.notes.nicefact.to.EventsTO;
-import com.notes.nicefact.to.SearchTO;
-import com.notes.nicefact.to.TutorialTO;
-import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CommonContext;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
 import com.notes.nicefact.util.EntityManagerHelper;
-import com.notes.nicefact.util.Utils;
 
 @Path("/dashboard")
 public class DashboardController extends CommonController {
@@ -157,59 +138,29 @@ public class DashboardController extends CommonController {
 
 	@GET
 	@Path("/dataList")
-	public void getDashboardAfterLoginData(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException{
+	public void getDashboardAfterLoginData(@Context HttpServletRequest request, @Context HttpServletResponse response){
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		logger.info("dashboard data fetch start");
 		Map<String, Object> json = new HashMap<>();
 		try {
-			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService();
-			if(service!=null){
-				// List the next 10 events from the primary calendar.
-				Calendar cal = Calendar.getInstance();
-				
-				cal.set(Calendar.HOUR, 0);
-				cal.set(Calendar.MINUTE, 0);
-				cal.set(Calendar.SECOND, 0);
-				DateTime today = new DateTime(cal.getTime());
-				cal.set(Calendar.DAY_OF_YEAR, cal.get(Calendar.DAY_OF_YEAR)+1);
-				DateTime tomorrow = new DateTime(cal.getTime());
-				
-		        Events events = service.events().list("primary")
-		            .setTimeMin(today)
-		            .setTimeMax(tomorrow)
-		            .setOrderBy("startTime")
-		            .setSingleEvents(true)
-		            .execute();
-				
-				List<Event> items = events.getItems();
-				List<EventTO> eventTos = new ArrayList<EventTO>();
-	
-				if (items.size() == 0) {
-					json.put(Constants.CODE, Constants.NO_RESULT);
-					System.out.println("No upcoming events found.");
-				} else {
-	
-					System.out.println("Upcoming events");
-					for (Event event : items) {
-						DateTime start = event.getStart().getDateTime();
-						DateTime end = event.getEnd().getDateTime();
-						if (start == null) {
-							start = event.getStart().getDate();
-						}
-						if (end == null) {
-							end = event.getEnd().getDate();
-						}						
-						
-						eventTos.add(new EventTO(event.getId(), event.getSummary(), "--", start, end, Utils.getRandomColor(),Utils.getRandomColor()));
-						System.out.printf("%s (%s)\n", event.getSummary(), start);
-					}
-					//EventsTO eventsTo = new EventsTO("1", eventTos);
-					json.put(Constants.CODE, Constants.RESPONSE_OK);
-					json.put("todaySchedules", eventTos);
+			ScheduleService scheduleService = new ScheduleService(em);
+			Events events = scheduleService.fetchTodayGoogleEvents();
+			List<Event> items = events.getItems();
+			List<EventTO> eventTos = new ArrayList<EventTO>();
+
+			if (items.size() == 0) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+				System.out.println("No upcoming events found.");
+			} else {
+				System.out.println("Upcoming events");
+				for (Event event : items) {
+					EventTO  eventTO = scheduleService.convertToEventTO(event);
+					eventTos.add(eventTO);
 				}
-	
-				json.put(Constants.TOTAL, items.size());
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put("todaySchedules", eventTos);
 			}
+			json.put(Constants.TOTAL, items.size());			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);

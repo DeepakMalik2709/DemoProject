@@ -99,7 +99,7 @@ int noOfSubmissions;
 	String title;
 	
 	String location;
-	
+	String weekday;
 	private String googleEventId;
 	public String getGoogleEventId() {
 		return googleEventId;
@@ -165,6 +165,7 @@ int noOfSubmissions;
 		
 		this.title = post.getTitle();
 		this.googleEventId = post.getGoogleEventId();
+		this.weekday= post.getWeekDay();
 	}
 
 	public void updateProps(Post post) {
