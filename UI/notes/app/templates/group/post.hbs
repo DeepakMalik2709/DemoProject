@@ -8,15 +8,15 @@
             <!-- /.row -->
 
  <div class="row">
-{{#each posts as |post|}}
  <div class="row">
- {{#if post.isTask}}
- {{task-item item=post updateTask="saveTask" deletePost="deletePost" group=model }}
- {{else if post.isPost}}
-{{post-item item=post updatePost="savePost" deletePost="deletePost" group=model }}
+ {{#if model.isTask}}
+ {{task-item item=model updateTask="saveTask" deletePost="deletePost" group=model }}
+ {{else if model.isPost}}
+{{post-item item=model updatePost="savePost" deletePost="deletePost" group=model }}
+{{else if model.isSchedule}}
+{{schedule-item item=model updatePost="savePost" deletePost="deletePost"  group=model }}
 {{/if}}
 </div>   
-{{/each}}
 
 {{#if noRecords}}
  <div class="row">

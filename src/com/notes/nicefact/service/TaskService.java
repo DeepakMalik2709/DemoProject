@@ -242,8 +242,7 @@ public class TaskService extends CommonService<Post> {
 			String header = "Name,Email\n";
 			StringBuffer sb = new StringBuffer(header);
 			GroupMemberDAO groupMemberDAO = new GroupMemberDAO(em);
-			SearchTO searchTO = new SearchTO();
-			searchTO.setLimit(1000);
+			SearchTO searchTO = SearchTO.getInstances().setLimit(1000);
 			List<GroupMember> members = groupMemberDAO.fetchGroupMembersByGroupId(task.getGroupId(), searchTO);
 
 			for (GroupMember groupMember : members) {

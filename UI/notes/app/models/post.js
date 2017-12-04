@@ -24,6 +24,7 @@ export default DS.Model.extend({
 	  deadlineTime: DS.attr('number'),
 	  isTask : DS.attr('boolean'),
 	  isPost : DS.attr('boolean'),
+	  isSchedule: DS.attr('boolean'),
 	  files: DS.attr( {
 		    defaultValue() { return []; }
 		  }),

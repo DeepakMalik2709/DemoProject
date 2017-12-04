@@ -34,6 +34,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
         this.initCreatePost();
         this.fetchGroupPosts();
         this.bindScrolling();
+        hideSidebarMobile();
     },
     willDestroy : function(){
     	this.unbindScrolling();
@@ -134,6 +135,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
     		this.initCreatePost();
     	},
         error(reason){
+    		console.log(reason)
         	this.transitionTo('home');
         },
         showCreatePostAction(){

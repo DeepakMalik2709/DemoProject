@@ -96,7 +96,6 @@ export default Ember.Component.extend(authenticationMixin,{
 			}
 		},
         saveEvent(event) {
-        	
         	if(this.validation(event)){
         		this.set("submitted", true);
             	event.groups=[];

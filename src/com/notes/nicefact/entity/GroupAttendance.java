@@ -1,14 +1,19 @@
 package com.notes.nicefact.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.to.GroupAttendanceTO;
+import com.notes.nicefact.util.CurrentContext;
 
 /**
  * @author user
@@ -23,7 +28,8 @@ public class GroupAttendance extends CommonEntity {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private Date attendenceDate;
+	@Basic
+	Date date;
 	
 	private String fromTime;
 	
@@ -35,37 +41,68 @@ public class GroupAttendance extends CommonEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private AppUser teacher;
 	
-	private String remarks;
+	private String comments;
 	
-	@OneToMany(fetch = FetchType.LAZY)
-	private List<StudentAttendence> studentAttendences;
-
-	public List<StudentAttendence> getStudentAttendences() {
-		return studentAttendences;
-	}
-
-	public void setStudentAttendences(List<StudentAttendence> studentAttendences) {
-		this.studentAttendences = studentAttendences;
-	}
-
+	private String teacherEmail;
+	
+	@OneToMany(mappedBy = "groupAttendance", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval=true)
+	private List<StudentAttendance> studentAttendances;
+	
 	public GroupAttendance() {}
 	
 	public GroupAttendance(GroupAttendanceTO groupAttendanceTO) {
-		// TODO Auto-generated constructor stub
+		super();
+		this.updateProps(groupAttendanceTO);
+	}
+	
+	public void updateProps(GroupAttendanceTO groupAttendanceTO) {
+		this.teacher = CurrentContext.getAppUser();
+		if(this.teacher==null){
+			throw new AppException("Teacher cannot be null");
+		}
+		this.date = new Date(groupAttendanceTO.getDate());
+		this.comments =  groupAttendanceTO.getComments();
+		this.fromTime = groupAttendanceTO.getFromTime();
+		this.toTime = groupAttendanceTO.getToTime();
+		this.teacherEmail = this.teacher.getEmail();
+		
 	}
 
-	/**
-	 * @return the attendenceDate
-	 */
-	public Date getAttendenceDate() {
-		return attendenceDate;
+	public Date getDate() {
+		return date;
 	}
 
-	/**
-	 * @param attendenceDate the attendenceDate to set
-	 */
-	public void setAttendenceDate(Date attendenceDate) {
-		this.attendenceDate = attendenceDate;
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public String getTeacherEmail() {
+		return teacherEmail;
+	}
+
+	public void setTeacherEmail(String teacherEmail) {
+		this.teacherEmail = teacherEmail;
+	}
+
+
+
+	public List<StudentAttendance> getStudentAttendances() {
+		if(null == studentAttendances){
+			studentAttendances = new ArrayList<>();
+		}
+		return studentAttendances;
+	}
+
+	public void setStudentAttendances(List<StudentAttendance> studentAttendances) {
+		this.studentAttendances = studentAttendances;
+	}
+
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 
 	/**
@@ -124,18 +161,6 @@ public class GroupAttendance extends CommonEntity {
 		this.teacher = teacher;
 	}
 
-	/**
-	 * @return the remarks
-	 */
-	public String getRemarks() {
-		return remarks;
-	}
 
-	/**
-	 * @param remarks the remarks to set
-	 */
-	public void setRemarks(String remarks) {
-		this.remarks = remarks;
-	}
 
 }

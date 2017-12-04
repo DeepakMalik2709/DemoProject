@@ -23,7 +23,7 @@ Router.map(function() {
         this.route('post',{path : '/post/:postId'});
         this.route('task.create',{path : '/task/create'});
         this.route('task.edit',{path : '/task/edit/:taskId'});
-        this.route('attendance',{path : 'attendance/:groupId/groupAttendance'});
+        this.route('attendance',{path : '/:groupId/attendance'});
       });
   this.route('tag', function() {
       this.route('view',{path : '/:groupId'});

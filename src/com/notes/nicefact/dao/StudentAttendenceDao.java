@@ -15,13 +15,13 @@ import org.apache.log4j.Logger;
 
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
 import com.notes.nicefact.entity.GroupAttendance;
-import com.notes.nicefact.entity.StudentAttendence;
+import com.notes.nicefact.entity.StudentAttendance;
 
 /**
  * @author user
  *
  */
-public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendence> {
+public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendance> {
 	static Logger logger = Logger.getLogger(GroupDAO.class.getSimpleName());
 
 	public StudentAttendenceDao(EntityManager em) {
@@ -29,14 +29,14 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendence> {
 	}
 
 
-	public List<StudentAttendence> fetchGroupsbyIds(Collection<Long> groupAttendenceIds) {
-		List<StudentAttendence> results = new ArrayList<>();
+	public List<StudentAttendance> fetchGroupsbyIds(Collection<Long> groupAttendenceIds) {
+		List<StudentAttendance> results = new ArrayList<>();
 		if (null !=groupAttendenceIds && !groupAttendenceIds.isEmpty()) {
 			EntityManager pm = super.getEntityManager();
 			Query query = pm.createQuery("select t from StudentAttendence t where  t.groupAttendence.id in (:groupAttendenceIds) order by t.name");
 			query.setParameter("groupAttendenceIds", groupAttendenceIds);
 			try {
-				results = (List<StudentAttendence>) query.getResultList();
+				results = (List<StudentAttendance>) query.getResultList();
 			} catch (NoResultException nre) {
 				return new ArrayList<>();
 			} 
@@ -44,15 +44,15 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendence> {
 		return results;
 	}
 
-	public List<StudentAttendence> getByGroupAttendence(GroupAttendance groupAttendence) {
+	public List<StudentAttendance> getByGroupAttendence(GroupAttendance groupAttendence) {
 		
-			List<StudentAttendence> results = new ArrayList<>();
+			List<StudentAttendance> results = new ArrayList<>();
 			if (null !=groupAttendence) {
 				EntityManager pm = super.getEntityManager();
 				Query query = pm.createQuery("select t from StudentAttendence t where  t.groupAttendence.id in (:groupIds) order by t.name");
 				query.setParameter("groupIds", groupAttendence.getId());
 				try {
-					results = (List<StudentAttendence>) query.getResultList();
+					results = (List<StudentAttendance>) query.getResultList();
 				} catch (NoResultException nre) {
 					return new ArrayList<>();
 				} 

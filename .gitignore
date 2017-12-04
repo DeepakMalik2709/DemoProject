@@ -4,7 +4,6 @@
 /WebContent/assets
 /WebContent/fonts
 /ReadMe.txt
-/keys
 /keys/AllSchool1.pem
 /keys/allschool1.ppk
 /keys/allschool1.pub
@@ -27,8 +26,3 @@
 /.settings/org.eclipse.wst.common.project.facet.core.xml
 /.settings/org.eclipse.wst.validation.prefs
 /.classpath
-/WebContent
-/.settings
-/uploads/tmp
-/bin
-/build/

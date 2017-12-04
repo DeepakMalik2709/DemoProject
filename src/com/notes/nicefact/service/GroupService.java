@@ -16,12 +16,15 @@ import com.notes.nicefact.dao.GroupMemberDAO;
 import com.notes.nicefact.dao.TagDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
-import com.notes.nicefact.exception.ServiceException;
+import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.exception.UnauthorizedException;
+import com.notes.nicefact.to.AttendanceMemberTO;
+import com.notes.nicefact.to.GroupAttendanceTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
 import com.notes.nicefact.to.GroupTO;
@@ -121,7 +124,7 @@ public class GroupService extends CommonService<Group> {
 
 	private void addMembersToNewGroup(GroupTO groupTO, Group group, AppUser appUserTO) {
 		GroupMember member = new GroupMember(appUserTO);
-		member.setIsAdmin(true);
+		member.getPositions().add(UserPosition.ADMIN);
 		member.setGroup(group);
 		group.getMembers().add(member);
 		group.getAdmins().add(appUserTO.getEmail());
@@ -135,6 +138,7 @@ public class GroupService extends CommonService<Group> {
 					} else {
 						member = new GroupMember(userHr);
 					}
+					member.getPositions().add(UserPosition.STUDENT);
 					member.setGroup(group);
 					group.getMembers().add(member);
 				}
@@ -158,6 +162,7 @@ public class GroupService extends CommonService<Group> {
 					} else {
 						member = new GroupMember(userHr);
 					}
+					member.getPositions().add(UserPosition.STUDENT);
 					member.setGroup(group);
 					if (group.getMembers().add(member)) {
 						allNewMembers.add(memberTO.getEmail());
@@ -208,10 +213,41 @@ public class GroupService extends CommonService<Group> {
 		for (GroupMember groupMember : members) {
 			memberTO = new GroupMemberTO(groupMember);
 			memberTos.add(memberTO);
+			if(groupMember.getPositions().isEmpty()){
+				if(groupMember.getIsAdmin()){
+					memberTO.getPositions().add(UserPosition.ADMIN);
+				}else{
+					memberTO.getPositions().add(UserPosition.STUDENT);
+				}
+			}
 		}
 		return memberTos;
 	}
 
+	public GroupAttendanceTO fetchGroupAttendanceMembers(SearchTO searchTO) {
+		GroupAttendanceTO attendance = null;
+		StudentAttendenceService attendenceService = new StudentAttendenceService(em);
+		GroupAttendance groupAttendance = attendenceService.getGroupAttendance(searchTO);
+		if(null == groupAttendance){
+			attendance = new GroupAttendanceTO();
+			attendance.setDate(searchTO.getDate());
+			attendance.setFromTime(searchTO.getFromTime());
+			attendance.setGroupId(searchTO.getGroupId());
+			List<AttendanceMemberTO> memberTos = new ArrayList<>();
+			AttendanceMemberTO memberTO;
+			List<GroupMember> members = groupMemberDAO.fetchGroupAttendanceMembers( searchTO);
+			for (GroupMember groupMember : members) {
+				memberTO = new AttendanceMemberTO(groupMember);
+				memberTos.add(memberTO);
+			}
+			attendance.setMembers(memberTos);
+		}else{
+			attendance = new GroupAttendanceTO(groupAttendance);
+			attendance.setGroupId(searchTO.getGroupId());
+		}
+		return attendance;
+	}
+	
 	public void deleteGroupMember(long groupId, long memberId, AppUser appUser) {
 		GroupMember member = groupMemberDAO.get(memberId);
 		if (member != null) {
@@ -226,29 +262,43 @@ public class GroupService extends CommonService<Group> {
 	}
 
 
-
-	public GroupMember toggleGroupAdmin(long groupId, long memberId, boolean isAdmin) {
-		GroupMember member = groupMemberDAO.get(memberId);
-		if (member != null) {
-			Group group = member.getGroup();
-			if (group.getAdmins().contains(CurrentContext.getEmail())) {
-				if (!isAdmin && group.getAdmins().contains(member.getEmail()) && group.getAdmins().size() == 1) {
-					throw new ServiceException("Cannot remove only admin");
-				}
-				member.setIsAdmin(isAdmin);
-				member = groupMemberDAO.upsert(member);
-				if (isAdmin) {
-					group.getAdmins().add(member.getEmail());
+	public GroupMemberTO updateGroupMember(long groupId, GroupMemberTO memberTO, AppUser appuser) {
+		GroupMemberTO updatedMember = null;
+		Group group = get(groupId);
+		if (group !=null && group.getAdmins().contains(appuser.getEmail())) {
+			GroupMember dbmember = groupMemberDAO.get(memberTO.getId());
+			if (null != dbmember) {
+				if (memberTO.getPositions() == null || memberTO.getPositions().isEmpty()) {
+					dbmember.getPositions().add(UserPosition.STUDENT);
 				} else {
-					group.getAdmins().remove(member.getEmail());
+					dbmember.getPositions().clear();
+					dbmember.getPositions().addAll(memberTO.getPositions());
 				}
-				groupDao.upsert(group);
-			} else {
-				throw new UnauthorizedException("You cannot update this group");
+				boolean isAdmin = memberTO.getPositions().contains(UserPosition.ADMIN);
+				boolean isTeacher = memberTO.getPositions().contains(UserPosition.TEACHER);
+				if (isAdmin) {
+					group.getAdmins().add(memberTO.getEmail());
+				} else {
+					group.getAdmins().remove(memberTO.getEmail());
+				}
+				
+				if(isTeacher){
+					group.getTeachers().add(memberTO.getEmail());
+				}else{
+					group.getTeachers().remove(memberTO.getEmail());
+				}
 			}
+			
+			group = upsert(group);
+			groupMemberDAO.upsert(dbmember);
+			updatedMember = new GroupMemberTO(dbmember);
+		} else {
+			throw new UnauthorizedException(appuser.getEmail() + " does not have permission to edit this group.");
 		}
-		return member;
+
+		return updatedMember;
 	}
+
 
 	public GroupMember toggleGroupBlock(long groupId, long memberId, boolean isBlocked) {
 		GroupMember member = groupMemberDAO.get(memberId);
@@ -343,6 +393,14 @@ public class GroupService extends CommonService<Group> {
 	public List<EventAttendee> fetchMemberEmailFromGroup(List<Group> groups, SearchTO searchTO) {
 		 List<EventAttendee> members = groupMemberDAO.getMemberEmailFromGroup(groups,searchTO);		
 		return members;
+	}
+
+	public boolean isUserTeacher(Long groupId, String email) {
+		GroupMember member = groupMemberDAO.fetchGroupMemberByEmail(groupId, email);
+		if(null !=member && !member.getIsBlocked()){
+			return member.getPositions().contains(UserPosition.TEACHER);
+		}
+		return false;
 	}
 
 }

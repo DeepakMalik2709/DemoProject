@@ -7,15 +7,16 @@ import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 
 import com.notes.nicefact.dao.CommonDAO;
+import com.notes.nicefact.dao.GroupAttendanceDao;
 import com.notes.nicefact.dao.StudentAttendenceDao;
 import com.notes.nicefact.entity.GroupAttendance;
-import com.notes.nicefact.entity.StudentAttendence;
+import com.notes.nicefact.entity.StudentAttendance;
 import com.notes.nicefact.to.SearchTO;
 
-public class StudentAttendenceService  extends CommonService<StudentAttendence> {
+public class StudentAttendenceService  extends CommonService<StudentAttendance> {
 	private final static Logger logger = Logger.getLogger(GroupService.class.getName());
 	private StudentAttendenceDao studentAttendenceDao;
-	
+	GroupAttendanceDao groupAttendenceDao;
 	AppUserService appUserService;
 	
 	BackendTaskService backendTaskService;
@@ -25,30 +26,36 @@ public class StudentAttendenceService  extends CommonService<StudentAttendence> 
 		studentAttendenceDao = new StudentAttendenceDao(em);
 		appUserService = new AppUserService(em);
 		backendTaskService  = new BackendTaskService(em);
+		groupAttendenceDao = new GroupAttendanceDao(em);
 	}
 
 	@Override
-	protected CommonDAO<StudentAttendence> getDAO() {
+	protected CommonDAO<StudentAttendance> getDAO() {
 		return studentAttendenceDao;
 	}
 
-	public StudentAttendence upsert(StudentAttendence StudentAttendence) {
-		StudentAttendence db = super.upsert(StudentAttendence);
+	public StudentAttendance upsert(StudentAttendance StudentAttendence) {
+		StudentAttendance db = super.upsert(StudentAttendence);
 		return db;
 	}
 	
-	public StudentAttendence get(Long id) {
-		StudentAttendence StudentAttendence = super.get(id);
+	public StudentAttendance get(Long id) {
+		StudentAttendance StudentAttendence = super.get(id);
 		return StudentAttendence;
 	}
 
 	
 	
-	public List<StudentAttendence> fetchMyGroups(SearchTO searchTO, GroupAttendance groupAttendence) {
+	public List<StudentAttendance> fetchMyGroups(SearchTO searchTO, GroupAttendance groupAttendence) {
 		
-		List<StudentAttendence> list = studentAttendenceDao.getByGroupAttendence(groupAttendence);
+		List<StudentAttendance> list = studentAttendenceDao.getByGroupAttendence(groupAttendence);
 		
 		
 		return list;
+	}
+
+	public GroupAttendance getGroupAttendance(SearchTO searchTO) {
+		GroupAttendance groupAttendance = groupAttendenceDao.getByGroupDate(searchTO);
+		return groupAttendance;
 	}
 }

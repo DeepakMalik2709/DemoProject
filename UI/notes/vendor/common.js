@@ -3,6 +3,15 @@ String.prototype.replaceAll = function(search, replacement) {
     return target.split(search).join(replacement);
 };
 
+function hideSidebarMobile(){
+	 if ($(window).width() <= 992) {
+         $('.left-side').addClass("collapse-left hide");
+         $(".right-side").removeClass("hide");
+         $('.row-offcanvas').removeClass("active relative");
+         $("body").removeClass("fixed");
+     }
+}
+
 $(function(){
 	
 	  $("[data-toggle='tooltip']").tooltip();
@@ -30,9 +39,10 @@ $(function(){
 				        //If window is small enough, enable sidebar push menu
 				        if ($(window).width() <= 992) {
 				            $('.row-offcanvas').toggleClass('active');
-				            $('.left-side').toggleClass("collapse-left");
+				            $('.left-side').toggleClass("collapse-left hide");
 				            $(".right-side").toggleClass("hide");
 				            $('.row-offcanvas').toggleClass("relative");
+				            $("body").toggleClass("fixed");
 				        } else {
 				            //Else, enable content streching
 				            $('.left-side').toggleClass("collapse-left");
@@ -52,6 +62,18 @@ $(function(){
 			 
 		  });
 		
+		 var interval1 = setInterval(function(){
+			 if( $('.left-side').length){
+				 clearInterval(interval1);
+				  if ($(window).width() <= 992) {
+					  $('.left-side').addClass("hide");
+				  }else{
+					  $("body").addClass("fixed");
+				  }
+			 }
+			 
+		  },50)
+		 
 		  /* 
 	     * Make sure that the sidebar is streched full height
 	     * ---------------------------------------------

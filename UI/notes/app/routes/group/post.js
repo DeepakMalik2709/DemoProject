@@ -15,14 +15,13 @@ export default Ember.Route.extend( {
 	  },
     setupController: function(controller, model) {
         this._super(controller, model);
-        this.set('posts', [model]);
         this.hasMoreRecords = true;
         this.nextPageLink = null;
         this.isFetching =false;
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
-        this.controller.set("posts", this.posts);
         this.controller.set('controllerRef', this)
          this.controller.set("noRecords", false);
+        console.log(model )
     },
     willDestroy : function(){
     },

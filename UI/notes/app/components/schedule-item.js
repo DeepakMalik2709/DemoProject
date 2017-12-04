@@ -18,7 +18,6 @@ export default Ember.Component.extend(postMixin ,{
 	    this._super(...arguments);
 	    this.cleanupPost(this.item);
 	    this.initScheduleResponse();
-	    console.log(this.item.comment);
 	    this.initNewComment();
 	  },
 	  initScheduleResponse(){

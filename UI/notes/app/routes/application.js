@@ -15,12 +15,8 @@ export default Ember.Route.extend({
     },
     router: Ember.inject.service('-routing'),
     groupService: Ember.inject.service('group'),
-    onRouteChange: Ember.observer('router.currentRouteName', function(){ 
-    	 if ($(window).width() <= 992) {
-            $('.left-side').addClass("collapse-left");
-            $(".right-side").removeClass("hide");
-            $('.row-offcanvas').removeClass("active relative");
-        }
+    onRouteChange: Ember.observer('router.currentPath', function(a){ 
+    	hideSidebarMobile();
     }),
     showGooglePermissionMessage : _.once(function(){
         	setTimeout((function() {

@@ -119,4 +119,31 @@ export default DS.Store.extend(ajaxMixin ,{
 			      });
 		 });
 	 },
+	 updateMember :  function( id, member) {
+		    return new Ember.RSVP.Promise((resolve, reject) =>{
+		    	let url = "/rest/secure/group/" +id + "/member/update";
+		    	let json = {
+	        			email : member.email,
+	        			positions : [],
+	        			id:member.id,
+	        	}
+		    	if(member.roles){
+		    		for(var i =0; i<member.roles.length;i++){
+		        		var role = member.roles[i];
+		        		json.positions.push(role.id);
+		        	}
+		    	}
+	        	
+		    	this.doPost(url, json ).then(function(data) {
+		    		if(data.code == 0){
+		    			Ember.run(null, resolve, data);
+		    		}else{
+		    			  Ember.run(null, reject, jqXHR);
+		    		}
+		      }, function(jqXHR) {
+		        jqXHR.then = null; // tame jQuery's ill mannered promises
+		        Ember.run(null, reject, jqXHR);
+		      });
+		    });
+		  },
 });

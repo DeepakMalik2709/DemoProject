@@ -1,8 +1,9 @@
 import Ember from 'ember';
 import ajaxMixin from '../../mixins/ajax';
 import authenticationMixin from '../../mixins/authentication';
+import instituteMixin from '../../mixins/institute';
 
-export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
+export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, {
 
 
     model(params) {
@@ -27,6 +28,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
 	  },
     setupController: function(controller, model) {
         this._super(controller, model);
+        this.controller.set("roles", this.roles);
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         this.controller.set("newMembers", []);
          this.set('hasMoreRecords', true);
@@ -71,6 +73,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
 	    	if(typeof model.get("members") == 'undefined'){
 				model.set("members" , [])
 			}
+	    	this.cleanupMembers(list);
 			model.get("members").pushObjects(list);
     	}
     	
@@ -246,6 +249,15 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, {
             		} , 500);
         		queue.pushObject({"id" : member.id , "timer" : timer});
         	}
-        }
+        },
+        updateMember(member){
+        	let model = this.controller.get('model');
+        	Ember.set(member, "isLoading" ,true);
+        	Ember.set(member, "isUpdated" ,false);
+        	this.get('groupService').updateMember(model.get("id") ,member ).then((result)=>{
+        		Ember.set(member, "isLoading" ,false);
+        	});
+        	
+	    },
     }
 });

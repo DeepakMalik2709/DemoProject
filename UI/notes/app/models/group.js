@@ -9,6 +9,8 @@ export default DS.Model.extend({
 	  isMember: DS.attr('boolean'),
 	  isBlocked: DS.attr('boolean'),
 	  isAdmin: DS.attr('boolean'),
+	  canMarkAttendance: DS.attr('boolean'),
+	  isTeacher: DS.attr('boolean'),
 	  isSaving : DS.attr('boolean'),
 	  instituteId : DS.attr('number'),
 	  instituteName: DS.attr('string'),

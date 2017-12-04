@@ -1,37 +1,52 @@
 package com.notes.nicefact.to;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.notes.nicefact.entity.AppUser;
-import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.entity.GroupAttendance;
+import com.notes.nicefact.entity.StudentAttendance;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GroupAttendanceTO {
 
 	private Long id;
 	
-	private Date attendenceDate;
+	private long date;
 	
 	private String fromTime;
 	
 	private String toTime;
 	
-	private Group group;
+	private long groupId;
 	
-	private AppUser teacher;
+	private String comments;
 	
-	private String remarks;
-	
-	private List<StudentAttendanceTO> studentAttendances;
+	private List<AttendanceMemberTO> members = new ArrayList<>();;
 
-	public Date getAttendenceDate() {
-		return attendenceDate;
+	public GroupAttendanceTO(){
+		
 	}
 
-	public void setAttendenceDate(Date attendenceDate) {
-		this.attendenceDate = attendenceDate;
+	public GroupAttendanceTO(GroupAttendance attendance ) {
+		this.id = attendance.getId();
+		this.date = attendance.getDate().getTime();
+		this.fromTime = attendance.getFromTime();
+		this.toTime = attendance.getToTime();
+		this.comments = attendance.getComments();
+		AttendanceMemberTO memberTO;
+		for(StudentAttendance sa : attendance.getStudentAttendances()){
+			memberTO = new AttendanceMemberTO(sa);
+			this.members.add(memberTO);
+		}
+	}
+
+	public long getDate() {
+		return date;
+	}
+
+	public void setDate(long date) {
+		this.date = date;
 	}
 
 	public String getFromTime() {
@@ -50,36 +65,30 @@ public class GroupAttendanceTO {
 		this.toTime = toTime;
 	}
 
-	public Group getGroup() {
-		return group;
+
+	public long getGroupId() {
+		return groupId;
 	}
 
-	public void setGroup(Group group) {
-		this.group = group;
+	public void setGroupId(long groupId) {
+		this.groupId = groupId;
 	}
 
-	public AppUser getTeacher() {
-		return teacher;
+
+	public String getComments() {
+		return comments;
 	}
 
-	public void setTeacher(AppUser teacher) {
-		this.teacher = teacher;
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 
-	public String getRemarks() {
-		return remarks;
+	public List<AttendanceMemberTO> getMembers() {
+		return members;
 	}
 
-	public void setRemarks(String remarks) {
-		this.remarks = remarks;
-	}
-
-	public List<StudentAttendanceTO> getStudentAttendances() {
-		return studentAttendances;
-	}
-
-	public void setStudentAttendances(List<StudentAttendanceTO> studentAttendances) {
-		this.studentAttendances = studentAttendances;
+	public void setMembers(List<AttendanceMemberTO> members) {
+		this.members = members;
 	}
 
 	public Long getId() {

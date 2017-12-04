@@ -1273,8 +1273,7 @@ public class BackendTaskController extends CommonController {
 
 			AppUser user = null;
 			if (null != institute) {
-				SearchTO searchTO = new SearchTO();
-				searchTO.setFirst(0).setLimit(200);
+				SearchTO searchTO = SearchTO.getInstances().setFirst(0).setLimit(200);
 				List<InstituteMember> members = null;
 				Set<String> recipientEmailSet = new HashSet<>();
 				do {
