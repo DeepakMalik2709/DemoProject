@@ -119,12 +119,12 @@ public class PostDAO extends CommonDAOImpl<Post> {
 		EntityManager pm = getEntityManager();
 		try {
 			Query query = pm.createQuery("select count(t) from Post t where  t.postType='SCHEDULE' and t.isDeleted = :isDeleted and t.isActive = :isActive"+
-					"and date(t.fromDate) <= :todayDate and date(t.toDate) >= :todayDate and weekday = :weekday");
+					" and date(t.fromDate) <= :todayDate and date(t.toDate) >= :todayDate and weekday = :weekday");
 			Calendar calendar = Calendar.getInstance();
 	        calendar.setTime(date);
 	        System.out.println(calendar.get(Calendar.DAY_OF_WEEK));
 			query.setParameter("todayDate",calendar.getTime());
-			query.setParameter("weekday",WeekDay.getByNumber(calendar.get(Calendar.DAY_OF_WEEK)));
+			query.setParameter("weekday",WeekDay.getByNumber(calendar.get(Calendar.DAY_OF_WEEK)).toString());
 			query.setParameter("isDeleted", false);
 			query.setParameter("isActive", true);
 			Number result = (Number) query.getSingleResult();

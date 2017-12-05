@@ -25,5 +25,13 @@ export default DS.Store.extend(ajaxMixin,{
 			    	  resolve(data);
 			      });
 		 });
+	},
+	fetchtodayScheduleCount:function(){
+		return  new Ember.RSVP.Promise((resolve, reject) =>{
+			var url = "/rest/calendar/todayScheduleCount";
+			this.doGet(url).then((data ) =>{
+		    	  resolve(data);
+		      });
+	 });
 	}
 });

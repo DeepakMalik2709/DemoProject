@@ -15,6 +15,7 @@ export default Ember.Route.extend({
     },
     router: Ember.inject.service('-routing'),
     groupService: Ember.inject.service('group'),
+	scheduleService: Ember.inject.service('new.schedule'),
     onRouteChange: Ember.observer('router.currentPath', function(a){ 
     	hideSidebarMobile();
     }),
@@ -86,6 +87,10 @@ export default Ember.Route.extend({
 	        			  controller.set("notifications" ,response );
 	        		}
 	        	   
+	        });	       
+	        this.get('scheduleService').fetchtodayScheduleCount().then((response) => {
+	        	   controller.set("todayScheduleCount" ,response.total );
+	        	   $.event.trigger( "sidebarUpdated");
 	        });
         }
         $.event.trigger( "sidebarUpdated");
