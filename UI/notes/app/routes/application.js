@@ -141,6 +141,12 @@ export default Ember.Route.extend({
         	}else if(notification.groupId){
         		this.transitionTo('group.posts', notification.groupId);
         	}
+        },
+        hideAd(){
+        	$(".footer-ad").hide();
+        	setTimeout(function(){
+        		$(".footer-ad").show(400);
+        	},10000)
         }
     }
 });

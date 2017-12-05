@@ -12,6 +12,14 @@
           {{textarea type="text" value=item.description class="form-control" placeholder="Description"}}
         </div>
     </div>
+    
+            <div class="form-group">
+        <label class="col-sm-3 control-label">Attendance can be marked</label>
+        <div class="col-sm-9">
+          {{input type="checkbox" checked=item.isGroupAttendaceAllowed class="" }}
+        </div> 
+    </div>
+    
     {{#if hasInstitutes}}
       <div class="form-group has-feedback {{if item.isValid 'has-success'}}">
         <label class="col-sm-2 control-label">Institute</label>

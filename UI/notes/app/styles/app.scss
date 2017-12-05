@@ -3228,3 +3228,21 @@ footer.page-footer{
 .attendance-box.active{
 	border : 3px solid black !important;
 }
+.footer-ad .close{
+    top: -9px;
+    position: absolute;
+    right: -11px;
+    border: 1px solid gray;
+    border-radius: 50%;
+    line-height: 0.5;
+}
+.footer-ad{
+	position:fixed;
+	width:728px;
+	height:100px;
+	border:1px solid black;
+	bottom:0px;
+	left:50%;
+	margin-left:-364px;
+	z-index:1000;
+}
