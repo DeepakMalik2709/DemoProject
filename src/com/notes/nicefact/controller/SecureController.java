@@ -375,10 +375,12 @@ public class SecureController extends CommonController {
 			} else {
 				CacheUtils.addGroupToCache(group);
 				GroupTO savedTO = new GroupTO(group, false);
-				boolean isTeacher = groupService.isUserTeacher(group.getId(), user.getEmail());
+				boolean isTeacher = group.getTeachers().contains(user.getEmail());
+				savedTO.setIsTeacher(isTeacher);
 				if(isTeacher){
-					savedTO.setCanMarkAttendance(true);
-					savedTO.setIsTeacher(true);
+					if(group.getIsGroupAttendaceAllowed()){
+						savedTO.setCanMarkAttendance(true);
+					}
 				}
 				json.put(Constants.CODE, Constants.RESPONSE_OK);
 				json.put(Constants.DATA_ITEM, savedTO);

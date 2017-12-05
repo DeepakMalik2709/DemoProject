@@ -154,7 +154,7 @@ public class PostTO {
 		this.updatedTime = post.getUpdatedTime().getTime();
 		this.numberOfComments = post.getNumberOfComments();
 		this.numberOfReactions = post.getNumberOfReactions();	
-		if(post.getPostType().equals(POST_TYPE.SCHEDULE) ){						
+		if(POST_TYPE.SCHEDULE.equals(post.getPostType()) ){						
 			AppUser user =  CurrentContext.getAppUser();
 			if(this.createdByEmail.equalsIgnoreCase(user.getEmail())){
 				this.postPriv="creator";		

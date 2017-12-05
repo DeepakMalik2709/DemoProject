@@ -41,6 +41,8 @@ public class GroupTO {
 	boolean isMember;
 	boolean isBlocked;
 	
+	boolean isGroupAttendaceAllowed;
+	
 	boolean isTeacher;
 	boolean canMarkAttendance;
 
@@ -76,6 +78,7 @@ public class GroupTO {
 		this.languages.addAll(group.getLanguages());
 		this.description = group.getDescription();
 		admins = group.getAdmins();
+		this.isGroupAttendaceAllowed = group.getIsGroupAttendaceAllowed();
 		TagTO tagTO;
 		for (Tag tag : group.getTags()) {
 			tagTO = new TagTO(tag);
@@ -97,7 +100,14 @@ public class GroupTO {
 			isBlocked = group.getBlocked().contains(CurrentContext.getEmail());
 		}
 	}
+	public boolean getIsGroupAttendaceAllowed() {
+		return isGroupAttendaceAllowed;
+	}
 
+	public void setIsGroupAttendaceAllowed(boolean isGroupAttendaceAllowed) {
+		this.isGroupAttendaceAllowed = isGroupAttendaceAllowed;
+	}
+	
 	public boolean getIsBlocked() {
 		return isBlocked;
 	}

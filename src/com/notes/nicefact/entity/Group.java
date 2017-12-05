@@ -72,6 +72,9 @@ public class Group extends CommonEntity {
 
 	@Basic
 	private String icon;
+	
+	@Basic
+	private Boolean isGroupAttendaceAllowed = true;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	Set<String> admins = new HashSet<>();
@@ -103,6 +106,18 @@ public class Group extends CommonEntity {
 	
 	
 	
+
+
+	public Boolean getIsGroupAttendaceAllowed() {
+		if(null == isGroupAttendaceAllowed){
+			return true;
+		}
+		return isGroupAttendaceAllowed;
+	}
+
+	public void setIsGroupAttendaceAllowed(Boolean isGroupAttendaceAllowed) {
+		this.isGroupAttendaceAllowed = isGroupAttendaceAllowed;
+	}
 
 	public String getAssignmentFolderId() {
 		return assignmentFolderId;
@@ -312,6 +327,7 @@ public class Group extends CommonEntity {
 			this.languages = new HashSet<>( group.getLanguages());
 		}
 		this.description = group.getDescription();
+		this.isGroupAttendaceAllowed = group.getIsGroupAttendaceAllowed();
 		for (TagTO tagTO : group.getTags()) {
 			if(tagTO.getId() !=null && tagTO.getId() > 0){
 				this.tagIds.add(tagTO.getId());
@@ -329,5 +345,6 @@ public class Group extends CommonEntity {
 		}
 		this.description = group.getDescription();
 		this.tagIds = new HashSet<>(group.getTagIds());
+		this.isGroupAttendaceAllowed = group.getIsGroupAttendaceAllowed();
 	}
 }

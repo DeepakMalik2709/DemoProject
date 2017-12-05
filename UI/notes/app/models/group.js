@@ -14,6 +14,7 @@ export default DS.Model.extend({
 	  isSaving : DS.attr('boolean'),
 	  instituteId : DS.attr('number'),
 	  instituteName: DS.attr('string'),
+	  isGroupAttendaceAllowed : DS.attr('boolean'),
 	  members: DS.attr( {
 		    defaultValue() { return []; }
 	  }),
