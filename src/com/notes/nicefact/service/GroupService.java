@@ -20,7 +20,6 @@ import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Institute;
-import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.UserPosition;
@@ -125,12 +124,16 @@ public class GroupService extends CommonService<Group> {
 		return group;
 	}
 
-	private void addMembersToNewGroup(GroupTO groupTO, Group group, AppUser appUserTO) {
-		GroupMember member = new GroupMember(appUserTO);
+	private void addMembersToNewGroup(GroupTO groupTO, Group group, AppUser user) {
+		GroupMember member = new GroupMember(user);
 		member.getPositions().add(UserPosition.ADMIN);
+		member.setIsJoinRequestApproved(true);
+		member.setIsBlocked(false);
+		member.setJoinRequestApproveDate(new Date());
+		member.setJoinRequestApprover(user.getEmail());
 		member.setGroup(group);
 		group.getMembers().add(member);
-		group.getAdmins().add(appUserTO.getEmail());
+		group.getAdmins().add(user.getEmail());
 		if (groupTO.getMembers() != null) {
 			for (GroupMemberTO memberTO : groupTO.getMembers()) {
 				if (Utils.isValidEmailAddress(memberTO.getEmail())) {
@@ -141,6 +144,10 @@ public class GroupService extends CommonService<Group> {
 					} else {
 						member = new GroupMember(userHr);
 					}
+					member.setIsJoinRequestApproved(true);
+					member.setIsBlocked(false);
+					member.setJoinRequestApproveDate(new Date());
+					member.setJoinRequestApprover(user.getEmail());
 					member.getPositions().add(UserPosition.STUDENT);
 					member.setGroup(group);
 					group.getMembers().add(member);
@@ -155,20 +162,39 @@ public class GroupService extends CommonService<Group> {
 		Group group = groupDao.get(groupId);
 		if (group.getAdmins().contains(appuser.getEmail())) {
 			Set<String> allNewMembers = new HashSet<>();
+			Set<GroupMember> allNewGroupMembers = new HashSet<>();
 			GroupMember member;
 			for (GroupMemberTO memberTO : members) {
 				if (Utils.isValidEmailAddress(memberTO.getEmail())) {
-					AppUser userHr = CacheUtils.getAppUser(memberTO.getEmail());
-					if (null == userHr) {
-						member = new GroupMember(memberTO.getEmail(), memberTO.getName());
-						member.setIsAppUser(false);
-					} else {
-						member = new GroupMember(userHr);
-					}
-					member.getPositions().add(UserPosition.STUDENT);
-					member.setGroup(group);
-					if (group.getMembers().add(member)) {
-						allNewMembers.add(memberTO.getEmail());
+					
+					GroupMember dbmember = fetchGroupMemberByEmail(groupId, memberTO.getEmail());
+					if (null == dbmember) {
+						AppUser userHr = CacheUtils.getAppUser(memberTO.getEmail());
+						if (null == userHr) {
+							member = new GroupMember(memberTO.getEmail(), memberTO.getName());
+							member.setIsAppUser(false);
+						} else {
+							member = new GroupMember(userHr);
+						}
+						if (memberTO.getPositions() == null || memberTO.getPositions().isEmpty()) {
+							member.getPositions().add(UserPosition.STUDENT);
+						} else {
+							member.getPositions().addAll(memberTO.getPositions());
+						}
+						member.setGroup(group);
+						member.setIsJoinRequestApproved(true);
+						member.setIsBlocked(false);
+						member.setJoinRequestApproveDate(new Date());
+						member.setJoinRequestApprover(appuser.getEmail());
+						allNewGroupMembers.add(member);
+						group.getMembers().add(member);
+						allNewMembers.add(member.getEmail());
+					} else if (!dbmember.getIsJoinRequestApproved()) {
+						dbmember.setIsJoinRequestApproved(true);
+						dbmember.setIsBlocked(false);
+						dbmember.setJoinRequestApproveDate(new Date());
+						dbmember.setJoinRequestApprover(appuser.getEmail());
+						allNewGroupMembers.add(dbmember);
 					}
 				}
 			}
@@ -178,8 +204,9 @@ public class GroupService extends CommonService<Group> {
 				group.getMemberGroupsIds().add(child.getId());
 			}
 			group.getMemberGroupsIds().remove(group.getId());
-
+			groupMemberDAO.upsertAll(allNewGroupMembers);
 			group = upsert(group);
+			
 			groupVO = new GroupTO(group, false);
 
 			for (GroupMember addedMember : group.getMembers()) {

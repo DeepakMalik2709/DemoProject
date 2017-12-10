@@ -79,7 +79,7 @@ export default DS.Adapter.extend(ajaxMixin ,{
 				    	  if(data.code == 0){
 				    		  let storePost1 = this.store.peekRecord('group', data.item.id);
 								if(storePost1){
-									this.unloadRecord(storePost1);
+									this.store.unloadRecord(storePost1);
 								}
 								 
 				    		  const storeGroup = this.store.createRecord('group', data.item);

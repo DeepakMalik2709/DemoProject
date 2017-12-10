@@ -1,0 +1,1 @@
+ update GroupMember set isJoinRequestApproved = 1;

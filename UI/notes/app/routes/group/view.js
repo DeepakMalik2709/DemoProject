@@ -98,7 +98,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
     },
     fetchJoinRquests (){
     	var controller = this.get("controller");
-    	if(this.hasMoreRecords && !controller.get("isLoading")){
+    	if(this.hasMoreRequestRecords && !controller.get("isLoading")){
     		
     		var model = controller.get('model');
     		controller.set("isLoading" , true);

@@ -577,13 +577,7 @@ public class HomeController extends CommonController {
 	GroupTO getGroup(long id ,EntityManager em){
 		Group group =	(Group) CacheUtils.getGroup(id);
 		if(group == null){
-			GroupService groupService = new GroupService(em);
-			group = groupService.get(id);
-			CacheUtils.addGroupToCache(group);
-		}
-		
-		if(group == null){
-			throw new ServiceException("Instiute not found for id : " + id);
+			throw new ServiceException("group not found for id : " + id);
 		}
 		GroupTO groupTO = new GroupTO(group, false);
 		return groupTO;

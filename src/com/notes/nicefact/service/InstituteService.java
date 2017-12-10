@@ -251,6 +251,7 @@ public class InstituteService extends CommonService<Institute> {
 					member.setIsBlocked(false);
 					member.setJoinRequestApproveDate(new Date());
 					member.setJoinRequestApprover(user.getEmail());
+					member.getPositions().add(UserPosition.STUDENT);
 					member.setInstitute(institute);
 					allNewMembers.add(member);
 				}

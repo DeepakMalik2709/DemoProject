@@ -40,7 +40,7 @@ export default Ember.Route.extend(ajaxMixin, {
         joinInstituteClick(){
         	var model = this.controller.get("model");
         	if(this.controller.get("isLoggedIn")){
-        		groupAdapter.joinGroup(model.id);
+        		this.groupAdapter.joinGroup(model.id);
         		model.set("isJoinRequested" , true);
         		alert("your request has been sent for approval.")
         	}else{
