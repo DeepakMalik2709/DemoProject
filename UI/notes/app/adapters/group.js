@@ -132,4 +132,19 @@ export default DS.Adapter.extend(ajaxMixin ,{
 						      });
 						    });
 						  },
+						  fetchChildGroups :  function( groupId) {
+							    return new Ember.RSVP.Promise((resolve, reject) =>{
+							    	var url = '/rest/public/group/' + groupId + '/children' ;
+							    	this.doGet(url ).then(function(data) {
+							    		if(data){
+							    			Ember.run(null, resolve, data);
+							    		}else{
+							    			  Ember.run(null, reject, jqXHR);
+							    		}
+							      }, function(jqXHR) {
+							        jqXHR.then = null; // tame jQuery's ill mannered promises
+							        Ember.run(null, reject, jqXHR);
+							      });
+							    });
+							  },
 });

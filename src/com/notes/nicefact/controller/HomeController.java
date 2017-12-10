@@ -3,6 +3,7 @@ package com.notes.nicefact.controller;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -587,5 +588,75 @@ public class HomeController extends CommonController {
 		GroupTO groupTO = new GroupTO(group, false);
 		return groupTO;
 		
+	}
+	
+	@GET
+	@Path("/group/{groupId}/children")
+	public void fetchGroupChildren(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("groupId") long groupId) {
+		logger.info("start : fetchGroupChildren , groupId : " + groupId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			List<Group> groups = groupService.fetchGroupChildren(groupId, searchTO);
+			GroupTO groupTO = null;
+			List<GroupTO> groupTOs = new ArrayList<>();
+			for (Group group : groups) {
+				groupTO = new GroupTO(group, false);
+				groupTOs.add(groupTO);
+			}
+			json.put(Constants.DATA_ITEMS, groupTOs);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			if (!groupTOs.isEmpty()) {
+				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : fetchGroupChildren");
+	}
+	
+	@GET
+	@Path("/institute/{instituteId}/groups")
+	public void fetchInstituteChildren(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId) {
+		logger.info("start : fetchInstituteChildren , groupId : " + instituteId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			List<Group> groups = groupService.fetchInstituteChildren(instituteId, searchTO);
+			GroupTO groupTO = null;
+			List<GroupTO> groupTOs = new ArrayList<>();
+			for (Group group : groups) {
+				groupTO = new GroupTO(group, false);
+				groupTOs.add(groupTO);
+			}
+			json.put(Constants.DATA_ITEMS, groupTOs);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			if (!groupTOs.isEmpty()) {
+				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : fetchInstituteChildren");
 	}
 }

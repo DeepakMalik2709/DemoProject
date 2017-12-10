@@ -28,6 +28,19 @@
  <div>
  {{model.description}}
  </div>
+ 
+  <hr>
+ {{# if childGroups.length}}
+ <div>
+ <h5>Child Groups of {{model.name}}</h5>
+  <ul class="">
+  {{#each childGroups as |group|}}
+      {{#nav-link-to 'group.public' group.id   tagName="li"}}{{group.name}}{{/nav-link-to}}
+    {{/each}}
+    </ul>
+ </div>
+ {{/if}}
+ 
  </div>
  
  

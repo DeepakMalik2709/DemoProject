@@ -468,4 +468,11 @@ public class GroupService extends CommonService<Group> {
 		return memberTos;
 	}
 
+	public List<Group> fetchGroupChildren(long groupId, SearchTO searchTO) {
+		return groupDao.fetchGroupChildren(groupId, searchTO);
+	}
+
+	public List<Group> fetchInstituteChildren(long instituteId, SearchTO searchTO) {
+		return groupDao.fetchInstituteChildren(instituteId, searchTO);
+	}
 }

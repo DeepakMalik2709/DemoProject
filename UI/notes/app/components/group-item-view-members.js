@@ -20,5 +20,12 @@ export default Ember.Component.extend(instituteMixin, {
 	    	deleteMember(user){
 	    		 this.sendAction('deleteMember', user);
 	    	},
+	        toggleUserList(){
+	        	 this.model.toggleProperty("showGroupMembers");
+	        	return false;
+	        },
+	        deleteGroupMember(user){
+	    		 this.sendAction('deleteGroupMember', user);
+	    	},
 	 }
 });

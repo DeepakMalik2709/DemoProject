@@ -25,8 +25,8 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 	}
 	
 
-/*	public List<GroupMember> fetchGroupMembersByGroupId(long groupId, SearchTO searchTO) {
-		List<GroupMember> results = new ArrayList<>();
+	public List<GroupMember> fetchGroupMembersByGroupId(long groupId, SearchTO searchTO) {
+/*		List<GroupMember> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
 		Query query = pm.createQuery("select t from GroupMember t where  t.group.id = :groupId order by t.name");
 		query.setParameter("groupId", groupId);
@@ -37,8 +37,9 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 		} catch (NoResultException nre) {
 			logger.warn(nre.getMessage());
 		}
-		return results;
-	}*/
+		return results;*/
+		return fetchByGroupId(groupId, true, searchTO);
+	}
 	
 	public List<GroupMember> fetchGroupAttendanceMembers( SearchTO searchTO) {
 		List<GroupMember> results = new ArrayList<>();

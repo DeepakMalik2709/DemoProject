@@ -1763,4 +1763,5 @@ public class SecureController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("exit : fetchGroupJoinRequests");
 	}
+	
 }

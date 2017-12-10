@@ -4,7 +4,7 @@ import authenticationMixin from '../../mixins/authentication';
 
 export default Ember.Route.extend(ajaxMixin, {
 
-
+	groupAdapter : null,
     model(params) {
     	const groupAdapter = this.store.adapterFor('group');
         return groupAdapter.findPublicRecord( params.groupId);
@@ -14,11 +14,18 @@ export default Ember.Route.extend(ajaxMixin, {
 	  },
     setupController: function(controller, model) {
         this._super(controller, model);
-       
+        this.groupAdapter = this.store.adapterFor('group');
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         var bgImageSrc  = "/img/group_bg.jpg";
 		 this.controller.set("bgImageSrc","/img/group_bg.jpg");
 		Ember.run.later(()=>{$('.institute-public-section').css("background" , "url('" +bgImageSrc +"') no-repeat");} , 100)
+        this.groupAdapter.fetchChildGroups(model.id).then((result)=>{
+        	if(result.code == 0){
+        		if(result.items && result.items.length){
+					this.controller.set( "childGroups" , result.items)
+				}
+        	}
+        });
     },
 
  
@@ -33,7 +40,6 @@ export default Ember.Route.extend(ajaxMixin, {
         joinInstituteClick(){
         	var model = this.controller.get("model");
         	if(this.controller.get("isLoggedIn")){
-        		const groupAdapter = this.store.adapterFor('group');
         		groupAdapter.joinGroup(model.id);
         		model.set("isJoinRequested" , true);
         		alert("your request has been sent for approval.")

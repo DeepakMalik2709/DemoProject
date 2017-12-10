@@ -210,10 +210,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
         error(reason){
         	this.transitionTo('dashboard');
         },
-        toggleUserList(){
-        	 this.controller.get('model').toggleProperty("showGroupMembers");
-        	return false;
-        },
+
         deleteMember(member){
         	let confirmation = confirm("Remove user " + member.email +  "?");
         	if(confirmation){
