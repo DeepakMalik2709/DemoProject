@@ -153,5 +153,12 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
         editTask(task){
         	 this.transitionTo('group.task.edit', task.id);
     	},
+	    copyPublicLink(){
+	    	let model = this.controller.get('model');
+	    	var context = this.contextService.fetchContext((result)=>{
+	    		copyToClipboard(result.url + "/group/" + model.id)
+	    		alert("Public link copied to clipboard");
+	    	});
+	    },
     }
 });

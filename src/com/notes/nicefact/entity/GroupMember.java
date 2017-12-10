@@ -1,8 +1,10 @@
 package com.notes.nicefact.entity;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Basic;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -39,6 +41,13 @@ public class GroupMember extends CommonEntity{
 	
 	Boolean isAppUser = true;
 
+	Boolean isJoinRequestApproved = false;
+
+	String joinRequestApprover ;
+	
+	@Basic
+	Date  joinRequestApproveDate;
+	
 	private String position;
 	
 	private String folderPermissionId;
@@ -153,6 +162,32 @@ public class GroupMember extends CommonEntity{
 
 	public void setIsBlocked(Boolean isBlocked) {
 		this.isBlocked = isBlocked;
+	}
+	public Boolean getIsJoinRequestApproved() {
+		if(null == isJoinRequestApproved){
+			isJoinRequestApproved = true;
+		}
+		return isJoinRequestApproved;
+	}
+
+	public void setIsJoinRequestApproved(Boolean isJoinRequestApproved) {
+		this.isJoinRequestApproved = isJoinRequestApproved;
+	}
+
+	public String getJoinRequestApprover() {
+		return joinRequestApprover;
+	}
+
+	public void setJoinRequestApprover(String joinRequestApprover) {
+		this.joinRequestApprover = joinRequestApprover;
+	}
+
+	public Date getJoinRequestApproveDate() {
+		return joinRequestApproveDate;
+	}
+
+	public void setJoinRequestApproveDate(Date joinRequestApproveDate) {
+		this.joinRequestApproveDate = joinRequestApproveDate;
 	}
 
 	public String getName() {

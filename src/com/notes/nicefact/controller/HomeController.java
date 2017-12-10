@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -29,6 +28,8 @@ import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
 
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.entity.Tutorial;
@@ -37,9 +38,11 @@ import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.CommonEntityService;
+import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
+import com.notes.nicefact.to.GroupTO;
 import com.notes.nicefact.to.InstituteTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TutorialTO;
@@ -528,6 +531,61 @@ public class HomeController extends CommonController {
 		}
 		InstituteTO instituteTO = new InstituteTO(institute);
 		return instituteTO;
+		
+	}
+	
+	@GET
+	@Path("/group/{groupId}")
+	public void fetchPublicGroup(@PathParam("groupId") long groupId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("fetchPublicGroup start, groupId : " + groupId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			AppUser user = CurrentContext.getAppUser();
+			GroupTO groupTO = null;
+			if(user == null){
+				groupTO =  getGroup(groupId, em);
+			}else{
+				GroupMember member = groupService.fetchGroupMemberByEmail(groupId, CurrentContext.getEmail());
+				if(member == null){
+					groupTO =  getGroup(groupId, em);
+				}else{
+					groupTO = new GroupTO(member);
+				}
+			}
+			if (null == groupTO) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			} else {
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, groupTO);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("fetchPublicGroup exit");
+	}
+	
+	GroupTO getGroup(long id ,EntityManager em){
+		Group group =	(Group) CacheUtils.getGroup(id);
+		if(group == null){
+			GroupService groupService = new GroupService(em);
+			group = groupService.get(id);
+			CacheUtils.addGroupToCache(group);
+		}
+		
+		if(group == null){
+			throw new ServiceException("Instiute not found for id : " + id);
+		}
+		GroupTO groupTO = new GroupTO(group, false);
+		return groupTO;
 		
 	}
 }

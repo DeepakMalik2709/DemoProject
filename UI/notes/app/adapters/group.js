@@ -72,5 +72,64 @@ export default DS.Adapter.extend(ajaxMixin ,{
 			        Ember.run(null, reject, jqXHR);
 			      });
 			    });
-			  }
+			  },
+			  findPublicRecord: function(id) {
+				    return new Ember.RSVP.Promise((resolve, reject) =>{
+				      this.doGet(`/rest/public/group/${id}`).then((data)=> {
+				    	  if(data.code == 0){
+				    		  let storePost1 = this.store.peekRecord('group', data.item.id);
+								if(storePost1){
+									this.unloadRecord(storePost1);
+								}
+								 
+				    		  const storeGroup = this.store.createRecord('group', data.item);
+				    			Ember.run(null, resolve, storeGroup);
+				    		}else{
+				    			  Ember.run(null, reject, jqXHR);
+				    		}
+				    	  
+				      }, function(jqXHR) {
+				        reject(jqXHR);
+				      });
+				    });
+				  },
+				  joinGroup :  function( id) {
+					    return new Ember.RSVP.Promise((resolve, reject) =>{
+					    	var url = '/rest/secure/group/' + id + '/join';
+					    	this.doPost(url ).then(function(data) {
+					    		if(data.code == 0){
+					    			Ember.run(null, resolve, data.items);
+					    		}else{
+					    			  Ember.run(null, reject, jqXHR);
+					    		}
+					      }, function(jqXHR) {
+					        jqXHR.then = null; // tame jQuery's ill mannered promises
+					        Ember.run(null, reject, jqXHR);
+					      });
+					    });
+					  },
+					  approveMember :  function( id, member) {
+						    return new Ember.RSVP.Promise((resolve, reject) =>{
+						    	let url = "/rest/secure/group/" + id + "/approveJoin";
+						    	let json = {
+					        			email : member.email,
+					        			positions : [],
+					        			id:member.id,
+					        	}
+					        	for(var i =0; i<member.roles.length;i++){
+					        		var role = member.roles[i];
+					        		json.positions.push(role.id);
+					        	}
+						    	this.doPost(url, json ).then(function(data) {
+						    		if(data.code == 0){
+						    			Ember.run(null, resolve, data);
+						    		}else{
+						    			  Ember.run(null, reject, jqXHR);
+						    		}
+						      }, function(jqXHR) {
+						        jqXHR.then = null; // tame jQuery's ill mannered promises
+						        Ember.run(null, reject, jqXHR);
+						      });
+						    });
+						  },
 });

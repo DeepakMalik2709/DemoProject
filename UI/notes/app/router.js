@@ -17,7 +17,8 @@ Router.map(function() {
   this.route('profile');
   this.route('group', function() {
         this.route('posts',{path : '/:groupId/posts'});
-        this.route('view',{path : '/:groupId'});
+        this.route('view',{path : '/:groupId/details'});
+        this.route('public',{path : '/:groupId'});
         this.route('edit',{path : '/:groupId/edit'});
         this.route('create',{path : '/create'});
         this.route('post',{path : '/post/:postId'});

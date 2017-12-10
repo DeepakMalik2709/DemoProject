@@ -17,8 +17,11 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
     hasMoreRecords : true,
     nextPageLink : null,
     groupService: Ember.inject.service('group'),
+    groupAdapter :null,
     blockQueue : null,
     adminQueue : null,
+    joinRequestNextPageLink : null,
+    hasMoreRequestRecords : true,
     init() {
 	    this._super(...arguments);
 	    this.set('blockQueue', []);
@@ -28,9 +31,11 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
 	  },
     setupController: function(controller, model) {
         this._super(controller, model);
+        this.groupAdapter = this.store.adapterFor('group');
         this.controller.set("roles", this.roles);
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         this.controller.set("newMembers", []);
+        controller.set("noJoinRequests" , false);
          this.set('hasMoreRecords', true);
 	    this.set('nextPageLink', null);
         this.fetchMembers(model);
@@ -91,7 +96,38 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
 			  }
     	}
     },
-
+    fetchJoinRquests (){
+    	var controller = this.get("controller");
+    	if(this.hasMoreRecords && !controller.get("isLoading")){
+    		
+    		var model = controller.get('model');
+    		controller.set("isLoading" , true);
+    		var url = this.joinRequestNextPageLink;
+    		if(!url){
+    			url = "/rest/secure/group/" + model.get("id") + "/joinRequests";
+    		}
+    		this.doGet(url).then((result)=>{
+    			controller.set("isLoading" , false);
+    			if(result.code ==0){
+    				if(result.items && result.items.length){
+    					this.cleanupMembers(result.items);
+    					Ember.set(model, "joinRequests" ,result.items)
+    				}else{
+    					controller.set("noJoinRequests" , true);
+    				}
+    				if(result.nextLink){
+    					this.set("joinRequestNextPageLink", result.nextLink);
+    				}else{
+    					this.set("joinRequestNextPageLink", null);
+    					this.set("hasMoreRequestRecords", false);
+    				}
+    				
+    			}
+    		})
+    	}
+    	
+    },
+    
     actions: {
 
         confirmAndDeleteGroup() {
@@ -259,5 +295,30 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
         	});
         	
 	    },
+	    copyPublicLink(){
+	    	let model = this.controller.get('model');
+	    	var context = this.contextService.fetchContext((result)=>{
+	    		copyToClipboard(result.url + "/group/" + model.id)
+	    		alert("Public link copied to clipboard");
+	    	});
+	    },
+        showJoinRquests(){
+        	var model = this.controller.get('model');
+	    	if(typeof model.get("joinRequests") == 'undefined' || model.get("joinRequests").length <=0){
+	    		  this.set('hasMoreRequestRecords', true);
+	         	    this.set('joinRequestNextPageLink', null);
+	                 this.fetchJoinRquests();
+			}
+        	Ember.$("#members-request-modal").modal("show");
+        },
+        approveMember(member){
+        	let model = this.controller.get('model');
+        	this.groupAdapter.approveMember(model.get("id") ,member );
+        	model.get("joinRequests").removeObject(member);
+        	model.get("members").pushObject(member);
+        	if(!model.get("joinRequests").length){
+        		Ember.$("#members-request-modal").modal("hide");
+        	}
+        },
     }
 });

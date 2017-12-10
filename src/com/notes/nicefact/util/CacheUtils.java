@@ -48,6 +48,7 @@ public class CacheUtils {
 			GroupService groupService = new GroupService(em);
 			group = groupService.get(id);
 			if (null!=group) {
+				group.getAdmins().size();
 				group.getMembers().size();
 				group.getMemberGroupsIds().size();
 				em.detach(group);

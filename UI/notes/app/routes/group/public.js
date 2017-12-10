@@ -6,7 +6,8 @@ export default Ember.Route.extend(ajaxMixin, {
 
 
     model(params) {
-        return this.store.findRecord('institute', params.instituteId);
+    	const groupAdapter = this.store.adapterFor('group');
+        return groupAdapter.findPublicRecord( params.groupId);
     },
     init() {
 	    this._super(...arguments);
@@ -15,11 +16,9 @@ export default Ember.Route.extend(ajaxMixin, {
         this._super(controller, model);
        
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
-        if(model.get( "bgImagePath")){
-    		var bgImageSrc  = "/a/public/file/preivew?id=" + model.get( "bgImagePath")
-    		 this.controller.set("bgImageSrc",bgImageSrc);
-    		Ember.run.later(()=>{$('.institute-public-section').css("background" , "url('" +bgImageSrc +"') no-repeat");} , 100)
-    	}
+        var bgImageSrc  = "/img/group_bg.jpg";
+		 this.controller.set("bgImageSrc","/img/group_bg.jpg");
+		Ember.run.later(()=>{$('.institute-public-section').css("background" , "url('" +bgImageSrc +"') no-repeat");} , 100)
     },
 
  
@@ -34,12 +33,12 @@ export default Ember.Route.extend(ajaxMixin, {
         joinInstituteClick(){
         	var model = this.controller.get("model");
         	if(this.controller.get("isLoggedIn")){
-        		const instituteAdapter = this.store.adapterFor('institute');
-        		instituteAdapter.joinInstitute(model.id);
+        		const groupAdapter = this.store.adapterFor('group');
+        		groupAdapter.joinGroup(model.id);
         		model.set("isJoinRequested" , true);
         		alert("your request has been sent for approval.")
         	}else{
-        		var url = "/a/public/login?redirect=/institute/" + model.get("id");
+        		var url = "/a/public/login?redirect=/group/" + model.get("id");
         		window.location.href = url;
         	}
         }

@@ -11,6 +11,7 @@ import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.SHARING;
+import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.util.CurrentContext;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -59,10 +60,23 @@ public class GroupTO {
 	List<LANGUAGE> languages = new ArrayList<>();
 
 	Set<String> admins = new HashSet<>();
+	
+	private Set<UserPosition> positions = new HashSet<>();
+	boolean isJoinRequestApproved ;
+	boolean isJoinRequested ;
 
 	public GroupTO() {
 	}
 
+	public GroupTO(GroupMember member) {
+		this(member.getGroup(), false);
+		this.isJoinRequestApproved = member.getIsJoinRequestApproved();
+		if(this.isJoinRequestApproved == false){
+			this.isJoinRequested = true;
+		}
+		this.positions = member.getPositions();
+	}
+	
 	public GroupTO(Group group, boolean fetchMembers) {
 		this.id = group.getId();
 		this.sharing = group.getSharing();
@@ -159,7 +173,28 @@ public class GroupTO {
 	public Set<String> getAdmins() {
 		return admins;
 	}
+	public Set<UserPosition> getPositions() {
+		return positions;
+	}
 
+	public void setPositions(Set<UserPosition> positions) {
+		this.positions = positions;
+	}
+	
+	public boolean getIsJoinRequestApproved() {
+		return isJoinRequestApproved;
+	}
+	public void setIsJoinRequestApproved(boolean isJoinRequestApproved) {
+		this.isJoinRequestApproved = isJoinRequestApproved;
+	}
+	public boolean getIsJoinRequested() {
+		return isJoinRequested;
+	}
+	public void setIsJoinRequested(boolean isJoinRequested) {
+		this.isJoinRequested = isJoinRequested;
+	}
+	
+	
 	public void setAdmins(Set<String> admins) {
 		this.admins = admins;
 	}

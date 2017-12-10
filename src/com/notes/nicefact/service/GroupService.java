@@ -1,6 +1,7 @@
 package com.notes.nicefact.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,9 +20,11 @@ import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Institute;
+import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.UserPosition;
+import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.to.AttendanceMemberTO;
 import com.notes.nicefact.to.GroupAttendanceTO;
@@ -207,7 +210,7 @@ public class GroupService extends CommonService<Group> {
 	}
 
 	public List<GroupMemberTO> fetchGroupMembers(long groupId, SearchTO searchTO) {
-		List<GroupMember> members = groupMemberDAO.fetchGroupMembersByGroupId(groupId, searchTO);
+		List<GroupMember> members = groupMemberDAO.fetchByGroupId(groupId,true, searchTO);
 		List<GroupMemberTO> memberTos = new ArrayList<>();
 		GroupMemberTO memberTO;
 		for (GroupMember groupMember : members) {
@@ -401,6 +404,68 @@ public class GroupService extends CommonService<Group> {
 			return member.getPositions().contains(UserPosition.TEACHER);
 		}
 		return false;
+	}
+	
+	public GroupMember fetchGroupMemberByEmail(long groupId, String email) {
+		return groupMemberDAO.fetchGroupMemberByEmail(groupId, email);
+	}
+	
+	public GroupMember joinGroup(long groupId, AppUser user) {
+		GroupMember member =  fetchGroupMemberByEmail(groupId, user.getEmail());
+		if (member == null) {
+			Group group = get(groupId);
+			if(group == null){
+				throw new ServiceException("Group not found for id : " + groupId);
+			}
+			member = new GroupMember(user);
+			member.setIsJoinRequestApproved(false);
+			member.setIsBlocked(true);
+			member.setGroup(group);
+			groupMemberDAO.upsert(member);
+			AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
+			dbUser.getJoinRequestGroups().add(groupId);
+			appUserService.upsert(dbUser);
+		}
+		return member;
+	}
+	
+	public GroupMember approveJoinGroup(long groupId, GroupMemberTO memberTO, AppUser user) {
+		GroupMember  member =null;
+		Group group = CacheUtils.getGroup(groupId);
+		if (group != null && group.getAdmins().contains(user.getEmail())) {
+			member = fetchGroupMemberByEmail(groupId, memberTO.getEmail());
+			if (member != null && !member.getIsJoinRequestApproved()) {
+				member.setIsJoinRequestApproved(true);
+				member.setIsBlocked(false);
+				member.setJoinRequestApproveDate(new Date());
+				member.setJoinRequestApprover(user.getEmail());
+				if (memberTO.getPositions() == null || memberTO.getPositions().isEmpty()) {
+					member.getPositions().add(UserPosition.STUDENT);
+				} else {
+					member.getPositions().clear();
+					member.getPositions().addAll(memberTO.getPositions());
+				}
+				groupMemberDAO.upsert(member);
+				AppUser dbUser = appUserService.getAppUserByEmail(memberTO.getEmail());
+				dbUser.getJoinRequestGroups().remove(groupId);
+				dbUser.getGroupIds().add(groupId);
+				appUserService.upsert(dbUser);
+			}
+		}else{
+			throw new UnauthorizedException();
+		}
+		return member;
+	}
+	
+	public List<GroupMemberTO> fetchGroupJoinRequests(long groupId, SearchTO searchTO) {
+		List<GroupMember> members = groupMemberDAO.fetchByGroupId(groupId,false, searchTO);
+		List<GroupMemberTO> memberTos = new ArrayList<>();
+		GroupMemberTO memberTO;
+		for (GroupMember instituteMember : members) {
+			memberTO = new GroupMemberTO(instituteMember);
+			memberTos.add(memberTO);
+		}
+		return memberTos;
 	}
 
 }
