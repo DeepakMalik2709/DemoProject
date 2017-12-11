@@ -482,6 +482,31 @@ public class SecureController extends CommonController {
 		logger.info("exit : fetchGroupAttendanceMembers");
 	}
 
+	@POST
+	@Path("/group/{groupId}/attendance/{studentId}")
+	public void fetchStudentAttendance(@Context HttpServletResponse response, @Context HttpServletRequest request,@PathParam("groupId") long groupId) {
+		logger.info("start : fetchGroupAttendanceMembers");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			AppUser user = CurrentContext.getAppUser();			
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			GroupAttendanceService groupAttendenceService = new GroupAttendanceService(em);
+			GroupAttendanceTO groupAttendanceTO = groupAttendenceService.fetchStudentAttendance( searchTO,groupId,user.getEmail());			
+			json.put(Constants.DATA_ITEM, groupAttendanceTO);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : fetchGroupAttendanceMembers");
+	}
 	
 	@POST
 	@Path("/group/{groupId}/attendance/upsert")
@@ -493,7 +518,6 @@ public class SecureController extends CommonController {
 		try {
 			AppUser user = CurrentContext.getAppUser();
 			GroupAttendanceService groupAttendenceService = new GroupAttendanceService(em);
-			
 			GroupAttendance groupAttendance = groupAttendenceService.upsert(groupAttendanceTO, user);
 			GroupAttendanceTO groupAttendanceTO2 = new GroupAttendanceTO(groupAttendance);
 			json.put(Constants.DATA_ITEM, groupAttendanceTO2);

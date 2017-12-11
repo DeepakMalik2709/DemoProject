@@ -82,13 +82,13 @@ public class ScheduleService extends CommonService<Group> {
 				schedule.setStart(new Date());
 			}
 			DateTime startDateTime = new DateTime(schedule.getStart());
-			EventDateTime start = new EventDateTime().setDateTime(startDateTime)/*.setTimeZone("Asia/Kolkata")*/;
+			EventDateTime start = new EventDateTime().setDateTime(startDateTime).setTimeZone("Asia/Kolkata");
 			event.setStart(start);
 			if (schedule.getEnd() == null) {
 				schedule.setEnd(new Date());
 			}
 			DateTime endDateTime = new DateTime(schedule.getEnd());
-			EventDateTime end = new EventDateTime().setDateTime(endDateTime)/*.setTimeZone("Asia/Kolkata")*/;
+			EventDateTime end = new EventDateTime().setDateTime(endDateTime).setTimeZone("Asia/Kolkata");
 			event.setEnd(end);
 			
 			String[] recurrence = createGoogleRecurrenceStr(schedule.getWeekdays());

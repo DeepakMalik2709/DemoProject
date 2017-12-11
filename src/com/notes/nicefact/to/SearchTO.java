@@ -15,6 +15,7 @@ public class SearchTO {
 	long groupId;
 	long date;
 	String fromTime;
+	long studentId;
 	
 	HttpServletRequest request;
 

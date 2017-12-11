@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
 import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.StudentAttendance;
+import com.notes.nicefact.to.SearchTO;
 
 /**
  * @author user
@@ -33,7 +34,7 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendance> {
 		List<StudentAttendance> results = new ArrayList<>();
 		if (null !=groupAttendenceIds && !groupAttendenceIds.isEmpty()) {
 			EntityManager pm = super.getEntityManager();
-			Query query = pm.createQuery("select t from StudentAttendence t where  t.groupAttendence.id in (:groupAttendenceIds) order by t.name");
+			Query query = pm.createQuery("select t from StudentAttendance t where  t.groupAttendence.id in (:groupAttendenceIds) order by t.name");
 			query.setParameter("groupAttendenceIds", groupAttendenceIds);
 			try {
 				results = (List<StudentAttendance>) query.getResultList();
@@ -49,7 +50,7 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendance> {
 			List<StudentAttendance> results = new ArrayList<>();
 			if (null !=groupAttendence) {
 				EntityManager pm = super.getEntityManager();
-				Query query = pm.createQuery("select t from StudentAttendence t where  t.groupAttendence.id in (:groupIds) order by t.name");
+				Query query = pm.createQuery("select t from StudentAttendance t where  t.groupAttendence.id in (:groupIds) order by t.name");
 				query.setParameter("groupIds", groupAttendence.getId());
 				try {
 					results = (List<StudentAttendance>) query.getResultList();
@@ -59,6 +60,22 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendance> {
 			}
 			return results;
 		}
+
+
+	public List<StudentAttendance> fetchStudentAttendance(SearchTO searchTO,long groupId, String email) {
+		List<StudentAttendance> results = new ArrayList<>();
+		
+			EntityManager pm = super.getEntityManager();
+			Query query = pm.createQuery("select t from StudentAttendance t where  t.groupAttendence.id =:groupIds) and t.email= :email order by t.name");
+			query.setParameter("groupId",groupId);
+			try {
+				results = (List<StudentAttendance>) query.getResultList();
+			} catch (NoResultException nre) {
+				return new ArrayList<>();
+			} 
+	
+		return results;
+	}
 	
 
 }

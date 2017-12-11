@@ -248,6 +248,30 @@ public class GroupService extends CommonService<Group> {
 		return attendance;
 	}
 	
+	public GroupAttendanceTO fetchStudentAttendance(SearchTO searchTO,long groupId, long studentId) {
+		GroupAttendanceTO attendance = null;
+		StudentAttendenceService attendenceService = new StudentAttendenceService(em);
+		GroupAttendance groupAttendance = attendenceService.getGroupAttendance(searchTO);
+		if(null == groupAttendance){
+			attendance = new GroupAttendanceTO();
+			attendance.setDate(searchTO.getDate());
+			attendance.setFromTime(searchTO.getFromTime());
+			attendance.setGroupId(searchTO.getGroupId());
+			List<AttendanceMemberTO> memberTos = new ArrayList<>();
+			AttendanceMemberTO memberTO;
+			List<GroupMember> members = groupMemberDAO.fetchGroupAttendanceMembers( searchTO);
+			for (GroupMember groupMember : members) {
+				memberTO = new AttendanceMemberTO(groupMember);
+				memberTos.add(memberTO);
+			}
+			attendance.setMembers(memberTos);
+		}else{
+			attendance = new GroupAttendanceTO(groupAttendance);
+			attendance.setGroupId(searchTO.getGroupId());
+		}
+		return attendance;
+	}
+	
 	public void deleteGroupMember(long groupId, long memberId, AppUser appUser) {
 		GroupMember member = groupMemberDAO.get(memberId);
 		if (member != null) {
@@ -402,5 +426,4 @@ public class GroupService extends CommonService<Group> {
 		}
 		return false;
 	}
-
 }

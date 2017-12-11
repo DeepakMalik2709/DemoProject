@@ -16,12 +16,14 @@ import com.notes.nicefact.dao.StudentAttendenceDao;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
+import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.StudentAttendance;
 import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.to.AttendanceMemberTO;
 import com.notes.nicefact.to.GroupAttendanceTO;
 import com.notes.nicefact.to.SearchTO;
+import com.notes.nicefact.to.StudentAttendanceTO;
 import com.notes.nicefact.util.CacheUtils;
 
 /**
@@ -104,6 +106,26 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 	public GroupAttendance get(Long id) {
 		GroupAttendance GroupAttendence = super.get(id);
 		return GroupAttendence;
+	}
+
+	public GroupAttendanceTO fetchStudentAttendance(SearchTO searchTO,long groupId, String email) {
+		GroupAttendanceTO attendance = null;		
+		attendance = new GroupAttendanceTO();
+		attendance.setDate(searchTO.getDate());
+		attendance.setFromTime(searchTO.getFromTime());
+		attendance.setGroupId(searchTO.getGroupId());
+		List<AttendanceMemberTO> studentTOs = new ArrayList<>();
+		AttendanceMemberTO studentTO;
+		List<StudentAttendance> studentAttendances  =  studentAttendenceDao.fetchStudentAttendance(searchTO,groupId,email);
+		
+		for (StudentAttendance studentAttendance : studentAttendances) {
+			studentTO = new AttendanceMemberTO(studentAttendance);
+			studentTOs.add(studentTO);
+		}
+		attendance.setMembers(studentTOs);
+		return attendance;
+		
+		
 	}
 
 	
