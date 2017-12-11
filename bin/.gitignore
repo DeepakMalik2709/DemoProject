@@ -26,8 +26,12 @@
 /.settings/org.eclipse.wst.common.project.facet.core.xml
 /.settings/org.eclipse.wst.validation.prefs
 /.classpath
-/build/
-/keys/
-/uploads/
+/.gitignore
+/.project
+/README.md
+/UI/
 /WebContent/
-/bin/
+/liquibase/
+/memcached/
+/src/
+/uploads/
