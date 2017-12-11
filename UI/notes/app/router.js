@@ -15,6 +15,7 @@ Router.map(function() {
   this.route('dashboard', function() {  });
   this.route('home', function() {  });
   this.route('profile');
+  this.route('terms');
   this.route('group', function() {
         this.route('posts',{path : '/:groupId/posts'});
         this.route('view',{path : '/:groupId/view'});
