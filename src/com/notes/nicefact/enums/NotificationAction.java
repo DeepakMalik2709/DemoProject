@@ -25,9 +25,14 @@ public enum NotificationAction {
 	/* general case of notification */
 	COMMENT_FOLLOWING( " commented on a post your following ", "notification_commented"),
 	/* someone added you to a group or institute*/
-	GROUP_ADDED(" added you to ", "notification_group_added"),
-	INSTITUTE_ADDED(" added you to ", "notification_institute_added");
-
+	GROUP_ADDED(" added you to group ", "notification_group_added"),
+	INSTITUTE_ADDED(" added you to institute ", "notification_institute_added"),
+	GROUP_JOIN_APPROVED(" approved your request to join group ", "notification_group_added"),
+	INSTITUTE_JOIN_APPROVED(" approved your request to join institute ", "notification_institute_added"),
+	GROUP_JOIN_REQUESTED(" requested to join group ", "notification_group_added"),
+	INSTITUTE_JOIN_REQUESTED(" requested to join institute ", "notification_institute_added")
+	
+	;
 	String messageKey;
 	
 	String mailTemplateName ;

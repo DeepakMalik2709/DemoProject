@@ -21,6 +21,10 @@ import com.notes.nicefact.dao.InstituteMemberDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.InstituteMember;
+import com.notes.nicefact.entity.Notification;
+import com.notes.nicefact.entity.NotificationRecipient;
+import com.notes.nicefact.enums.NotificationAction;
+import com.notes.nicefact.enums.NotificationType;
 import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.exception.UnauthorizedException;
@@ -293,6 +297,24 @@ public class InstituteService extends CommonService<Institute> {
 			AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
 			dbUser.getJoinRequestInstitutes().add(instituteId);
 			appUserService.upsert(dbUser);
+			NotificationService notificationService = new NotificationService(em);
+			Notification notification = new Notification(dbUser);
+			notification.setInstituteId(institute.getId()).setGroupName(institute.getName()).setTitle(institute.getName()).setType(NotificationType.INSTITUTE);
+			notificationService.upsert(notification);
+			NotificationRecipient notificationRecipient;
+			for (String email : institute.getAdmins()) {
+				AppUser admin = CacheUtils.getAppUser(email);
+				if (admin == null) {
+					notificationRecipient = new NotificationRecipient(email);
+				} else {
+					notificationRecipient = new NotificationRecipient(admin);
+					notificationRecipient.setSendEmail(false);
+				}
+				notificationRecipient.setAction(NotificationAction.INSTITUTE_JOIN_REQUESTED).setNotification(notification);
+				notification.getRecipients().add(notificationRecipient);
+				notificationService.upsertRecipient(notificationRecipient);
+			}
+			notificationService.upsert(notification);
 		}
 		return member;
 	}
@@ -318,6 +340,16 @@ public class InstituteService extends CommonService<Institute> {
 				dbUser.getJoinRequestInstitutes().remove(instituteId);
 				dbUser.getInstituteIds().add(instituteId);
 				appUserService.upsert(dbUser);
+				
+				NotificationService notificationService = new NotificationService(em);
+				Notification notification = new Notification(user);
+				notification.setInstituteId(institute.getId()).setGroupName(institute.getName()).setTitle(institute.getName()).setType(NotificationType.INSTITUTE);
+				notificationService.upsert(notification);
+				NotificationRecipient notificationRecipient = new NotificationRecipient(dbUser);
+				notificationRecipient.setAction(NotificationAction.INSTITUTE_JOIN_APPROVED).setNotification(notification);
+				notification.getRecipients().add(notificationRecipient);
+				notificationService.upsertRecipient(notificationRecipient);
+				notificationService.upsert(notification);
 			}
 		}else{
 			throw new UnauthorizedException();

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.google.api.services.calendar.model.EventAttendee;
@@ -20,8 +21,12 @@ import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Institute;
+import com.notes.nicefact.entity.Notification;
+import com.notes.nicefact.entity.NotificationRecipient;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
+import com.notes.nicefact.enums.NotificationAction;
+import com.notes.nicefact.enums.NotificationType;
 import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.exception.UnauthorizedException;
@@ -275,7 +280,21 @@ public class GroupService extends CommonService<Group> {
 			attendance = new GroupAttendanceTO(groupAttendance);
 			attendance.setGroupId(searchTO.getGroupId());
 		}
+		addMissingNamesToAttendance(attendance);
 		return attendance;
+	}
+	
+	public void addMissingNamesToAttendance(GroupAttendanceTO attendance ){
+		for(AttendanceMemberTO sa : attendance.getMembers()){
+			if(StringUtils.isBlank(sa.getName())){
+				AppUser user = CacheUtils.getAppUser(sa.getEmail());
+				if (null==user) {
+					sa.setName("No name");
+				}else{
+					sa.setName(user.getDisplayName());
+				}
+			}
+		}
 	}
 	
 	public void deleteGroupMember(long groupId, long memberId, AppUser appUser) {
@@ -413,7 +432,18 @@ public class GroupService extends CommonService<Group> {
 			}
 			appUser.setGroupIds(finalGroupIds);
 			appUserService.upsert(appUser);
+			
+			
+			List<GroupMember> results =  groupMemberDAO.fetchAllGroupMembersByEmail(email);
+			for (GroupMember member : results) {
+				if(StringUtils.isBlank(member.getName())){
+					member.setName(appUser.getDisplayName());
+					groupMemberDAO.upsert(member);
+				}
+			}
 		}
+		
+		
 	}
 	
 	public void updateGroupMember(GroupMember  member){
@@ -452,6 +482,25 @@ public class GroupService extends CommonService<Group> {
 			AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
 			dbUser.getJoinRequestGroups().add(groupId);
 			appUserService.upsert(dbUser);
+			
+			NotificationService notificationService = new NotificationService(em);
+			Notification notification = new Notification(dbUser);
+			notification.setGroupId(group.getId()).setGroupName(group.getName()).setTitle(group.getName()).setType(NotificationType.GROUP);
+			notificationService.upsert(notification);
+			NotificationRecipient notificationRecipient;
+			for (String email : group.getAdmins()) {
+				AppUser admin = CacheUtils.getAppUser(email);
+				if (admin == null) {
+					notificationRecipient = new NotificationRecipient(email);
+				} else {
+					notificationRecipient = new NotificationRecipient(admin);
+					notificationRecipient.setSendEmail(false);
+				}
+				notificationRecipient.setAction(NotificationAction.GROUP_JOIN_REQUESTED).setNotification(notification);
+				notification.getRecipients().add(notificationRecipient);
+				notificationService.upsertRecipient(notificationRecipient);
+			}
+			notificationService.upsert(notification);
 		}
 		return member;
 	}
@@ -477,6 +526,16 @@ public class GroupService extends CommonService<Group> {
 				dbUser.getJoinRequestGroups().remove(groupId);
 				dbUser.getGroupIds().add(groupId);
 				appUserService.upsert(dbUser);
+				
+				NotificationService notificationService = new NotificationService(em);
+				Notification notification = new Notification(user);
+				notification.setGroupId(group.getId()).setGroupName(group.getName()).setTitle(group.getName()).setType(NotificationType.GROUP);
+				notificationService.upsert(notification);
+				NotificationRecipient notificationRecipient = new NotificationRecipient(dbUser);
+				notificationRecipient.setAction(NotificationAction.GROUP_JOIN_APPROVED).setNotification(notification);
+				notification.getRecipients().add(notificationRecipient);
+				notificationService.upsertRecipient(notificationRecipient);
+				notificationService.upsert(notification);
 			}
 		}else{
 			throw new UnauthorizedException();

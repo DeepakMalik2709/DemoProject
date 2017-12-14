@@ -1,12 +1,15 @@
 package com.notes.nicefact.to;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.Notification;
 import com.notes.nicefact.entity.NotificationRecipient;
+import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.enums.NotificationType;
 
@@ -33,18 +36,31 @@ public class NotificationTO implements Serializable {
 		this.senderPosition = notification.getSenderPosition();
 		this.senderName = notification.getSenderName();
 		this.groupId = notification.getGroupId();
+		this.instituteId = notification.getInstituteId();
 		this.groupName = notification.getGroupName();
 		this.action = notificationRecipient.getAction().toString();
 		this.actionKey = notificationRecipient.getAction().getMessageKey();
 		this.isRead = notificationRecipient.getIsRead();
 		this.type = notification.getType();
+		List<NotificationAction> showGroupNameActions = Arrays.asList(NotificationAction.POSTED_GROUP , NotificationAction.INSTITUTE_ADDED , NotificationAction.INSTITUTE_JOIN_APPROVED, NotificationAction.INSTITUTE_JOIN_REQUESTED,
+				NotificationAction.GROUP_ADDED , NotificationAction.GROUP_JOIN_APPROVED, NotificationAction.GROUP_JOIN_REQUESTED );
 		
-		if(NotificationAction.GROUP_ADDED.equals(notificationRecipient.getAction())){
+		if(showGroupNameActions.contains(notificationRecipient.getAction())){
 			showGroupName = true;
+		}
+		
+		List<NotificationAction> hideTitleActions = Arrays.asList(NotificationAction.INSTITUTE_ADDED , NotificationAction.INSTITUTE_JOIN_APPROVED, NotificationAction.INSTITUTE_JOIN_REQUESTED,
+				NotificationAction.GROUP_ADDED , NotificationAction.GROUP_JOIN_APPROVED, NotificationAction.GROUP_JOIN_REQUESTED);
+		
+		if(hideTitleActions.contains(notificationRecipient.getAction())){
 			showTitle = false;
 		}
-		if(NotificationAction.POSTED_GROUP.equals(notificationRecipient.getAction())){
-			showGroupName = true;
+		
+		List<NotificationAction> showDetailPageActions = Arrays.asList( NotificationAction.INSTITUTE_JOIN_REQUESTED,
+				 NotificationAction.GROUP_JOIN_REQUESTED);
+		
+		if(showDetailPageActions.contains(notificationRecipient.getAction())){
+			showDetailpage = true;
 		}
 	}
 
@@ -74,6 +90,8 @@ public class NotificationTO implements Serializable {
 	String actionKey;
 
 	boolean isRead;
+	
+	boolean showDetailpage = false;
 
 	Long groupId;
 	
@@ -83,6 +101,18 @@ public class NotificationTO implements Serializable {
 	
 	boolean showGroupName = false;
 	
+	Long instituteId;
+	
+	public Long getInstituteId() {
+		if(null == instituteId){
+			return 0l;
+		}
+		return instituteId;
+	}
+
+	public void setInstituteId(Long instituteId) {
+		this.instituteId = instituteId;
+	}
 	
 	public NotificationType getType() {
 		return type;
@@ -98,17 +128,11 @@ public class NotificationTO implements Serializable {
 	public boolean getShowGroupName() {
 		return showGroupName;
 	}
-	public boolean getsShowTitle() {
-		return showTitle;
-	}
 
 	public void setShowTitle(boolean showTitle) {
 		this.showTitle = showTitle;
 	}
 
-	public boolean getsShowGroupName() {
-		return showGroupName;
-	}
 
 	public void setShowGroupName(boolean showGroupName) {
 		this.showGroupName = showGroupName;
@@ -219,16 +243,36 @@ public class NotificationTO implements Serializable {
 		this.isRead = isRead;
 	}
 
-	public long getGroupId() {
+	public Long getGroupId() {
 		if(null == groupId){
-			return 0;
+			return 0l;
 		}
 		return groupId;
 	}
 
-	public void setGroupId(long groupId) {
+	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
 	}
 	
+	public boolean getIsPost(){
+		return   NotificationType.POST.equals(this.type);
+	}
+	
+	public boolean getIsTask(){
+		return  NotificationType.TASK.equals(this.type);
+	}
+	
+	public boolean getIsSchedule(){
+		return  NotificationType.SCHEDULE.equals(this.type);
+	}
+
+	public boolean getShowDetailpage() {
+		return showDetailpage;
+	}
+
+	public void setShowDetailpage(boolean showDetailpage) {
+		this.showDetailpage = showDetailpage;
+	}
+
 	
 }

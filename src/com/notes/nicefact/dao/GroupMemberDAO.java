@@ -117,4 +117,17 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 		}
 		return results;
 	}
+	
+	public List<GroupMember> fetchAllGroupMembersByEmail(String email) {
+		List<GroupMember> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from GroupMember t where  t.email = :email ");
+		query.setParameter("email", email);
+		try {
+			results = (List<GroupMember>) query.getResultList();
+		} catch (NoResultException nre) {
+			return  new ArrayList<>();
+		}
+		return results;
+	}
 }

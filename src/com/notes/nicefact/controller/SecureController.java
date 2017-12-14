@@ -1188,7 +1188,25 @@ public class SecureController extends CommonController {
 		try {
 			NotificationService notificationService = new NotificationService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_10);
-			List<NotificationTO> notifications = notificationService.fetchMyNotifications(CurrentContext.getAppUser(), searchTO);
+			AppUser user = CurrentContext.getAppUser();
+			List<NotificationTO> notifications = notificationService.fetchMyNotifications(user , searchTO);
+			boolean newNotifications = false;
+			if(!notifications.isEmpty()){
+				if(user.getLastSeenNotificationId() == null){
+					newNotifications = true;
+				}else if(notifications.get(0).getId() > user.getLastSeenNotificationId()){
+					newNotifications = true;
+				}
+			}
+			
+			if(newNotifications){
+				AppUserService appUserService = new AppUserService(em);
+				AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
+				dbUser.setLastSeenNotificationId(notifications.get(0).getId());
+				appUserService.upsert(dbUser);
+				request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, dbUser);
+			}
+			json.put("newNotifications", newNotifications);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEMS, notifications);
 			if (!notifications.isEmpty()) {

@@ -151,6 +151,10 @@ public class AppUser extends CommonEntity {
 
 	@Basic
 	private Date addInstituteMsgDate; 
+
+	
+	@Basic
+	private Long lastSeenNotificationId;
 	
 	public enum GENDER {
 		MALE, FEMALE
@@ -662,6 +666,14 @@ public class AppUser extends CommonEntity {
 
 	public void setJoinRequestInstitutes(Set<Long> joinRequestInstitutes) {
 		this.joinRequestInstitutes = joinRequestInstitutes;
+	}
+
+	public Long getLastSeenNotificationId() {
+		return lastSeenNotificationId;
+	}
+
+	public void setLastSeenNotificationId(Long lastSeenNotificationId) {
+		this.lastSeenNotificationId = lastSeenNotificationId;
 	}
 
 	@Override
