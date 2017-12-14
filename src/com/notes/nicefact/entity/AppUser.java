@@ -73,6 +73,7 @@ public class AppUser extends CommonEntity {
 
 	String uploadedPhotoPath;
 	
+	
 	/*send post mail if you member in group*/
 	boolean sendGroupPostEmail = true;
 	
@@ -559,6 +560,7 @@ public class AppUser extends CommonEntity {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
+
 
 	public String getAddress() {
 		return address;

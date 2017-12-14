@@ -33,7 +33,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
         this.controller.set("newMembers", []);
          this.set('hasMoreRecords', true);
 	    this.set('nextPageLink', null);
-        this.fetchMembers(model);
+	    this.fetchMembers(model);
     },
 
     fetchMembers (group){
@@ -51,7 +51,8 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
     			if(result.code ==0){
     				if(result.items){
     					this.addMembersToGroup( result.items);
-    					Ember.set(group, "memberGroups" ,result.memberGroups)
+    					Ember.set(group, "memberGroups" ,result.memberGroups);
+    					Ember.set(group, "members" ,result.items);
     				}
     				if(result.nextLink){
     					this.set("nextPageLink", result.nextLink);
@@ -62,6 +63,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
     				
     			}
     		})
+    		
     	}
     	
     },
@@ -259,5 +261,6 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
         	});
         	
 	    },
+	    
     }
 });

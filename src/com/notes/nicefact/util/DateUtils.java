@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 public class DateUtils {
 
 	public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm";
+	public static final String DAY_MONTH_TIME_PATTERN = "dd/MM HH:mm";
 	public static final String LONG_DATE_PATTERN = "MMMM, yyyy.MM.dd (EEE)";
 	public static final String DATE_PATTERN = "yyyy/MM/dd";
 	public static final String MONTH_YEAR_PATTERN = "MMMM, yyyy";

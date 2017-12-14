@@ -1,11 +1,13 @@
 package com.notes.nicefact.to;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.StudentAttendance;
+import com.notes.nicefact.util.DateUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GroupAttendanceTO {
@@ -16,7 +18,11 @@ public class GroupAttendanceTO {
 	
 	private String fromTime;
 	
+	private Date fromTimeObject;
+	
 	private String toTime;
+	
+	private Date toTimeObject;
 	
 	private long groupId;
 	
@@ -31,14 +37,37 @@ public class GroupAttendanceTO {
 	public GroupAttendanceTO(GroupAttendance attendance ) {
 		this.id = attendance.getId();
 		this.date = attendance.getDate().getTime();
+		
 		this.fromTime = attendance.getFromTime();
+		this.fromTimeObject = DateUtils.addTimeFromStringToDate(DateUtils.formatDate(attendance.getDate(), DateUtils.DATE_PATTERN), attendance.getFromTime());
+		
 		this.toTime = attendance.getToTime();
+		if(this.toTime != null){
+			this.toTimeObject = DateUtils.addTimeFromStringToDate(DateUtils.formatDate(attendance.getDate(), DateUtils.DATE_PATTERN), attendance.getToTime());
+		}
 		this.comments = attendance.getComments();
 		AttendanceMemberTO memberTO;
 		for(StudentAttendance sa : attendance.getStudentAttendances()){
 			memberTO = new AttendanceMemberTO(sa);
 			this.members.add(memberTO);
 		}
+	}
+	
+	
+	public Date getFromTimeObject() {
+		return fromTimeObject;
+	}
+
+	public void setFromTimeObject(Date fromTimeObject) {
+		this.fromTimeObject = fromTimeObject;
+	}
+
+	public Date getToTimeObject() {
+		return toTimeObject;
+	}
+
+	public void setToTimeObject(Date toTimeObject) {
+		this.toTimeObject = toTimeObject;
 	}
 
 	public long getDate() {

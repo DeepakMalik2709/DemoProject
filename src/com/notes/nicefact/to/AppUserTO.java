@@ -54,6 +54,7 @@ public class AppUserTO  implements Serializable  {
 	
 	boolean hasUploadedPhoto ;
 	
+	
 	/* check AppUser entity for comments */
 	
 	Boolean sendGroupPostEmail ;
@@ -101,6 +102,7 @@ public class AppUserTO  implements Serializable  {
 		super();
 	}
 
+	
 	public boolean getHasUploadedPhoto() {
 		return hasUploadedPhoto;
 	}

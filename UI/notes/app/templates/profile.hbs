@@ -77,6 +77,45 @@
         </div>
     </div>
     
+    
+    
+    
+    
+  <!--  
+    {{#each model.instituteMembers as |instituteMember|}}
+    <div class="box box-primary">
+        <div class="box-header">
+            <h3 class="box-title">instituteMember.organization</h3>
+        </div><!-- /.box-header -->
+        <!-- form start -->
+        <form role="form">
+            <div class="box-body">
+                <div class="form-group">
+			        <label class="col-sm-2 control-label">Unique Id</label>
+			        <div class="col-sm-10">
+			          {{input type="text" value=instituteMember.uniqueId class="form-control" placeholder="Unique Id"}}
+			        </div>
+			    </div>
+			    
+			    <div class="form-group">
+			        <label class="col-sm-2 control-label">Roll Number</label>
+			        <div class="col-sm-10">
+			          {{input type="text" value=instituteMember.rollNo class="form-control" placeholder="Roll Number"}}
+			        </div>
+			    </div>
+            </div><!-- /.box-body -->
+
+            <div class="box-footer">
+                <button {{action 'saveInstitutesInformation' instituteMember}} class="btn btn-primary">Save Info.</button>
+            </div>
+        </form>
+    </div>
+    {{/each}}
+    
+    -->
+    
+    
+    
      <div class="form-group">
         <label class="col-sm-2 control-label">Institutes</label>
         <div class="col-sm-10">

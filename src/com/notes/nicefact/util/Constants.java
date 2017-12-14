@@ -23,6 +23,7 @@ public class Constants {
 	
 	public static final String LOGIN_USER = "loginUser";
 	public static final String SESSION_INSTITUTES = "institutes";
+	public static final String SESSION_INSTITUTE_MEMBERS = "instituteMembers";
 	public static final String CONTEXT = "properties";
 
 	public static final String NEXT_LINK = "nextLink";
