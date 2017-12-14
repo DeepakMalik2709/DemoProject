@@ -6,7 +6,9 @@ module.exports = function(environment) {
     environment: environment,
     rootURL: '/',
     locationType: 'auto',
-
+    'ember-light-table': {
+        enableSync: true
+      },
    
     EmberENV: {
       FEATURES: {

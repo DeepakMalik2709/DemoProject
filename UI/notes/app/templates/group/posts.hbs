@@ -17,7 +17,11 @@
 	                   {{#link-to 'group.attendance' model.id  tagName="button"  class="btn btn-default"}}
 	                 Attendance
 	                  {{/link-to}}
-	                  {{/if}}
+	                {{else}}
+	                   		 {{#link-to 'attendance.view' model.id tagName="button"  class="btn btn-default"}}
+				                 Attendance
+				              {{/link-to}}
+	                   {{/if}}
 	                   {{#if model.isAdmin}}
 	                     
 	                  

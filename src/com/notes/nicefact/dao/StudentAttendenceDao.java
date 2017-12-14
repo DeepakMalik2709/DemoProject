@@ -5,6 +5,7 @@ package com.notes.nicefact.dao;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -62,12 +63,15 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendance> {
 		}
 
 
-	public List<StudentAttendance> fetchStudentAttendance(SearchTO searchTO,long groupId, String email) {
+	public List<StudentAttendance> fetchStudentAttendance(SearchTO searchTO,long groupId, String email, Date fromDate, Date toDate) {
 		List<StudentAttendance> results = new ArrayList<>();
 		
 			EntityManager pm = super.getEntityManager();
-			Query query = pm.createQuery("select t from StudentAttendance t where  t.groupAttendence.id =:groupIds) and t.email= :email order by t.name");
+			Query query = pm.createQuery("select t from StudentAttendance t where date >= :fromDate and date<= :toDate and  t.groupId = :groupId and t.email= :email order by t.name");
 			query.setParameter("groupId",groupId);
+			query.setParameter("email",email);
+			query.setParameter("fromDate",fromDate);
+			query.setParameter("toDate",toDate);
 			try {
 				results = (List<StudentAttendance>) query.getResultList();
 			} catch (NoResultException nre) {

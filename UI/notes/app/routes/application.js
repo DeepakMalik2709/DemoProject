@@ -88,10 +88,15 @@ export default Ember.Route.extend({
 	        		}
 	        	   
 	        });	       
+	    	if(!model.get('loginUser.todayScheduleCount')){
 	        this.get('scheduleService').fetchtodayScheduleCount().then((response) => {
 	        	   controller.set("todayScheduleCount" ,response.total );
+	        	   model.set('loginUser.todayScheduleCount', response.total);
 	        	   $.event.trigger( "sidebarUpdated");
 	        });
+	    	}else{
+	    		 controller.set("todayScheduleCount" ,model.get('loginUser.todayScheduleCount') );
+	    	}
         }
         $.event.trigger( "sidebarUpdated");
     },

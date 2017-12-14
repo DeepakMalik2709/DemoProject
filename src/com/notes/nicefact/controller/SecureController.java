@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +31,8 @@ import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.notes.nicefact.comparator.CreatedDateComparator;
 import com.notes.nicefact.dao.GroupMemberDAO;
 import com.notes.nicefact.entity.AppUser;
@@ -482,17 +485,27 @@ public class SecureController extends CommonController {
 		logger.info("exit : fetchGroupAttendanceMembers");
 	}
 
-	@POST
-	@Path("/group/{groupId}/attendance/{studentId}")
-	public void fetchStudentAttendance(@Context HttpServletResponse response, @Context HttpServletRequest request,@PathParam("groupId") long groupId) {
+	@GET
+	@Path("/group/{groupId}/attendance")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void fetchStudentAttendance(@Context HttpServletRequest request,@Context HttpServletResponse response, @PathParam("groupId") long groupId,
+			@QueryParam("fromDate") long fromDate,@QueryParam("toDate") long toDate) {
 		logger.info("start : fetchGroupAttendanceMembers");
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
+			/*Date fromDate = new Date();
+			Date toDate = new Date();
+			*/
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(fromDate);
+			Date start = cal.getTime();
+			cal.setTimeInMillis(toDate);
+			Date end = cal.getTime();
 			AppUser user = CurrentContext.getAppUser();			
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
 			GroupAttendanceService groupAttendenceService = new GroupAttendanceService(em);
-			GroupAttendanceTO groupAttendanceTO = groupAttendenceService.fetchStudentAttendance( searchTO,groupId,user.getEmail());			
+			GroupAttendanceTO groupAttendanceTO = groupAttendenceService.fetchStudentAttendance( searchTO,groupId,user.getEmail(),start,end);			
 			json.put(Constants.DATA_ITEM, groupAttendanceTO);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 		} catch (Exception e) {

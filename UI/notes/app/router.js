@@ -25,6 +25,9 @@ Router.map(function() {
         this.route('task.edit',{path : '/task/edit/:taskId'});
         this.route('attendance',{path : '/:groupId/attendance'});
       });
+  this.route('attendance', function() {
+      this.route('view',{path : '/:groupId'});      
+  });
   this.route('tag', function() {
       this.route('view',{path : '/:groupId'});
        this.route('edit',{path : '/edit/:tagId'});

@@ -4,6 +4,7 @@
 package com.notes.nicefact.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -108,7 +109,7 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 		return GroupAttendence;
 	}
 
-	public GroupAttendanceTO fetchStudentAttendance(SearchTO searchTO,long groupId, String email) {
+	public GroupAttendanceTO fetchStudentAttendance(SearchTO searchTO,long groupId, String email, Date fromDate, Date toDate) {
 		GroupAttendanceTO attendance = null;		
 		attendance = new GroupAttendanceTO();
 		attendance.setDate(searchTO.getDate());
@@ -116,7 +117,7 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 		attendance.setGroupId(searchTO.getGroupId());
 		List<AttendanceMemberTO> studentTOs = new ArrayList<>();
 		AttendanceMemberTO studentTO;
-		List<StudentAttendance> studentAttendances  =  studentAttendenceDao.fetchStudentAttendance(searchTO,groupId,email);
+		List<StudentAttendance> studentAttendances  =  studentAttendenceDao.fetchStudentAttendance(searchTO,groupId,email, fromDate, toDate);
 		
 		for (StudentAttendance studentAttendance : studentAttendances) {
 			studentTO = new AttendanceMemberTO(studentAttendance);

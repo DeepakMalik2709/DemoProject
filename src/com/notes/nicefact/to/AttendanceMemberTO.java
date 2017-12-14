@@ -37,6 +37,7 @@ public class AttendanceMemberTO {
 		this.name = sa.getName();
 		this.id = sa.getId();
 		this.status = sa.getStatus();
+		this.date =  sa.getDate().getTime();
 	}
 	
 	public boolean getIsPresent(){
