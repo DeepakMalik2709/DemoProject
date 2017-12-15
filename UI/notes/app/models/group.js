@@ -15,6 +15,8 @@ export default DS.Model.extend({
 	  instituteId : DS.attr('number'),
 	  instituteName: DS.attr('string'),
 	  isGroupAttendaceAllowed : DS.attr('boolean'),
+	  isJoinRequestApproved :DS.attr('boolean'),
+	  isJoinRequested :DS.attr('boolean'),
 	  members: DS.attr( {
 		    defaultValue() { return []; }
 	  }),
@@ -26,6 +28,15 @@ export default DS.Model.extend({
 	  }),
 	  languagesUI: DS.attr( {
 		    defaultValue() { return []; }
+	  }),
+	  showJoinButton :  Ember.computed('isJoinRequestApproved', 'isJoinRequested', function() {
+		  if(this.get('isJoinRequestApproved')){
+			  return false;
+		  }else  if(this.get('isJoinRequested')){
+			  return false;
+		  }
+		  return true;
+		    
 	  }),
 	  isValidName: Ember.computed.notEmpty('name'),
 	  isValidSharing: Ember.computed.notEmpty('sharing'),

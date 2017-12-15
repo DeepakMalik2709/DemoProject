@@ -20,6 +20,7 @@ export default Ember.Component.extend({
 	    		}
 	    		this.singleInstitute = (this.institutes.length==1);
 	    		this.firstInstitute = this.institutes[0];
+	    		console.log(this.firstInstitute)
 	    		Ember.set(this.item, "instituteId" ,this.firstInstitute.id )
 	    	}
 	    }

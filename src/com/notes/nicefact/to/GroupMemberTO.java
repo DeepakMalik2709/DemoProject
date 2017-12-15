@@ -15,8 +15,6 @@ public class GroupMemberTO {
 
 	String name;
 	
-	boolean isAdmin;
-	
 	boolean isBlocked;
 	
 	boolean isJoinRequestApproved ;
@@ -81,20 +79,19 @@ public class GroupMemberTO {
 		super();
 		this.email = member.getEmail();
 		this.name = member.getName();
-		this.isAdmin = member.getIsAdmin();
 		this.department = member.getDepartment();
 		this.organization = member.getOrganization();
 		this.isBlocked = member.getIsBlocked();
 		this.positions = member.getPositions();
 		this.id = member.getId();
-		
+		this.positions = member.getPositions();
+		this.isJoinRequestApproved = member.getIsJoinRequestApproved();
 	}
 
 	public GroupMemberTO(InstituteMember member) {
 		super();
 		this.email = member.getEmail();
 		this.name = member.getName();
-		this.isAdmin = member.getIsAdmin();
 		this.department = member.getDepartment();
 		this.organization = member.getOrganization();
 		this.isBlocked = member.getIsBlocked();
@@ -111,10 +108,8 @@ public class GroupMemberTO {
 		this.id = id;
 	}
 
-	@Deprecated 
-	/**use positions and check for admin */
 	public boolean getIsAdmin() {
-		return isAdmin;
+		return this.positions.contains(UserPosition.ADMIN);
 	}
 
 

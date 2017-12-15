@@ -76,6 +76,7 @@ import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TagTO;
 import com.notes.nicefact.to.TaskSubmissionTO;
 import com.notes.nicefact.to.TutorialTO;
+import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
@@ -131,6 +132,7 @@ public class SecureController extends CommonController {
 				json.put(Constants.SESSION_INSTITUTES, institutes);
 				Map<String, Object> userMap = user.toMap();
 				json.put(Constants.LOGIN_USER, userMap);
+				json.put(Constants.APPLICATION_URL, AppProperties.getInstance().getApplicationUrl());
 				json.put(Constants.CONTEXT, CurrentContext.getCommonContext().toMap());
 				CurrentContext.getCommonContext().setMessage(null);
 			} catch (Exception e) {
@@ -581,7 +583,7 @@ public class SecureController extends CommonController {
 	@DELETE
 	@Path("/group/{groupId}/members/{memberId}")
 	public void deleteGroupMember(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("groupId") long groupId, @PathParam("memberId") long memberId) {
-		logger.info("start : deleteGroupMember");
+		logger.info("start : deleteGroupMember , groupId : " + groupId + " , memberId :" + memberId);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -1223,7 +1225,25 @@ public class SecureController extends CommonController {
 		try {
 			NotificationService notificationService = new NotificationService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_10);
-			List<NotificationTO> notifications = notificationService.fetchMyNotifications(CurrentContext.getAppUser(), searchTO);
+			AppUser user = CurrentContext.getAppUser();
+			List<NotificationTO> notifications = notificationService.fetchMyNotifications(user , searchTO);
+			boolean newNotifications = false;
+			if(!notifications.isEmpty()){
+				if(user.getLastSeenNotificationId() == null){
+					newNotifications = true;
+				}else if(notifications.get(0).getId() > user.getLastSeenNotificationId()){
+					newNotifications = true;
+				}
+			}
+			
+			if(newNotifications){
+				AppUserService appUserService = new AppUserService(em);
+				AppUser dbUser = appUserService.getAppUserByEmail(user.getEmail());
+				dbUser.setLastSeenNotificationId(notifications.get(0).getId());
+				appUserService.upsert(dbUser);
+				request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, dbUser);
+			}
+			json.put("newNotifications", newNotifications);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEMS, notifications);
 			if (!notifications.isEmpty()) {
@@ -1522,7 +1542,7 @@ public class SecureController extends CommonController {
 	@GET
 	@Path("/institute/{instituteId}/joinRequests")
 	public void fetchInstituteJoinRequests(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId) {
-		logger.info("start : fetchInstituteJoinRequests");
+		logger.info("start : fetchInstituteJoinRequests, instituteId : " + instituteId);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -1552,7 +1572,7 @@ public class SecureController extends CommonController {
 	@GET
 	@Path("/institute/{instituteId}/members")
 	public void fetchInstituteMembers(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId) {
-		logger.info("start : fetchInstituteMembers");
+		logger.info("start : fetchInstituteMembers, instituteId : " + instituteId);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -1581,7 +1601,7 @@ public class SecureController extends CommonController {
 	@DELETE
 	@Path("/institute/{instituteId}/members/{memberId}")
 	public void deleteInstituteMember(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("instituteId") long instituteId, @PathParam("memberId") long memberId) {
-		logger.info("start : deleteInstituteMember");
+		logger.info("start : deleteInstituteMember, instituteId : " + instituteId + " , memberId :" + memberId);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -1707,4 +1727,96 @@ public class SecureController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("exit : updateGroupMemberPositions");
 	}
+	
+	@POST
+	@Path("/group/{groupId}/join")
+	public void joinGroup(@PathParam("groupId") long groupId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("joinGroup start, groupId : " + groupId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			AppUser user = CacheUtils.getAppUser( CurrentContext.getEmail());
+			GroupMember member = groupService.joinGroup(groupId, user);
+			if (null == member) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			} else {
+				GroupMemberTO memberTO = new GroupMemberTO(member);
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, memberTO);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("joinGroup exit");
+	}
+	
+	@POST
+	@Path("/group/{groupId}/approveJoin")
+	public void joinGroupApprove(@PathParam("groupId") long groupId, GroupMemberTO memberTO1, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("joinGroupApprove start, groupId : " + groupId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			AppUser user = CacheUtils.getAppUser( CurrentContext.getEmail());
+			GroupMember member = groupService.approveJoinGroup(groupId,memberTO1,  user);
+			if (null == member) {
+				json.put(Constants.CODE, Constants.NO_RESULT);
+			} else {
+				GroupMemberTO memberTO = new GroupMemberTO(member);
+				json.put(Constants.CODE, Constants.RESPONSE_OK);
+				json.put(Constants.DATA_ITEM, memberTO);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("joinGroupApprove exit");
+	}
+	
+	@GET
+	@Path("/group/{groupId}/joinRequests")
+	public void fetchGroupJoinRequests(@Context HttpServletResponse response, @Context HttpServletRequest request, @PathParam("groupId") long groupId) {
+		logger.info("start : fetchGroupJoinRequests , groupId : " + groupId);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_40);
+			List<GroupMemberTO> members = groupService.fetchGroupJoinRequests(groupId, searchTO);
+			json.put(Constants.DATA_ITEMS, members);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			if (!members.isEmpty()) {
+				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("exit : fetchGroupJoinRequests");
+	}
+	
 }

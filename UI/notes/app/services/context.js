@@ -49,10 +49,10 @@ export default Ember.Service.extend(ajaxMixin ,utilsMixin ,{
 			    			  this.cleanupTimes(item);
 			    			  notifications.pushObject(item);
 			    		  }
-			    		  
 			    		 // resolve( Ember.ArrayProxy.create({ content: Ember.A(items) }));
 			    	  }
-			    	  resolve(notifications);
+			    	  data.items = notifications;
+			    	  resolve(data);
 			      });
 		 });
 	 

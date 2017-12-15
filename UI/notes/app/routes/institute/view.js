@@ -28,6 +28,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, instituteMixin,
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         this.controller.set("newMembers", []);
         this.controller.set("roles", this.roles);
+        controller.set("noJoinRequests" , false);
          this.set('hasMoreRecords', true);
 	    this.set('nextPageLink', null);
         this.fetchMembers();
@@ -40,8 +41,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, instituteMixin,
 
     fetchMembers (){
     	var controller = this.get("controller");
-    	if(this.hasMoreRecords && !controller.get("isLoading")){
-    		
+    	if(this.hasMoreRequestRecords && !controller.get("isLoading")){
     		var model = controller.get('model');
     		controller.set("isLoading" , true);
     		var url = this.nextPageLink;
@@ -79,9 +79,11 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, instituteMixin,
     		this.doGet(url).then((result)=>{
     			controller.set("isLoading" , false);
     			if(result.code ==0){
-    				if(result.items){
+    				if(result.items && result.items.length){
     					this.cleanupMembers(result.items);
     					Ember.set(model, "joinRequests" ,result.items)
+    				}else{
+    					controller.set("noJoinRequests" , true);
     				}
     				if(result.nextLink){
     					this.set("joinRequestNextPageLink", result.nextLink);

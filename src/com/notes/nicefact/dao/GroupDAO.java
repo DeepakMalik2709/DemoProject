@@ -74,4 +74,27 @@ public class GroupDAO extends CommonDAOImpl<Group> {
 		return results;
 	}
 
+	public List<Group> fetchGroupChildren(long groupId, SearchTO searchTO) {
+		List<Group> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Group group = get(groupId);
+		if (group != null) {
+			return fetchGroupsbyIds(group.getMemberGroupsIds());
+		}
+		return results;
+	}
+
+	public List<Group> fetchInstituteChildren(long instituteId, SearchTO searchTO) {
+		List<Group> results = new ArrayList<>();
+			EntityManager pm = super.getEntityManager();
+			Query query = pm.createQuery("select t from Group t where  t.institute.id = :instituteId order by t.name");
+			query.setParameter("instituteId", instituteId);
+			try {
+				results = (List<Group>) query.getResultList();
+			} catch (NoResultException nre) {
+				return new ArrayList<>();
+			} 
+		return results;
+	}
+
 }

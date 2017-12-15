@@ -17,6 +17,7 @@ public class CommonController {
 	public void renderResponseJson(Object object, HttpServletResponse response) {
 		response.setContentType("application/json; charset=UTF-8");
 		try {
+			System.out.println(new JSONSerializer().exclude("class", "*.class", "authorities").deepSerialize(object));
 			response.getWriter().print(new JSONSerializer().exclude("class", "*.class", "authorities").deepSerialize(object));
 			response.getWriter().flush();
 			response.getWriter().close();

@@ -82,9 +82,16 @@ export default Ember.Route.extend({
 	        	   $.event.trigger( "sidebarUpdated");
 	        });
 	        this.contextService.fetchNotifications().then((response) => {
-	        		if(response && response.length){
-	        			  controller.set("showNotifications", true);
-	        			  controller.set("notifications" ,response );
+	        		if(response && response.code == 0){
+        				if(response.items.length){
+        				  controller.set("showNotifications", true);
+        				  if( !controller.get("notifications" )){
+        					  controller.set("newNotifications", response.newNotifications);
+        				  }
+        				
+   	        			  controller.set("notifications" ,response.items );
+        				}
+	        			 
 	        		}
 	        	   
 	        });	       
@@ -139,12 +146,23 @@ export default Ember.Route.extend({
         },
         
         notificationClick(notification){
+        	this.controller.set("newNotifications",false);
         	if(notification.entityId){
-        		if(notification.type == 'TASK' || notification.type == 'POST'){
+        		if(notification.isPost || notification.isTask || notification.isSchedule){
         			this.transitionTo('group.post', notification.entityId);
         		}
         	}else if(notification.groupId){
-        		this.transitionTo('group.posts', notification.groupId);
+        		if(notification.showDetailpage){
+        			this.transitionTo('group.view', notification.groupId);
+        		}else{
+        			this.transitionTo('group.posts', notification.groupId);
+        		}
+        	}else if(notification.instituteId){
+        		if(notification.showDetailpage){
+        			this.transitionTo('institute.view', notification.instituteId);
+        		}else{
+        			this.transitionTo('institute.public', notification.instituteId);
+        		}
         	}
         },
         hideAd(){

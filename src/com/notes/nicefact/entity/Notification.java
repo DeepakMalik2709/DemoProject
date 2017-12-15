@@ -132,32 +132,36 @@ public class Notification extends CommonEntity{
 		return type;
 	}
 
-	public void setType(NotificationType type) {
+	public Notification setType(NotificationType type) {
 		this.type = type;
+		return this;
 	}
 
 	public String getGroupName() {
 		return groupName;
 	}
 
-	public void setGroupName(String groupName) {
+	public Notification setGroupName(String groupName) {
 		this.groupName = groupName;
+		return this;
 	}
 
 	public String getSenderName() {
 		return senderName;
 	}
 
-	public void setSenderName(String senderName) {
+	public Notification setSenderName(String senderName) {
 		this.senderName = senderName;
+		return this;
 	}
 
 	public String getTitle() {
 		return title;
 	}
 
-	public void setTitle(String title) {
+	public Notification setTitle(String title) {
 		this.title = title;
+		return this;
 	}
 
 
@@ -166,24 +170,27 @@ public class Notification extends CommonEntity{
 		return recipients;
 	}
 
-	public void setRecipients(List<NotificationRecipient> recipients) {
+	public Notification setRecipients(List<NotificationRecipient> recipients) {
 		this.recipients = recipients;
+		return this;
 	}
 
 	public String getSender() {
 		return sender;
 	}
 
-	public void setSender(String sender) {
+	public Notification setSender(String sender) {
 		this.sender = sender;
+		return this;
 	}
 
 	public String getSenderPosition() {
 		return senderPosition;
 	}
 
-	public void setSenderPosition(String senderPosition) {
+	public Notification setSenderPosition(String senderPosition) {
 		this.senderPosition = senderPosition;
+		return this;
 	}
 
 
@@ -191,48 +198,53 @@ public class Notification extends CommonEntity{
 		return sharing;
 	}
 
-	public void setSharing(SHARING sharing) {
+	public Notification setSharing(SHARING sharing) {
 		this.sharing = sharing;
+		return this;
 	}
 
 	public String getComment() {
 		return comment;
 	}
 
-	public void setComment(String comment) {
+	public Notification setComment(String comment) {
 		this.comment = comment;
+		return this;
 	}
 
 	public Long getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(Long entityId) {
+	public Notification setEntityId(Long entityId) {
 		this.entityId = entityId;
+		return this;
 	}
 
 	public Long getSubEntityId() {
 		return subEntityId;
 	}
 
-	public void setSubEntityId(Long subEntityId) {
+	public Notification setSubEntityId(Long subEntityId) {
 		this.subEntityId = subEntityId;
+		return this;
 	}
 
 	public Long getGroupId() {
 		return groupId;
 	}
 
-	public void setGroupId(Long groupId) {
+	public Notification setGroupId(Long groupId) {
 		this.groupId = groupId;
+		return this;
 	}
 
 	public Long getInstituteId() {
 		return instituteId;
 	}
 
-	public void setInstituteId(Long instituteId) {
+	public Notification setInstituteId(Long instituteId) {
 		this.instituteId = instituteId;
+		return this;
 	}
-	
 }

@@ -48,10 +48,7 @@ public class CacheUtils {
 			GroupService groupService = new GroupService(em);
 			group = groupService.get(id);
 			if (null!=group) {
-				group.getMembers().size();
-				group.getMemberGroupsIds().size();
-				em.detach(group);
-				putInCache(cacheKey, group);
+				addGroupToCache(group);
 			}
 			em.close();
 		}
@@ -59,7 +56,7 @@ public class CacheUtils {
 	}
 	
 	private static String generateGroupKey(Long id) {
-		return "Group_" + id;
+		return "Group_1_" + id;
 	}
 
 	public static Post getPost(Long id) {
@@ -163,6 +160,11 @@ public class CacheUtils {
 		if (null!= group) {
 			group.getMembers().size();
 			group.getMemberGroupsIds().size();
+			group.getAdmins().size();
+			group.getTeachers().size();
+			if(group.getInstitute() !=null){
+				group.getInstitute().toString();
+			}
 			String cacheKey = generateGroupKey(group.getId());
 			putInCache(cacheKey, group);
 		}

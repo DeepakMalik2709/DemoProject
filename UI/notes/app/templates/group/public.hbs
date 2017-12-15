@@ -1,13 +1,13 @@
  <section class="content-header institute-public-section pos-rel"  >
     <h1>
-       {{model.name}} - <small>Institute</small> 
+       {{model.name}} - <small>Group</small> 
     </h1>
     
     
     <div>
        <div class="  buttons ">
         {{#if model.isAdmin}}
-    {{#link-to 'institute.view' model.id tagName="button" class="btn btn-default"}}Manage
+    {{#link-to 'group.view' model.id tagName="button" class="btn btn-default"}}Manage
       {{/link-to}}
       {{/if}}
        {{#if model.showJoinButton}}
@@ -28,7 +28,8 @@
  <div>
  {{model.description}}
  </div>
- <hr>
+ 
+  <hr>
  {{# if childGroups.length}}
  <div>
  <h5>Child Groups of {{model.name}}</h5>
@@ -39,6 +40,7 @@
     </ul>
  </div>
  {{/if}}
+ 
  </div>
  
  

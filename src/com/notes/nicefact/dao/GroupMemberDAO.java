@@ -13,6 +13,7 @@ import com.google.api.services.calendar.model.EventAttendee;
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
+import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.to.SearchTO;
 
@@ -25,7 +26,7 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 	
 
 	public List<GroupMember> fetchGroupMembersByGroupId(long groupId, SearchTO searchTO) {
-		List<GroupMember> results = new ArrayList<>();
+/*		List<GroupMember> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
 		Query query = pm.createQuery("select t from GroupMember t where  t.group.id = :groupId order by t.name");
 		query.setParameter("groupId", groupId);
@@ -36,13 +37,14 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 		} catch (NoResultException nre) {
 			logger.warn(nre.getMessage());
 		}
-		return results;
+		return results;*/
+		return fetchByGroupId(groupId, true, searchTO);
 	}
 	
 	public List<GroupMember> fetchGroupAttendanceMembers( SearchTO searchTO) {
 		List<GroupMember> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();
-		Query query = pm.createQuery("select t from GroupMember t where t.isBlocked = false and :position MEMBER OF t.positions and   t.group.id = :groupId order by t.name");
+		Query query = pm.createQuery("select t from GroupMember t where t.isBlocked = false and :position MEMBER OF t.positions and   t.group.id = :groupId and t.isJoinRequestApproved = true order by t.name");
 		query.setParameter("groupId", searchTO.getGroupId());
 		query.setParameter("position", UserPosition.STUDENT.toString());
 		try {
@@ -87,7 +89,7 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 		List<GroupMember> results= new ArrayList<GroupMember>();		
 		try {
 			for (Group grp : groups) {
-				results.addAll(fetchGroupMembersByGroupId(grp.getId(),searchTO));
+				results.addAll(fetchByGroupId(grp.getId(),true,searchTO));
 			}		
 			for (GroupMember groupMember : results) {
 				EventAttendee att = new EventAttendee();
@@ -98,5 +100,34 @@ public class GroupMemberDAO extends CommonDAOImpl<GroupMember> {
 			return  new ArrayList<>();
 		}
 		return attendees;
+	}
+	
+	public List<GroupMember> fetchByGroupId(long groupId, boolean isJoined, SearchTO searchTO) {
+		List<GroupMember> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from GroupMember t where t.group.id = :groupId and t.isJoinRequestApproved = :isJoined order by t.email");
+		query.setParameter("groupId", groupId);
+		query.setParameter("isJoined", isJoined);
+		query.setFirstResult(searchTO.getFirst());
+		query.setMaxResults(searchTO.getLimit());
+		try {
+			results = (List<GroupMember>) query.getResultList();
+		} catch (NoResultException nre) {
+			logger.warn(nre.getMessage());
+		}
+		return results;
+	}
+	
+	public List<GroupMember> fetchAllGroupMembersByEmail(String email) {
+		List<GroupMember> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from GroupMember t where  t.email = :email ");
+		query.setParameter("email", email);
+		try {
+			results = (List<GroupMember>) query.getResultList();
+		} catch (NoResultException nre) {
+			return  new ArrayList<>();
+		}
+		return results;
 	}
 }

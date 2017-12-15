@@ -43,8 +43,9 @@ public class NotificationRecipient extends CommonEntity{
 		return action;
 	}
 
-	public void setAction(NotificationAction action) {
+	public NotificationRecipient setAction(NotificationAction action) {
 		this.action = action;
+		return this;
 	}
 
 	public NotificationRecipient(){
@@ -65,8 +66,9 @@ public class NotificationRecipient extends CommonEntity{
 		return notification;
 	}
 
-	public void setNotification(Notification notification) {
+	public NotificationRecipient setNotification(Notification notification) {
 		this.notification = notification;
+		return this;
 	}
 
 	public String getName() {
@@ -76,32 +78,36 @@ public class NotificationRecipient extends CommonEntity{
 		return name;
 	}
 
-	public void setName(String name) {
+	public NotificationRecipient setName(String name) {
 		this.name = name;
+		return this;
 	}
 
 	public Boolean getIsRead() {
 		return isRead;
 	}
 
-	public void setIsRead(Boolean isRead) {
+	public NotificationRecipient setIsRead(Boolean isRead) {
 		this.isRead = isRead;
+		return this;
 	}
 
 	public Boolean getSendEmail() {
 		return sendEmail;
 	}
 
-	public void setSendEmail(Boolean sendEmail) {
+	public NotificationRecipient setSendEmail(Boolean sendEmail) {
 		this.sendEmail = sendEmail;
+		return this;
 	}
 
 	public Boolean getSendToUI() {
 		return sendToUI;
 	}
 
-	public void setSendToUI(Boolean sendToUI) {
+	public NotificationRecipient setSendToUI(Boolean sendToUI) {
 		this.sendToUI = sendToUI;
+		return this;
 	}
 
 	public Boolean getIsDeleted() {
@@ -116,8 +122,9 @@ public class NotificationRecipient extends CommonEntity{
 		return email;
 	}
 
-	public void setEmail(String email) {
+	public NotificationRecipient setEmail(String email) {
 		this.email = email;
+		return this;
 	}
 
 

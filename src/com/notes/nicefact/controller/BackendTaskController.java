@@ -1293,10 +1293,7 @@ public class BackendTaskController extends CommonController {
 
 				if (!recipientEmailSet.isEmpty()) {
 					Notification notification = new Notification(notificationSender);
-					notification.setInstituteId(institute.getId());
-					notification.setGroupName(institute.getName());
-					notification.setTitle(institute.getName());
-					notification.setType(NotificationType.INSTITUTE);
+					notification.setInstituteId(institute.getId()).setGroupName(institute.getName()).setTitle(institute.getName()).setType(NotificationType.INSTITUTE);
 					notificationService.upsert(notification);
 					NotificationRecipient notificationRecipient;
 					for (String email : recipientEmailSet) {
@@ -1307,8 +1304,7 @@ public class BackendTaskController extends CommonController {
 							notificationRecipient = new NotificationRecipient(user);
 							notificationRecipient.setSendEmail(user.getSendGroupPostMentionEmail());
 						}
-						notificationRecipient.setAction(NotificationAction.INSTITUTE_ADDED);
-						notificationRecipient.setNotification(notification);
+						notificationRecipient.setAction(NotificationAction.INSTITUTE_ADDED).setNotification(notification);
 						notification.getRecipients().add(notificationRecipient);
 						notificationService.upsertRecipient(notificationRecipient);
 					}

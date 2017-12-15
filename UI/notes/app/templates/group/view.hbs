@@ -75,12 +75,14 @@
      <div class=" col-sm-6 ">
       <button  {{action 'showMembers' model}} class="btn btn-default" >Members</button>
     <button  {{action 'showAddMemberModal' model }} class="btn btn-default" >Add members</button>
+    <button  {{action 'showJoinRquests' model}} class="btn btn-default" >Join Requests</button>
     </div>
     
    <div class=" col-sm-6 ">
     {{#link-to 'group.edit' model.id tagName="button" class="btn btn-default"}}Edit
       {{/link-to}}
        <button type="button"  data-toggle="modal" {{action 'confirmAndDeleteGroup' model}} class="btn btn-default">Delete</button>
+        <button type="button"  data-toggle="modal" {{action 'copyPublicLink' }} class="btn btn-default">Copy public link</button>
     </div>
     
   </div>
@@ -164,7 +166,7 @@
  
  
 <!-- view members in  group Popup-->
-{{group-item-view-members model=model   updateMember="updateMember" deleteMember="deleteMember" toggleBlockMember="toggleBlockMember"}}
+{{group-item-view-members model=model   updateMember="updateMember" deleteMember="deleteMember" toggleBlockMember="toggleBlockMember" deleteGroupMember="deleteGroupMember"}}
 <!-- 
 <div class="modal vcenter" id="members-list-modal" tabindex="-1" role="dialog" aria-labelledby="PopUp" data-backdrop="static" >
   <div class="modal-dialog modal-md" role="document">
@@ -229,3 +231,49 @@
  	</div>
  </div>
 </div> -->
+
+<div class="modal vcenter" id="members-request-modal" tabindex="-1" role="dialog" aria-labelledby="PopUp" data-backdrop="static" >
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content">
+      <div class="modal-header noborder"> 
+      	<a class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></a>
+        <h4 class="modal-title" id="myModalLabel"> 
+        	{{model.name}} : Join requests <span class="{{if isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
+      	</h4>
+      	
+      </div>
+      <div class="modal-body">
+      	<div class="form-box group-form mtop-15"  >
+          <div class="form-group">
+            <div class="ol-user-list"> 
+            {{#each model.joinRequests as |user| }}    	
+                <div class="user-with-email" >
+                    <div class="s-list">
+                        {{user.email}}
+                         <button type="button" {{action "deleteMember" user}} class="btn btn-sm btn-default mr-5" ><i class="fa fa-trash" aria-hidden="true"></i>Delete</button>
+                      <div class="power-select-container pos-rel">
+                       {{#power-select-multiple selected=user.roles  options=roles  
+	                        placeholder="Select roles" class="institute-member-role-select pos-rel" tagName=div
+  							  onchange=(action (mut user.roles))  as |role| }}
+							  {{role.label}}
+							{{/power-select-multiple}}
+							</div>
+                         <button type="button" {{action "approveMember" user}} class="btn btn-sm btn-default mr-5 "><i class="fa fa-check" aria-hidden="true"></i>Approve</button>
+                   <span class="{{if user.isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
+                    </div>
+                </div>
+              {{/each}}
+              
+            </div>
+            
+            {{#if noJoinRequests}}
+            <div>No join requests</div>
+            {{/if}}
+          </div>
+        </div>
+        
+        <!-- user list end -->
+      </div>
+ 	</div>
+ </div>
+</div>

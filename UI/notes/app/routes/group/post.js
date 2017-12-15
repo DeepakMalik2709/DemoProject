@@ -21,7 +21,6 @@ export default Ember.Route.extend( {
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         this.controller.set('controllerRef', this)
          this.controller.set("noRecords", false);
-        console.log(model )
     },
     willDestroy : function(){
     },

@@ -190,7 +190,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin,u
             	 return;
              }
         	 if(toTime){
-        		 if( this.controller.get("attendanceUI.toHour")){
+        		 if( this.controller.get("attendanceUI.toMinutes")){
         			 toTime = toTime + ":" +  this.controller.get("attendanceUI.toMinutes");
         		 }else{
         			 toTime = toTime + ":00"; 
