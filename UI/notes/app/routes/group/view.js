@@ -319,5 +319,5 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
         		Ember.$("#members-request-modal").modal("hide");
         	}
         },
-    }    }
+        }
 });
