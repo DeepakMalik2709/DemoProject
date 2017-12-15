@@ -53,6 +53,13 @@ public class StudentAttendenceService  extends CommonService<StudentAttendance> 
 		
 		return list;
 	}
+	
+	public List<StudentAttendance> getAllByGroupId(Long groupId) {
+		
+		List<StudentAttendance> list = studentAttendenceDao.getAllByGroupId(groupId);
+		
+		return list;
+	}
 
 	public GroupAttendance getGroupAttendance(SearchTO searchTO) {
 		GroupAttendance groupAttendance = groupAttendenceDao.getByGroupDate(searchTO);

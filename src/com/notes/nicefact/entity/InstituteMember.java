@@ -52,6 +52,31 @@ public class InstituteMember extends CommonEntity {
 	String organization;
 	
 	boolean isNotificationSent = false;
+	
+	String uniqueId;
+	
+	/*
+	 * Student Member information
+	 */
+	
+	String rollNo;
+	
+
+	public String getUniqueId() {
+		return uniqueId;
+	}
+
+	public void setUniqueId(String uniqueId) {
+		this.uniqueId = uniqueId;
+	}
+
+	public String getRollNo() {
+		return rollNo;
+	}
+
+	public void setRollNo(String rollNo) {
+		this.rollNo = rollNo;
+	}
 
 	public Institute getInstitute() {
 		return institute;

@@ -31,13 +31,12 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendance> {
 	}
 
 
-	public List<StudentAttendance> fetchGroupsbyIds(Collection<Long> groupAttendenceIds) {
+	public List<StudentAttendance> fetchGroupsbyIds(Collection<Long> groupAttendanceIds) {
 		List<StudentAttendance> results = new ArrayList<>();
-		if (null !=groupAttendenceIds && !groupAttendenceIds.isEmpty()) {
+		if (null !=groupAttendanceIds && !groupAttendanceIds.isEmpty()) {
 			EntityManager pm = super.getEntityManager();
-			Query query = pm.createQuery("select t from StudentAttendance t where  t.groupAttendence.id in (:groupAttendenceIds) order by t.name");
-			query.setParameter("groupAttendenceIds", groupAttendenceIds);
-			try {
+Query query = pm.createQuery("select t from StudentAttendance t where  t.groupAttendance.id in (:groupAttendenceIds) order by t.name");
+			query.setParameter("groupAttendenceIds", groupAttendanceIds);			try {
 				results = (List<StudentAttendance>) query.getResultList();
 			} catch (NoResultException nre) {
 				return new ArrayList<>();
@@ -46,14 +45,13 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendance> {
 		return results;
 	}
 
-	public List<StudentAttendance> getByGroupAttendence(GroupAttendance groupAttendence) {
+	public List<StudentAttendance> getByGroupAttendence(GroupAttendance groupAttendance) {
 		
 			List<StudentAttendance> results = new ArrayList<>();
-			if (null !=groupAttendence) {
+			if (null !=groupAttendance) {
 				EntityManager pm = super.getEntityManager();
-				Query query = pm.createQuery("select t from StudentAttendance t where  t.groupAttendence.id in (:groupIds) order by t.name");
-				query.setParameter("groupIds", groupAttendence.getId());
-				try {
+Query query = pm.createQuery("select t from StudentAttendance t where  t.groupAttendance.id in (:groupIds) order by t.name");
+				query.setParameter("groupIds", groupAttendance.getId());				try {
 					results = (List<StudentAttendance>) query.getResultList();
 				} catch (NoResultException nre) {
 					return new ArrayList<>();
@@ -61,8 +59,22 @@ public class StudentAttendenceDao extends CommonDAOImpl<StudentAttendance> {
 			}
 			return results;
 		}
-
-
+public List<StudentAttendance> getAllByGroupId(Long groupId) {
+		
+		List<StudentAttendance> results = new ArrayList<>();
+		if (null !=groupId) {
+			EntityManager pm = super.getEntityManager();
+			Query query = pm.createQuery("select t from StudentAttendance t where  t.groupId = :groupId order by t.email");
+			query.setParameter("groupId", groupId);
+			try {
+				results = (List<StudentAttendance>) query.getResultList();
+			} catch (NoResultException nre) {
+				return new ArrayList<>();
+			} 
+		}
+		return results;
+	}
+	
 	public List<StudentAttendance> fetchStudentAttendance(SearchTO searchTO,long groupId, String email, Date fromDate, Date toDate) {
 		List<StudentAttendance> results = new ArrayList<>();
 		

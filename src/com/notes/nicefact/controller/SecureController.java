@@ -62,6 +62,7 @@ import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.TagService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
+import com.notes.nicefact.service.attendance.AttendanceService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.CommentTO;
 import com.notes.nicefact.to.FileTO;
@@ -69,6 +70,7 @@ import com.notes.nicefact.to.GroupAttendanceTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
 import com.notes.nicefact.to.GroupTO;
+import com.notes.nicefact.to.InstituteMemberTO;
 import com.notes.nicefact.to.InstituteTO;
 import com.notes.nicefact.to.NotificationTO;
 import com.notes.nicefact.to.PostTO;
@@ -114,6 +116,7 @@ public class SecureController extends CommonController {
 					req.getSession().setAttribute(Constants.SESSION_INSTITUTES, instituteMemberList);
 				}
 				List<InstituteTO> institutes = new ArrayList<>();
+				List<InstituteMemberTO> instituteMembers = new ArrayList<>();
 				if(instituteMemberList.isEmpty()){
 					if (null == user.getAddInstituteMsgDate() || ((new Date().getTime() - user.getAddInstituteMsgDate().getTime()) > (1 * 24 * 60 * 60 * 1000))) {
 						AppUserService appUserService = new AppUserService(em);
@@ -124,12 +127,17 @@ public class SecureController extends CommonController {
 					}
 				}else{
 					InstituteTO instituteTO;
+					InstituteMemberTO instituteMemberTO;
 					for (InstituteMember member : instituteMemberList) {
 						instituteTO = new InstituteTO(member);
 						institutes.add(instituteTO);
+						
+						instituteMemberTO = new InstituteMemberTO(member);
+						instituteMembers.add(instituteMemberTO);
 					}
 				}
 				json.put(Constants.SESSION_INSTITUTES, institutes);
+				json.put(Constants.SESSION_INSTITUTE_MEMBERS, instituteMembers);
 				Map<String, Object> userMap = user.toMap();
 				json.put(Constants.LOGIN_USER, userMap);
 				json.put(Constants.APPLICATION_URL, AppProperties.getInstance().getApplicationUrl());
@@ -1685,6 +1693,38 @@ public class SecureController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("exit : searchInstitutes");
 	}
+	
+	
+	@POST
+	@Path("/instituteMembers/save")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void saveInstituteMembersInformation(InstituteMemberTO instituteMemberTO, @Context HttpServletResponse response) {
+		logger.info("Save InstituteMember Information start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			InstituteService instituteService = new InstituteService(em);
+			
+			InstituteMember currentMember = new InstituteMember();
+			
+			instituteService.updateMember(currentMember);
+			
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, instituteMemberTO);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("Save InstituteMember Information exit");
+	}
+	
 	
 	/* institute methods end */
 	

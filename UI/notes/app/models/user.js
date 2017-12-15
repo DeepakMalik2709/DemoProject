@@ -23,6 +23,9 @@ export default DS.Model.extend({
 	institutes: DS.attr( {
 		    defaultValue() { return []; }
 		  }),
+	instituteMembers: DS.attr( {
+	    defaultValue() { return []; }
+	  }),
 	  isValidFirstName: Ember.computed.notEmpty('firstName'),
 	  isValidLastName: Ember.computed.notEmpty('lastName'),
 	  isPasswordNotEmpty :  Ember.computed.notEmpty('password'),

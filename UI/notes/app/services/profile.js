@@ -16,6 +16,14 @@ export default DS.Store.extend(ajaxMixin ,{
 			      });
 		 });
 	 },
+	 saveInstitutesInformation: function(json) {
+		 return  new Ember.RSVP.Promise((resolve, reject) =>{
+			 var url = "/rest/secure/instituteMembers/save";
+			 this.doPost(url , json).then((data ) =>{
+				  resolve(data);
+		      });
+		 });
+	 },
 	 uploadPhoto: function(file) {
 		 var fd = new FormData();
 	        fd.append('file', file);

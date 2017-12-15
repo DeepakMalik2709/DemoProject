@@ -36,9 +36,9 @@
 					  	    <div class=""><span class="task-title">{{{item.title}}}</span> <small class="pull-right {{if item.deadlineDisplayTime 'show' 'hide'}}">Deadline : {{item.deadlineDisplayTime}}</small></div>
 			                <div class="">{{{item.comment}}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
-						        <ol class="file-list">
+						        <ol class="file-list" style="padding-left:0px">
 						        {{#each item.files as |file|}}
-						        <li class="pos-rel">
+						        <li class="pos-rel" style="margin: 1px;height: 25px;">
 						        {{post-item-file-preview item=file isEditing=false removeFile="removeFile" }}
 						        </li>
 						        {{/each}}

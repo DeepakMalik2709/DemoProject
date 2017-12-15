@@ -22,17 +22,23 @@ export default Ember.Route.extend(authenticationMixin , {
         		sendCommentOnMentiondPostEmail : result.loginUser.sendCommentOnMentiondPostEmail  ,
         		sendCommentReplyEmail : result.loginUser.sendCommentReplyEmail  ,
         		sendCommentOnCommentEmail : result.loginUser.sendCommentOnCommentEmail  ,
-        		institutes : result.institutes ,
+        		institutes : result.institutes,
+        		instituteMembers : result.instituteMembers,
         		});
     		return user;
     	});
     	
     	return context;
     },
-
-    init: function() {},
+    
+    
+    init: function() {
+    	 
+    },
     setupController: function(controller, model) {
         this._super(controller, model);
+        var model = this.controller.get('model');
+   	 	alert(model.get("instituteMembers"));
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         controller.set("isSearchButtonDisabled", Ember.computed.empty("model.searchTerm"));
     },
@@ -57,6 +63,14 @@ export default Ember.Route.extend(authenticationMixin , {
         		this.controller.get('model').set('photoUrl', '/img/users/user_1.jpg');
 	    	});
         },
+
+        saveInstitutesInformation : function(instituteMembers){
+        	this.get("profileService").saveInstitutesInformation(instituteMembers).then((result)=>{
+        		alert("asfas");
+        		this.controller.get('model').set('photoUrl', '/img/users/user_1.jpg');
+        	});
+        },
+        
         toggleGoogleDrive : function(){
         	if(!this.get("controller").get("isSaving")){
         		this.get("controller").set("isSaving", true);

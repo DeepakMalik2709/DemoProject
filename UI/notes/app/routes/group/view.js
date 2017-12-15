@@ -38,7 +38,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
         controller.set("noJoinRequests" , false);
          this.set('hasMoreRecords', true);
 	    this.set('nextPageLink', null);
-        this.fetchMembers(model);
+	    this.fetchMembers(model);
     },
 
     fetchMembers (group){
@@ -56,7 +56,8 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
     			if(result.code ==0){
     				if(result.items){
     					this.addMembersToGroup( result.items);
-    					Ember.set(group, "memberGroups" ,result.memberGroups)
+    					Ember.set(group, "memberGroups" ,result.memberGroups);
+    					Ember.set(group, "members" ,result.items);
     				}
     				if(result.nextLink){
     					this.set("nextPageLink", result.nextLink);
@@ -67,6 +68,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
     				
     			}
     		})
+    		
     	}
     	
     },
@@ -292,7 +294,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
         	});
         	
 	    },
-	    copyPublicLink(){
+   copyPublicLink(){
 	    	let model = this.controller.get('model');
 	    	var context = this.contextService.fetchContext((result)=>{
 	    		copyToClipboard(result.url + "/group/" + model.id)
@@ -317,5 +319,5 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
         		Ember.$("#members-request-modal").modal("hide");
         	}
         },
-    }
+    }    }
 });
