@@ -6,7 +6,7 @@
              
             </a>
             <!-- Header Navbar: style can be found in header.less -->
-            <nav class="navbar navbar-static-top" role="navigation">
+            <nav class="navbar navbar-static-top" role="navigation" style="padding-right: 20px;">
                 <!-- Sidebar toggle button-->
                  {{#if isLoggedIn}}
                 <a href="javascript:void(0);" class="navbar-btn sidebar-toggle" data-toggle="offcanvas" role="button">
@@ -18,14 +18,14 @@
                 {{/if}}
                 <div class="navbar-right">
                     <ul class="nav navbar-nav">
-                        <!-- Messages: style can be found in dropdown.less-->
+                        <!-- Messages: style can be found in dropdown.less--> 
                          {{#if isLoggedIn}}
-                          <li><a href="/a/public/logout"><i class="fa fa-sign-out fa-fw"></i>  Logout</a></li>
+						<!--	<li><a href="/a/public/logout"><i class="fa fa-sign-out fa-fw"></i>  Logout</a></li> -->
                         {{else}}
-		                 <li class="dropdown">
-		             		 <a href="/a/public/login"><i class="fa fa-user fa-fw"></i> Login</a>
-		                 </li>
-		                <!-- /.dropdown -->
+			                 <li class="dropdown">
+			             		 <a href="/a/public/login"><i class="fa fa-user fa-fw"></i> Login</a>
+			                 </li>                         	
+                        
 		                {{/if}}
                       
                       {{#if showNotifications}}
@@ -147,45 +147,48 @@
                         </li> -->
                         {{/if}}
                         <!-- User Account: style can be found in dropdown.less -->
-                         {{#if isLoggedIn}}
-                        <li class="dropdown user user-menu">
-                            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
-                               <img width="18" src="{{model.loginUser.photoUrl}}">
-                                <span>{{model.loginUser.displayName}} <i class="caret"></i></span>
-                            </a>
-                            <ul class="dropdown-menu user-profile-dropdown">
-                                <!-- User image -->
-                                <li class="user-header bg-light-blue">
-                                    <img src="{{model.loginUser.photoUrl}}" class="img-circle" alt="User Image" />
-                                    <p>
-                                        {{model.loginUser.displayName}}<!--  - Web Developer
-                                        <small>Member since Nov. 2012</small> -->
-                                    </p>
-                                </li>
-                                <!-- Menu Body -->
-   <!--                              <li class="user-body">
-                                    <div class="col-xs-4 text-center">
-                                        <a href="javascript:void(0);">Followers</a>
-                                    </div>
-                                    <div class="col-xs-4 text-center">
-                                        <a href="javascript:void(0);">Sales</a>
-                                    </div>
-                                    <div class="col-xs-4 text-center">
-                                        <a href="javascript:void(0);">Friends</a>
-                                    </div>
-                                </li> -->
-                                <!-- Menu Footer-->
-                                <li class="user-footer">
-                                    <div class="pull-left">
-                                        {{#link-to 'profile'  class="btn btn-default btn-flat"}}Profile
-    										  {{/link-to}}
-                                    </div>
-                                    <div class="pull-right">
-                                        <a href="/a/public/logout" class="btn btn-default btn-flat">Sign out</a>
-                                    </div>
-                                </li>
-                            </ul>
-                        </li>
+                        {{#if isLoggedIn}}
+                         
+	                         <li class="dropdown user user-menu">
+	                            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
+	                               <img width="18" src="{{model.loginUser.photoUrl}}">
+	                                <span>{{model.loginUser.displayName}} <i class="caret"></i></span>
+	                            </a>
+	                            <ul class="dropdown-menu">
+	                                <!-- User image -->
+	                                <li class="user-header bg-light-blue">
+	                                    <img src="{{model.loginUser.photoUrl}}" class="img-circle" alt="User Image" />
+	                                    <p>
+	                                        {{model.loginUser.displayName}}<!--  - Web Developer
+	                                        <small>Member since Nov. 2012</small> -->
+	                                    </p>
+	                                </li>
+	                                <!-- Menu Body -->
+	                         <!--   <li class="user-body">
+	                                    <div class="col-xs-4 text-center">
+	                                        <a href="#">Followers</a>
+	                                    </div>
+	                                    <div class="col-xs-4 text-center">
+	                                        <a href="#">Sales</a>
+	                                    </div>
+	                                    <div class="col-xs-4 text-center">
+	                                        <a href="#">Friends</a>
+	                                    </div>
+	                                </li>
+	                           -->     
+	                                <!-- Menu Footer-->
+	                                <li class="user-footer">
+	                                    <div class="pull-left">
+	                                        {{#link-to 'profile'  class="btn btn-default btn-flat"}}Profile
+	    										  {{/link-to}}
+	                                    </div>
+	                                    <div class="pull-right">
+	                                        <a href="/a/public/logout" class="btn btn-default btn-flat">Sign out</a>
+	                                    </div>
+	                                </li>
+	                            </ul>
+	                        </li>
+                      
                         {{/if}}
                     </ul>
                 </div>

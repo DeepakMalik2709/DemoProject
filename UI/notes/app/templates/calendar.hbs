@@ -14,7 +14,7 @@
 
 
     <div class="row">
-        <div class="col-md-3">
+    	<div class="col-md-3">
             <div class="box box-primary">
                 <div class="box-header">
                     <h4 class="box-title">Draggable Events</h4>
@@ -60,8 +60,10 @@
                     </div><!-- /input-group -->
                 </div>
             </div>
-        </div><!-- /.col -->
-        <div class="col-md-9">
+        </div> 
+        
+        <!-- /.col -->
+        <div class="col-md-12">
             <div class="box box-primary">                                
                 <div class="box-body no-padding">                         
                   {{full-calendar timezone="local" events=model.eventTOs  editable=true header=model.header buttonText=model.buttonText droppable=true  nowIndicator=true}} 

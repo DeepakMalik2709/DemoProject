@@ -1,16 +1,21 @@
 <section class="content-header">
-      <div class="row">
-     <div class="col-md-8 col-sm-8 col-lg-8 col-md-offset-2 m-top20">
-        <form class="form-inline" id="searchForm" onsubmit="return false;">
-              <div class="col-md-8 col-sm-8 col-lg-8">
-              {{input type="text" class="form-control pull-left width80"  placeholder="Enter search text or tag"   value=model.searchTerm  autofocus="autofocus" insert-newline='doSearch'  }}
-  			</div>
-              <button {{action 'doSearch'}} type="button" disabled={{isSearchButtonDisabled}} class="col-md-2 col-sm-2 col-lg-2 btn btn-default pull-left">
-              <i class="fa fa-search"></i></button>
-            
+	<form id="searchForm" onsubmit="return false;">
+		<div class="input-group">
+	        {{input type="text" class="form-control"  placeholder="Enter search text or tag"   value=model.searchTerm  autofocus="autofocus" insert-newline='doSearch'  }}
+	        <span {{action 'doSearch'}} disabled={{isSearchButtonDisabled}} class="input-group-addon"><i class="fa fa-search"></i></span>
+	    </div>
+    </form>
+ <!-- Remove Below code if above search is working -->
+<!-- <div class="row">
+        	<form id="searchForm" onsubmit="return false;">
+            	<div class="col-md-4" style="padding-left:0px">
+              		{{input type="text" class="form-control"  placeholder="Enter search text or tag"   value=model.searchTerm  autofocus="autofocus" insert-newline='doSearch'  }}
+  				</div>
+              	<button {{action 'doSearch'}} type="button" disabled={{isSearchButtonDisabled}} class="col-md-1 btn btn-default">
+              	<i class="fa fa-search"></i></button>
             </form>
-        </div>
-        </div>
+    </div> 
+-->
 </section>
 <section class="content">   
        <div class="row index-page">

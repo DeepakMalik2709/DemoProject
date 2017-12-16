@@ -38,7 +38,7 @@ export default Ember.Route.extend(authenticationMixin , {
     setupController: function(controller, model) {
         this._super(controller, model);
         var model = this.controller.get('model');
-   	 	alert(model.get("instituteMembers"));
+   	 	
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         controller.set("isSearchButtonDisabled", Ember.computed.empty("model.searchTerm"));
     },
