@@ -137,9 +137,7 @@ public class AttendanceService extends CommonService<Group> {
 			}
 		}
 		
-		Set<Long> sortedAttendanceDates = new TreeSet<>(attendanceDates);
-		
-		for(Long date: sortedAttendanceDates){
+		for(Long date: attendanceDates){
 			String dateString = DateUtils.formatDate(new Date(date), DateUtils.DAY_MONTH_TIME_PATTERN);
 			attendanceDatesString.put(date, dateString);
 		}
@@ -163,7 +161,9 @@ public class AttendanceService extends CommonService<Group> {
 			
 			String header = "Name,Email";
 			
-			for(Long date: attendanceDatesString.keySet()){
+			Set<Long> sortedDates = new TreeSet<Long>(attendanceDatesString.keySet());
+			
+			for(Long date: sortedDates){
 				header+=","+attendanceDatesString.get(date);
 			}
 			
@@ -176,7 +176,7 @@ public class AttendanceService extends CommonService<Group> {
 				sb.append("\"" + name + "\",\"" + email +"\",");
 				Map<Long,StudentAttendance> dateAttendanceStatusMap = studentDateAttendanceMap.get(email);
 				
-				for (Long date : attendanceDatesString.keySet()) {
+				for (Long date : sortedDates) {
 					
 					if(dateAttendanceStatusMap.containsKey(date)){
 						StudentAttendance attendance = dateAttendanceStatusMap.get(date);

@@ -235,7 +235,7 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin,u
         	this.transitionTo('dashboard');
         },
         downloadAttendanceReport(){
-    		 window.open("/rest/secure/attendance/" + this.get("controller").get("model").get("id") +"/report/download");
+    		 window.open("/rest/attendance/" + this.get("controller").get("model").get("id") +"/report/download");
     	},
     }
 });
