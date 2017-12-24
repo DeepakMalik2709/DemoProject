@@ -132,7 +132,7 @@ public class HomeController extends CommonController {
 	@GET
 	@Path("/login")
 	public Viewable loginPage(@QueryParam("redirect")final String redirect,  @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
-		if(CurrentContext.getAppUser() == null || !AppProperties.getInstance().isProduction()){
+		/*if(CurrentContext.getAppUser() == null || !AppProperties.getInstance().isProduction()){
 			CurrentContext.getCommonContext().setRedirectUrl(redirect);
 			return new Viewable("/jsp/login.jsp", null);
 		}else{
@@ -142,7 +142,10 @@ public class HomeController extends CommonController {
 			}
 			response.sendRedirect(recirectUrl);
 			return null;
-		}
+		}*/
+		
+		response.sendRedirect("/a/oauth/googleLogin?redirect=" + redirect);
+		return null;
 	}
 	
 	@GET

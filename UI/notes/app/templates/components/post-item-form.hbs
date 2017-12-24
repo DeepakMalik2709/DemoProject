@@ -22,7 +22,7 @@
         <span class="{{if item.showLoading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
 
             <button type="button" class="btn btn-default" {{action 'savePost' item}} disabled={{unless item.isValid true}}>{{buttonLabel}}</button>
-         <button type="button"   onclick="$('#file-upload').click();" class="btn btn-default"  disabled={{if item.showLoading true}}>Attach Files</button>
+         <button type="button" {{action 'attachFilesClick'}}    class="btn btn-default"  disabled={{if item.showLoading true}}>Attach Files</button>
               <button type="button" class="btn btn-default" {{action 'cancelClicked' item}}>Cancel</button>
               
                <input  multiple id="file-upload" onchange={{action "uploadFile"}} type="file" style="width: 0px; height: 0px; overflow: hidden;"  >

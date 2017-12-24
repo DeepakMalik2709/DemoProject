@@ -48,6 +48,16 @@ export default Ember.Component.extend({
 		    		}
 		    	});
         	}
+        },
+        attachFilesClick(evt){
+        	if(this.useGoogleDrive){
+					$('#file-upload').click();
+				}else{
+					if(confirm("You must grant AllSchool permission to save your files to Google Drive to use this feature.")){
+	     				window.location.href= "/a/oauth/googleAllAuthorization";
+	     			}
+				}
+        	
         }
     }
 });

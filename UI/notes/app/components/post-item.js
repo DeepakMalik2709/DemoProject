@@ -6,10 +6,12 @@ export default Ember.Component.extend(postMixin ,{
 	disableReactButton : false,
 	recipientList : null,
 	originalComment : null,
+	useGoogleDrive : false,
     init() {
 	    this._super(...arguments);
 	    this.cleanupPost(this.item);
 	    this.initNewComment();
+	    this.useGoogleDrive = Ember.get(this.get("contextService").fetchContext().get("loginUser"), "useGoogleDrive");
 	  },
 	initNewComment(){
 		  this.set("recipientList" , []);
@@ -59,18 +61,19 @@ export default Ember.Component.extend(postMixin ,{
 				  alert("You cannot upload more than 10 files");
 				  return;
 			  }
-			  for(var i=0;i<files.length;i++){
+		/*	  for(var i=0;i<files.length;i++){
 				  var file = files[i];
 				  if(file.size > 10485760) {
 					  alert("file size must be less than 10 MB.");
 					  return;
 				  }
-			  }
+			  }*/
 			  Ember.set(this, "item.isUploading", true);
 				this.get("postService").uploadFile(files).then((result)=>{
 					Ember.set(this, "item.isUploading", false);
 					if(result.code == 0  ){
 		    			Ember.get(this.item, "files").pushObjects(result.items);
+		    			console.log(Ember.get(this.item, "files").length)
 		    		}
 		    	});
         	}
@@ -116,9 +119,19 @@ export default Ember.Component.extend(postMixin ,{
         			Ember.set(this.item, "numberOfReactions", result.item);
 	    		}
 	    	});
-    	}
-    	
+    	},
+    	 attachFilesClick(evt){
+    	    	if(this.useGoogleDrive){
+    	    		 this.$('menu').find('.file-upload').click();
+    				}else{
+    					if(confirm("You must grant AllSchool permission to save your files to Google Drive to use this feature.")){
+    	     				window.location.href= "/a/oauth/googleAllAuthorization";
+    	     			}
+    				}
+    	    	
+    	    }
     	//end of actions
     },
+   
   
 });

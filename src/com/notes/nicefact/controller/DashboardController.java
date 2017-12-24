@@ -44,7 +44,9 @@ public class DashboardController extends CommonController {
 		String redirect ="";
 		if(CurrentContext.getAppUser() == null){
 			CurrentContext.getCommonContext().setRedirectUrl(redirect);
-			return new Viewable("/jsp/login.jsp", null);
+			/*return new Viewable("/jsp/login.jsp", null);*/
+			response.sendRedirect("/a/oauth/googleLogin");
+			return null;
 		}else{
 			String recirectUrl = Constants.HOME_PAGE ;
 			if(StringUtils.isNotBlank(redirect)){

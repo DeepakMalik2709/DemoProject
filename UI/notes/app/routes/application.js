@@ -21,7 +21,7 @@ export default Ember.Route.extend({
     }),
     showGooglePermissionMessage : _.once(function(){
         	setTimeout((function() {
-     			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar. Granting Google drive permission removes 10MB upload limit.")){
+     			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar.")){
      				window.location.href= "/a/oauth/googleAllAuthorization";
      			}
     			 }), 2000);

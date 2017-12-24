@@ -157,9 +157,11 @@ public class OauthController {
 		if (StringUtils.isNotBlank(code)) {
 			String accessToken = getGoogleAccessTokenFromAuthorizatoinCode(GOOGLE_SCOPES, "/a/oauth/" + GOOGLE_CALLBACK, code);
 			AppUserTO userTo = getGoogleUserProfile(accessToken);			
-			doAutoLogin(userTo, request,accessToken);
+			AppUser user = doAutoLogin(userTo, request,accessToken);
 			String recirectUrl = Constants.HOME_PAGE ;
-			if(null != CurrentContext.getCommonContext() && StringUtils.isNotBlank(CurrentContext.getCommonContext().getRedirectUrl())){
+			if(!user.getUseGoogleDrive()){
+				recirectUrl ="/a/oauth/googleAllAuthorization";
+			}else if(null != CurrentContext.getCommonContext() && StringUtils.isNotBlank(CurrentContext.getCommonContext().getRedirectUrl())){
 				recirectUrl = CurrentContext.getCommonContext().getRedirectUrl();
 			}
 			response.sendRedirect(recirectUrl);
@@ -170,11 +172,26 @@ public class OauthController {
 
 	@GET
 	@Path("/googleLogin")
-	public Response googleLogin(@Context HttpServletResponse response) throws IOException, URISyntaxException {
-		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(GOOGLE_SCOPES, Constants.UTF_8) + "&response_type=code&access_type=online&approval_prompt=force" + "&client_id="
+	public Response googleLogin(@Context HttpServletResponse response , @QueryParam("redirect")final String redirect) throws IOException, URISyntaxException {
+		if(CurrentContext.getAppUser() == null || !AppProperties.getInstance().isProduction()){
+			CurrentContext.getCommonContext().setRedirectUrl(redirect);
+			String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(GOOGLE_SCOPES, Constants.UTF_8) + "&response_type=code&access_type=online&approval_prompt=force" + "&client_id="
+					+ AppProperties.getInstance().getGoogleClientId() + "&redirect_uri="
+					+ URLEncoder.encode(AppProperties.getInstance().getApplicationUrl() + "/a/oauth/" + GOOGLE_CALLBACK, Constants.UTF_8);
+			return Response.seeOther(new URI(url)).build();
+		}else{
+			String recirectUrl = Constants.HOME_PAGE ;
+			if(StringUtils.isNotBlank(redirect)){
+				recirectUrl = redirect;
+			}
+			response.sendRedirect(recirectUrl);
+			return null;
+		}
+		
+	/*	String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(GOOGLE_SCOPES, Constants.UTF_8) + "&response_type=code&access_type=online&approval_prompt=force" + "&client_id="
 				+ AppProperties.getInstance().getGoogleClientId() + "&redirect_uri="
 				+ URLEncoder.encode(AppProperties.getInstance().getApplicationUrl() + "/a/oauth/" + GOOGLE_CALLBACK, Constants.UTF_8);
-		return Response.seeOther(new URI(url)).build();
+		return Response.seeOther(new URI(url)).build();*/
 	}
 
 	public static void getRefreshTokenFromAuthorizatoinCode(String scope, String callback, String code, AppUser user) {
@@ -242,7 +259,7 @@ public class OauthController {
 		return token;
 	}
 
-	private void doAutoLogin(AppUserTO userTo, HttpServletRequest request, String accessToken) {
+	private AppUser doAutoLogin(AppUserTO userTo, HttpServletRequest request, String accessToken) {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			AppUserService appUserService = new AppUserService(em);
@@ -259,7 +276,7 @@ public class OauthController {
 			}
 			CacheUtils.addUserToCache(user);
 			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-			
+			return user;
 		} finally {
 			if (em.isOpen()) {
 				em.close();

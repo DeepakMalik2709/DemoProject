@@ -20,7 +20,7 @@
 									<li class="reply {{if item.isEditing 'show' 'hide'}}" {{action "cancelEditing"}} data-role="reply-link"><a href="javascript:void(0);"
 									data-action="reply"> <span class="text">Cancel Editing</span></a></li>
 								<li class="bullet" aria-hidden="true">•</li>
-								<li class="reply {{if item.isEditing 'show' 'hide'}}" disabled={{if item.isSaving true}} data-role="reply-link" onclick="$(this).parent('menu').find('.file-upload').click();" ><a href="javascript:void(0);"
+								<li class="reply {{if item.isEditing 'show' 'hide'}}" disabled={{if item.isSaving true}} data-role="reply-link"  {{action 'attachFilesClick'}}  ><a href="javascript:void(0);"
 									data-action="reply"> <span class="text">Attach Files</span></a>
 									 <span class="{{if item.isUploading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
 									 </li>
@@ -38,13 +38,14 @@
 			                <div class="{{unless item.isEditing 'show' 'hide'}}">{{{item.comment}}}</div>
 			                <div class="{{if item.isEditing 'show' 'hide'}}">{{post-comment-box  className="post-description edit-post"   save='updatePost' esc-key='cancelEditing'  value=item.comment autoCompleteList=myList disabled=item.isSaving}}</div>
 			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
-						        <ol class="file-list" style="padding-left:0px">
+						     {{post-item-files-list-preview item=item  }} 
+<!-- 							 <ol class="file-list" style="padding-left:0px">
 						        {{#each item.files as |file|}}
 						        <li class="pos-rel" style="margin: 1px;height: 25px;">
 						        {{post-item-file-preview item=file isEditing=item.isEditing removeFile="removeFile" }}
 						        </li>
 						        {{/each}}
-						        </ol>
+						        </ol> -->
 			       			</div>
 			                <div   class="stats {{unless item.isEditing 'show' 'hide'}}">
 			                    <a href="javascript:void(0);" class="btn btn-default stat-item" disabled={{disableReactButton}} {{action "reactToPost"}}>

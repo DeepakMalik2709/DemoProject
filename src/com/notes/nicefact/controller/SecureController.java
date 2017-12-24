@@ -31,8 +31,6 @@ import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.notes.nicefact.comparator.CreatedDateComparator;
 import com.notes.nicefact.dao.GroupMemberDAO;
 import com.notes.nicefact.entity.AppUser;
@@ -62,7 +60,6 @@ import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.TagService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
-import com.notes.nicefact.service.attendance.AttendanceService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.CommentTO;
 import com.notes.nicefact.to.FileTO;
@@ -1151,6 +1148,7 @@ public class SecureController extends CommonController {
 	public void generateFileThumbnail(@QueryParam("name") String serverName, @Context HttpServletRequest req, @Context HttpServletResponse response) {
 		logger.info("generateFileThumbnail start");
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		String noPreviewImage = Constants.NO_PREVIEW_IMAGE;
 		try {
 			String cacheKey = CacheUtils.getThumbnailCacheKey(serverName);
 			byte[] fileBytes = (byte[]) CacheUtils.getFromCache(cacheKey);
@@ -1161,11 +1159,19 @@ public class SecureController extends CommonController {
 					if (StringUtils.isNotBlank(postFile.getThumbnail()) && Files.exists(Paths.get(postFile.getThumbnail()))) {
 						fileBytes = Utils.readFileBytes(postFile.getThumbnail());
 						CacheUtils.putInCache(cacheKey, fileBytes);
+					}else if(postFile.getMimeType().contains("pdf")){
+						/**
+						 *  Deepak , add whatever image you want here and add more if else cases.
+						 * 
+						 */
+						noPreviewImage = Constants.NO_PREVIEW_IMAGE;
+					}else if(postFile.getMimeType().contains("video")){
+						noPreviewImage = Constants.NO_PREVIEW_IMAGE;
 					}
 				} 
 			}
 			if (null == fileBytes) {
-				response.sendRedirect(Constants.NO_PREVIEW_IMAGE);
+				response.sendRedirect(noPreviewImage);
 			} else {
 				renderImage(fileBytes, response);
 			}
