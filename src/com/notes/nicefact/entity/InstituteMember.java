@@ -13,6 +13,8 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
 import com.notes.nicefact.enums.UserPosition;
+import com.notes.nicefact.to.InstituteMemberTO;
+import com.notes.nicefact.to.InstituteTO;
 
 /**
  *  This will be the top most group an organisation can have, or we can call it home page of XYZ institute.
@@ -200,6 +202,21 @@ public class InstituteMember extends CommonEntity {
 		this.isAppUser = true;
 	}
 	
+	public InstituteMember(InstituteMemberTO instMember ) {
+		this.id = instMember.getId();
+		this.email = instMember.getEmail();
+		this.name = instMember.getName();
+		this.isBlocked =instMember.getIsBlocked();
+		this.isAppUser = instMember.getIsAppUser();
+		this.isJoinRequestApproved = instMember.getIsJoinRequestApproved();
+		
+		this.department = instMember.getDepartment();
+		if(instMember.getOrganization() != null){
+			this.organization = instMember.getOrganization();
+		}
+		this.uniqueId =instMember.getUniqueId();
+		this.rollNo = instMember.getRollNo();
+	}
 	
 	public InstituteMember() {
 		super();

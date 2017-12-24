@@ -10,6 +10,8 @@ import com.notes.nicefact.entity.InstituteMember;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InstituteMemberTO {
 	
+	Long id;
+	
 	String email;
 
 	String name;
@@ -22,7 +24,6 @@ public class InstituteMemberTO {
 
 	String joinRequestApprover ;
 	
-	@Basic
 	Date  joinRequestApproveDate;
 	String department;
 	
@@ -42,7 +43,7 @@ public class InstituteMemberTO {
 	
 
 	public InstituteMemberTO(InstituteMember instMember ) {
-		
+		this.id = instMember.getId();
 		this.email = instMember.getEmail();
 		this.name = instMember.getName();
 		this.isBlocked =instMember.getIsBlocked();
@@ -62,6 +63,16 @@ public class InstituteMemberTO {
 
 	
 	
+	public Long getId() {
+		return id;
+	}
+
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
 	public InstituteTO getInstitute() {
 		return institute;
 	}

@@ -31,6 +31,7 @@ import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
+import com.notes.nicefact.to.InstituteMemberTO;
 import com.notes.nicefact.to.InstituteTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.AppProperties;
@@ -61,7 +62,17 @@ public class InstituteService extends CommonService<Institute> {
 	}
 
 	
-
+	public InstituteMember updateInstituteMemberInformation(InstituteMemberTO instituteMemberTO){
+		
+		InstituteMember	 currentMember = instituteMemberDAO.get(instituteMemberTO.getId());
+		
+		currentMember.setUniqueId(instituteMemberTO.getUniqueId());
+		currentMember.setRollNo(instituteMemberTO.getRollNo());
+		
+		currentMember= instituteMemberDAO.upsert(currentMember);
+		
+		return currentMember;
+	}
 
 	public InstituteMember toggleInstituteBlock(long instituteId, long memberId, boolean isBlocked) {
 		logger.info("deleteInstituteMember start , instituteId : " + instituteId  + " , member Id : " + memberId + " , isBlocked : " + isBlocked );

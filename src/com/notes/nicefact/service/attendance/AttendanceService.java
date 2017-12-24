@@ -1,38 +1,27 @@
 package com.notes.nicefact.service.attendance;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
-import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.EventReminder;
 import com.notes.nicefact.content.AllSchoolError;
 import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.controller.CalendarController;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
-import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.StudentAttendance;
 import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.BackendTaskService;
@@ -41,10 +30,7 @@ import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.StudentAttendenceService;
 import com.notes.nicefact.to.GroupAttendanceTO;
-import com.notes.nicefact.to.PostTO;
-import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
-import com.notes.nicefact.util.CurrentContext;
 import com.notes.nicefact.util.DateUtils;
 
 public class AttendanceService extends CommonService<Group> {

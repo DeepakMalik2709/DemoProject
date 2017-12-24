@@ -66,8 +66,11 @@ export default Ember.Route.extend(authenticationMixin , {
 
         saveInstitutesInformation : function(instituteMembers){
         	this.get("profileService").saveInstitutesInformation(instituteMembers).then((result)=>{
-        		alert("asfas");
-        		this.controller.get('model').set('photoUrl', '/img/users/user_1.jpg');
+        		if(result.code === 0){
+        			alert(result.item.organization+" information has saved successfully");
+ 				}else{
+ 					alert(result.item.organization+" information has not saved successfully. Please try again.");
+ 				}
         	});
         },
         

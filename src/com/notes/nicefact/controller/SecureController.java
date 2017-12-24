@@ -1698,16 +1698,34 @@ public class SecureController extends CommonController {
 	@POST
 	@Path("/instituteMembers/save")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void saveInstituteMembersInformation(InstituteMemberTO instituteMemberTO, @Context HttpServletResponse response) {
+	public void saveInstituteMembersInformation(InstituteMemberTO instituteMemberTO, @Context HttpServletResponse response,
+			@Context HttpServletRequest request) {
 		logger.info("Save InstituteMember Information start");
+
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			InstituteService instituteService = new InstituteService(em);
 			
-			InstituteMember currentMember = new InstituteMember();
+			InstituteMember currentMember =  instituteService.updateInstituteMemberInformation(instituteMemberTO);
 			
-			instituteService.updateMember(currentMember);
+			List<InstituteMember> instituteMembers = Utils.getInstitutesFromSession(request.getSession());
+			
+			List<InstituteMember> updatedList = new ArrayList<>();
+			for(InstituteMember member: instituteMembers){
+				if(currentMember.getId() ==  member.getId()){
+					currentMember.getInstitute().getAdmins();
+					currentMember.getInstitute().getBlocked();
+					
+					updatedList.add(currentMember);
+				}else{
+					member.getInstitute().getAdmins();
+					member.getInstitute().getBlocked();
+					updatedList.add(member);
+				}
+			}
+			
+			request.getSession().setAttribute(Constants.SESSION_INSTITUTES, updatedList);
 			
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
 			json.put(Constants.DATA_ITEM, instituteMemberTO);
