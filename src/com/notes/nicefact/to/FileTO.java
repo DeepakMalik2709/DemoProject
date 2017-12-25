@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.services.calendar.model.EventAttachment;
 import com.notes.nicefact.entity.AbstractFile;
+import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.Utils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -89,6 +90,9 @@ public class FileTO {
 	}
 
 	public String getThumbnailLink() {
+		if(StringUtils.isBlank(thumbnailLink)){
+			return Constants.NO_PREVIEW_IMAGE;
+		}
 		return thumbnailLink;
 	}
 

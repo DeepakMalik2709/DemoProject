@@ -8,31 +8,35 @@ export default Ember.Route.extend(authenticationMixin,{
 		model() {
 			 return this.store.createRecord('post');
 	    },
+	    afterModel(transition) {
+			 var context = this.contextService.fetchContext(result=>{
+					if(result && result.code==0){
+						 var useGoogleDrive = Ember.get(result , "loginUser.useGoogleDrive")
+						 if(false == useGoogleDrive){
+				        		if(confirm("AllSchool needs access to Google Drive and Calendar to create Tasks. Would you like to grant permission now ?")){
+				        			window.location.href= "/a/oauth/googleAllAuthorization";
+				        		}else{
+									 this.transitionTo('home');
+								 }
+				        	}
+					}
+				});
+			  },
 	    taskService: Ember.inject.service('task'),
 	    useGoogleDrive : false,
 	    init() {
 		    this._super(...arguments);
-		    this.contextService.fetchContext(result=>{
-				if(result && result.code==0){
-					 this.useGoogleDrive = Ember.get(result , "loginUser.useGoogleDrive")
-				}
-			});
 		  },
 		    renderTemplate() {
 		        this.render('group/task/upsert');
 		    },
 	    setupController: function(controller, model) {
 	        this._super(controller, model);
-	       
 	        this.controller.set("pageTitle", 'Create task');
 	        this.controller.set("saveButtonLabel", 'Save');
 	        this.controller.set("selectedGroups", []);
 	        this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
-	       	if(false == this.useGoogleDrive){
-        		if(confirm("AllSchool needs access to Google Drive and Calendar to create Tasks. Would you like to grant permission now ?")){
-        			window.location.href= "/a/oauth/googleAllAuthorization";
-        		}
-        	}
+	       	
 	        let request = this.get('groupService').fetchMyGroups();
 	        request.then((response) => {
 	        	var adminGroups = response.filterBy("isAdmin", true) ;

@@ -42,8 +42,8 @@ export default Ember.Component.extend({
 	 },
 	 actions: {
 		 addToLibrary(item){
-			  Ember.set(this.item, "showLoading", true);
 			  if(this.useGoogleDrive){
+				  Ember.set(this.item, "showLoading", true);
 				  this.get("postService").addToLibrary(item).then((result)=>{
 					  Ember.set(this.item, "showLoading", false);
 		    		if(result.code == 0  ){
@@ -53,13 +53,18 @@ export default Ember.Component.extend({
 		    		}
 		    	});
 			  }
-			  Ember.set(this.item, "showLoading", false);
+			  
 		 },
 		 hovered(){
 			 this.showPopover();
 		 },
 		 removeFile(){
 		 		this.sendAction("removeFile", this.item);
-		 	}
+	 	},
+	 	openFile(item){
+	 		if(Ember.get(item,"driveLink")){
+	 			window.open(Ember.get(item,"driveLink"));
+	 		}
+	 	}
 	 }
 });

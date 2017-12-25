@@ -41,7 +41,7 @@ public class ServiceFilter implements Filter {
 
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 
-		boolean bypassLogin = false;
+		boolean bypassLogin = true;
 		HttpServletRequest request = ((HttpServletRequest) req);
 		HttpServletResponse response = ((HttpServletResponse) resp);
 		String url = request.getRequestURI();
@@ -80,7 +80,9 @@ public class ServiceFilter implements Filter {
 							logger.error(e.getMessage(), e);
 						}
 					} else {
-						response.sendRedirect("/a/public/login");
+						/*response.sendRedirect("/a/public/login");*/
+						response.sendRedirect("/a/oauth/googleLogin");
+						return ;
 					}
 				} else {
 					/* test */
