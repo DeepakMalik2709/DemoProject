@@ -58,12 +58,12 @@
 
 <div class="col-sm-6" > 
     <div class="form-group" >
-    <label for="inputEmail3" class="col-sm-4 control-label">Description</label>
+    	<label for="inputEmail3" class="col-sm-4 control-label">Description</label>
     <div class="col-sm-8">
      <p class="form-control-static"> {{model.description}}</p>
     </div>
-  </div>
-  </div>
+  	</div>
+ 
 <!--     <div class="form-group">
     <label for="inputEmail3" class="col-sm-4 control-label">Sharing</label>
     <div class="col-sm-8">
@@ -71,34 +71,24 @@
     </div>
   </div>
    -->
-      <div class="form-group">
-    <label for="inputEmail3" class="col-sm-4 control-label">Tags</label>
-    <div class="col-sm-8">
-     <p class="form-control-static"> 
-       {{#each model.tags as |tag|}}
-                <span class="file-tag blue" >
-    	{{tag.name}}
-    </span>
-    	{{/each}}
-    
-     </p>
-    </div>
+    <div class="form-group">
+    	<label for="inputEmail3" class="col-sm-4 control-label">Tags</label>
+    	<div class="col-sm-8">
+     		<p class="form-control-static"> 
+       			{{#each model.tags as |tag|}}
+                	<span class="file-tag blue" >{{tag.name}}</span>
+    			{{/each}}
+    	   </p>
+    	</div>
+  	</div>
   </div>
    {{#if model.isAdmin}}
   <div class="form-group" >
      <div class=" col-sm-6 ">
-      <button  {{action 'showMembers' model}} class="btn btn-default" >Members</button>
-    <button  {{action 'showAddMemberModal' model }} class="btn btn-default" >Add members</button>
-    <button  {{action 'showJoinRquests' model}} class="btn btn-default" >Join Requests</button>
+    	<button  {{action 'showJoinRquests' model}} class="btn btn-default" >Join Requests</button>
+    	<button type="button"  data-toggle="modal" {{action 'copyPublicLink' }} class="btn btn-default">Copy public link</button>
     </div>
-    
-   <div class=" col-sm-6 ">
-    {{#link-to 'group.edit' model.id tagName="button" class="btn btn-default"}}Edit
-      {{/link-to}}
-       <button type="button"  data-toggle="modal" {{action 'confirmAndDeleteGroup' model}} class="btn btn-default">Delete</button>
-        <button type="button"  data-toggle="modal" {{action 'copyPublicLink' }} class="btn btn-default">Copy public link</button>
-    </div>
-    
+       
   </div>
   {{/if}}</form>
  

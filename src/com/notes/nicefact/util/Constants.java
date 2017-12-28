@@ -77,7 +77,12 @@ public class Constants {
 	public static final String PROFILE_SCOPES = " https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
 	public static final String GOOGLE_CALLBACK = "/googleCallback";
 	
-	public static final String NO_PREVIEW_IMAGE = "/img/no-preview-available.png";
+	public static final String NO_PREVIEW_AVAILABLE = "/img/no-preview-available.png";
+	public static final String NO_PREVIEW_IMAGE = "/img/no-preview-image.png";
+	public static final String NO_PREVIEW_PDF = "/img/no-preview-pdf.png";
+	public static final String NO_PREVIEW_DOC = "/img/no-preview-doc.png";
+	public static final String NO_PREVIEW_PPT = "/img/no-preview-ppt.png";
+	public static final String NO_PREVIEW_EXCEL = "/img/no-preview-excel.png";
 	
 	public static final String DRIVE_FILE_UPLOAD_URL = "https://www.googleapis.com/upload/drive/v2/files";
 	public static final String DRIVE_FILE_DOWNLOAD_URL = "https://www.googleapis.com/drive/v3/files/";

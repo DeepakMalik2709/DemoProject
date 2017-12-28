@@ -1148,7 +1148,7 @@ public class SecureController extends CommonController {
 	public void generateFileThumbnail(@QueryParam("name") String serverName, @Context HttpServletRequest req, @Context HttpServletResponse response) {
 		logger.info("generateFileThumbnail start");
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		String noPreviewImage = Constants.NO_PREVIEW_IMAGE;
+		String noPreviewImage = Constants.NO_PREVIEW_AVAILABLE;
 		try {
 			String cacheKey = CacheUtils.getThumbnailCacheKey(serverName);
 			byte[] fileBytes = (byte[]) CacheUtils.getFromCache(cacheKey);
@@ -1160,13 +1160,17 @@ public class SecureController extends CommonController {
 						fileBytes = Utils.readFileBytes(postFile.getThumbnail());
 						CacheUtils.putInCache(cacheKey, fileBytes);
 					}else if(postFile.getMimeType().contains("pdf")){
-						/**
-						 *  Deepak , add whatever image you want here and add more if else cases.
-						 * 
-						 */
+						noPreviewImage = Constants.NO_PREVIEW_PDF;
+					}else if(postFile.getMimeType().contains("doc") || postFile.getMimeType().contains("docx")){
+						noPreviewImage = Constants.NO_PREVIEW_DOC;
+					}else if(postFile.getMimeType().contains("ppt")){
+						noPreviewImage = Constants.NO_PREVIEW_PPT;
+					}else if(postFile.getMimeType().contains("csv") || postFile.getMimeType().contains("xlsx") || postFile.getMimeType().contains("xls")){
+						noPreviewImage = Constants.NO_PREVIEW_EXCEL;
+					}else if(postFile.getMimeType().contains("jpg") || postFile.getMimeType().contains("jpeg") || postFile.getMimeType().contains("png")){
 						noPreviewImage = Constants.NO_PREVIEW_IMAGE;
-					}else if(postFile.getMimeType().contains("video")){
-						noPreviewImage = Constants.NO_PREVIEW_IMAGE;
+					}else{
+						noPreviewImage = Constants.NO_PREVIEW_AVAILABLE;
 					}
 				} 
 			}

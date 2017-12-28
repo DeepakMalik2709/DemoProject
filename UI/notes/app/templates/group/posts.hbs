@@ -2,58 +2,67 @@
     <h1>
        {{model.name}} - <small>Posts</small> 
     </h1>
+    
+    
+    
     <ol class="breadcrumb">
         <li><a href="/home"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">Posts</li>
     </ol>
+    
+    
+    
 </section>
 <section class="content">
   <div class="row">
-                <div class="col-lg-12">
-                    <h3 class="page-header">
-                     
-	                    <span class="pull-right">
-	                     {{#if model.canMarkAttendance}}
-	                   {{#link-to 'group.attendance' model.id  tagName="button"  class="btn btn-default"}}
-	                 Attendance
-	                  {{/link-to}}
-	                {{else}}
-	                   		 {{#link-to 'attendance.view' model.id tagName="button"  class="btn btn-default"}}
-				                 Attendance
-				              {{/link-to}}
-	                   {{/if}}
-	                   {{#if model.isAdmin}}
-	                     
-	                  
-	                    {{#link-to 'group.task.create'  tagName="button"  class="btn btn-default"}}
-	                 Create Task
-	                  {{/link-to}}
-	                        
-	                       {{#link-to 'group.view' model.id tagName="button"  class="btn btn-default"}}
-	                  Group Details
-	                  {{/link-to}}
-	                  
-	                     {{#link-to 'group.edit' model.id tagName="button"  class="btn btn-default"}}
-	                  Edit Group
-	                  {{/link-to}}
-	                   {{/if}}
-	                    <button type="button"  data-toggle="modal" {{action 'copyPublicLink' }} class="btn btn-default">Copy public link</button>
-	                  </span>
-                  
-                  </h3>
-                </div>
-                <!-- /.col-lg-12 -->
-            </div>
+	    <div class="col-lg-12">
+	    	<div class="btn-group pull-right">
+		        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+		            Options<span class="caret"></span>
+		        </button>
+		        <ul class="dropdown-menu">
+		            <li>
+		            	{{#if model.canMarkAttendance}}
+		                   {{#link-to 'group.attendance' model.id}}Attendance{{/link-to}}
+		                {{else}}
+			           		{{#link-to 'attendance.view' model.id}}Attendance{{/link-to}}
+		                {{/if}}
+		            </li>
+		            <li>
+		            	{{#if model.isAdmin}}
+			               {{#link-to 'group.edit' model.id}}Edit Group{{/link-to}}
+			            {{/if}}
+					</li>
+		            <li>
+		            	{{#if model.isAdmin}}
+			               {{#link-to 'group.task.create'}}Create Task{{/link-to}}
+			            {{/if}}
+					</li>
+		            <li>
+		            	{{#if model.isAdmin}}
+			               {{#link-to 'group.view' model.id}}Group Details{{/link-to}}
+			            {{/if}}
+					</li>
+					<li>
+						<a href="#" data-toggle="modal" {{action 'copyPublicLink'}}>Copy public link</a>
+					</li>
+		        </ul>
+		    </div>
+	    </div>
+	    <!-- /.col-lg-12 -->
+	</div>
             <!-- /.row -->
 
-            <div class="row">
+    <div class="row">
   
-  <div class="col-md-6 {{if showCreatePost 'inlinedisplay' 'nodisplay' }}">
-    {{post-item-form item=newPost buttonLabel='Save Post' savePost="savePost" cancelClicked="cancelCreatePost" controllerRef=controllerRef}}
-  </div>
-  
+	  <div class="col-md-8 {{if showCreatePost 'inlinedisplay' 'nodisplay' }}" style="margin-left:5px">
+	    {{post-item-form item=newPost buttonLabel='Save Post' savePost="savePost" cancelClicked="cancelCreatePost" controllerRef=controllerRef}}
+	  </div>
   
     </div>
+    
+    
+   
 <hr/>
  <div class="row">
 {{#each feeds as |post|}}
@@ -70,7 +79,9 @@
 
 {{#if noRecords}}
  <div class="row">
-There are no posts in this group.
+ 	<div class="col-lg-12">
+		<span style="margin-left:10px">There are no posts in this group.</span>
+	</div>
  </div>
  {{/if}}
 
