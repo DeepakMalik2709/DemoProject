@@ -16,9 +16,11 @@ export default Ember.Route.extend({
     router: Ember.inject.service('-routing'),
     groupService: Ember.inject.service('group'),
 	scheduleService: Ember.inject.service('new.schedule'),
+	
     onRouteChange: Ember.observer('router.currentPath', function(a){ 
     	hideSidebarMobile();
     }),
+
     showGooglePermissionMessage : _.once(function(){
         	setTimeout((function() {
      			if(confirm("Please give AllSchool permission to save your files to Google Drive and add events to your Google Calendar.")){
@@ -35,7 +37,7 @@ export default Ember.Route.extend({
  			}
 			 }), 2000);
 
-}),
+    }),
     setupController: function(controller, model) {
         this._super(controller, model);
         controller.set("isLoggedIn", Ember.computed.notEmpty("model"));

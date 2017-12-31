@@ -16,8 +16,8 @@ export default Ember.Component.extend({
 		    	Ember.set(this.item , "thumbnailLink" ,thumbnailLink );
 		    }
 		    
-		    if(this.item.name.length>25){
-		    	var shortName= this.item.name.substring(0,22)+"...";
+		    if(this.item.name.length>12){
+		    	var shortName= this.item.name.substring(0,10)+"..";
 		    	Ember.set(this.item , "shortName" ,shortName );
 		    }else{
 		    	Ember.set(this.item , "shortName" ,this.item.name );

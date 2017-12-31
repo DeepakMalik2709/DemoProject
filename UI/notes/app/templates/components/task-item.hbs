@@ -35,7 +35,7 @@
 					  	<div class="col-md-12 col-sm-12 col-lg-12"> 
 					  	    <div class=""><span class="task-title">{{{item.title}}}</span> <small class="pull-right {{if item.deadlineDisplayTime 'show' 'hide'}}">Deadline : {{item.deadlineDisplayTime}}</small></div>
 			                <div class="">{{{item.comment}}}</div>
-			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }}">
+			                <div class="col-sm-12" class="{{if item.files.length 'show' 'hide' }} attachment-view" style="">
 								 {{post-item-files-list-preview item=item  }} 
 			       			</div>
 			                <div   class="stats ">

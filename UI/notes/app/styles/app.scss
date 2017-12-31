@@ -3281,6 +3281,13 @@ footer.page-footer{
   	color: #026fd0;
     text-shadow: 1px 1px 1px #fff;
 }
+.file-name{
+    bottom: 4px;
+    left: 4px;
+    z-index: 100;
+  	font-weight: bold;
+    text-shadow: 1px 1px 1px #fff;
+}
 .inline-block{
 display: inline-block;
 }
@@ -3288,4 +3295,9 @@ display: inline-block;
 	top : 50px;
 	left : 50px;
 	
+}
+
+.attachment-view{
+	padding-left: 0px;
+	overflow-x: scroll;
 }

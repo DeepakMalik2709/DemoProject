@@ -6,9 +6,12 @@
    <span class="{{if item.showLoading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
         &nbsp;<span  {{action 'removeFile' file}} class="glyphicon glyphicon-remove pointer inlineblock" aria-hidden="true"></span>
 {{else }}
-<img class="post-slide-images" src="{{item.thumbnailLink}}" {{action 'openFile' item}}>
+<div>
+<img class="post-slide-images" src="{{item.thumbnailLink}}" {{action 'openFile' item}} data-toggle="tooltip" title={{item.name}} style="border: 1px solid #c7c7c7">
+<span class="file-name pos-abs inlinedisplay">{{item.shortName}}</span>
 <i  class="fa fa-lg fa-book file-library-btn pointer pos-abs {{if item.showLoading 'hide' 'show' }}" {{action "addToLibrary" item}}  ></i>
 <span class="loader-library-adding pos-abs {{if item.showLoading 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
+</div>
 {{/if}}
 
 
