@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.StudentAttendance;
 import com.notes.nicefact.enums.AttendanceStatus;
+import com.notes.nicefact.util.DateUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AttendanceMemberTO {
@@ -18,7 +19,14 @@ public class AttendanceMemberTO {
 	long date;
 	
 	String comments;
-
+	
+	String dateString;
+	
+	String toTimeString;
+	
+	String fromTimeString;
+		
+	
 	
 	public AttendanceMemberTO() {
 		super();
@@ -38,6 +46,9 @@ public class AttendanceMemberTO {
 		this.id = sa.getId();
 		this.status = sa.getStatus();
 		this.date =  sa.getDate().getTime();
+		this.dateString = DateUtils.formatDate(sa.getDate(), DateUtils.DEFAULT_PATTERN);
+		this.toTimeString = sa.getGroupAttendance().getToTime();
+		this.fromTimeString = sa.getGroupAttendance().getFromTime();
 	}
 	
 	public boolean getIsPresent(){
@@ -100,6 +111,30 @@ public class AttendanceMemberTO {
 
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	public String getDateString() {
+		return dateString;
+	}
+
+	public void setDateString(String dateString) {
+		this.dateString = dateString;
+	}
+
+	public String getToTimeString() {
+		return toTimeString;
+	}
+
+	public void setToTimeString(String toTimeString) {
+		this.toTimeString = toTimeString;
+	}
+
+	public String getFromTimeString() {
+		return fromTimeString;
+	}
+
+	public void setFromTimeString(String fromTimeString) {
+		this.fromTimeString = fromTimeString;
 	}
 	
 	

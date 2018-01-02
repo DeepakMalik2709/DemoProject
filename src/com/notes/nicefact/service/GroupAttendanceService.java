@@ -5,7 +5,9 @@ package com.notes.nicefact.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -115,6 +117,13 @@ public class GroupAttendanceService extends CommonService<GroupAttendance> {
 		attendance.setDate(searchTO.getDate());
 		attendance.setFromTime(searchTO.getFromTime());
 		attendance.setGroupId(searchTO.getGroupId());
+//		List<GroupAttendance> groupAttendanceList = groupAttendenceDao.getGroupAttendanceByDateRange(searchTO,fromDate,toDate);
+//		Map<Long,GroupAttendance> groupAttendanceIdMap = new HashMap<>();
+//		if(groupAttendanceList != null){
+//			for(GroupAttendance groupAttendance : groupAttendanceList){
+//				groupAttendanceIdMap.put(groupAttendance.getId(), groupAttendanceIdMap);
+//			}
+//		}
 		List<AttendanceMemberTO> studentTOs = new ArrayList<>();
 		AttendanceMemberTO studentTO;
 		List<StudentAttendance> studentAttendances  =  studentAttendenceDao.fetchStudentAttendance(searchTO,groupId,email, fromDate, toDate);

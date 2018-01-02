@@ -22,10 +22,12 @@
 		        </button>
 		        <ul class="dropdown-menu">
 		            <li>
-		            	{{#if model.canMarkAttendance}}
-		                   {{#link-to 'group.attendance' model.id}}Attendance{{/link-to}}
-		                {{else}}
-			           		{{#link-to 'attendance.view' model.id}}Attendance{{/link-to}}
+		            	{{#if model.isGroupAttendaceAllowed}}
+			            	{{#if model.canMarkAttendance}}
+			                   {{#link-to 'group.attendance' model.id}}Attendance{{/link-to}}
+			                {{else}}
+				           		{{#link-to 'attendance.view' model.id}}Attendance{{/link-to}}
+			                {{/if}}
 		                {{/if}}
 		            </li>
 		            <li>

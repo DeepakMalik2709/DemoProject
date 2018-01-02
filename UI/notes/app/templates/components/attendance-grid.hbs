@@ -130,16 +130,16 @@
  <div class="row">
   <form role="form">
     <div class="box-body">
-	 	<div class="col-sm-12 col-md-12 form-group">
-	 	 	<label class="col-sm-4  col-md-1 control-label">From date* </label>
-	        <div class="col-sm-8 col-md-4">
+	 	<div class="col-sm-12 form-group">
+	 	 	<label class="col-sm-2 control-label">From date* </label>
+	        <div class="col-sm-3">
 	          {{bootstrap-datepicker autoclose=true placeholder="Select from date*"  class="form-control" value=model.start readonly=true format='dd-M-yyyy'}}         
 	        </div>
-	        <label class="col-sm-4  col-md-1 control-label">To date* </label>
-	        <div class="col-sm-8  col-md-4">
+	        <label class="col-sm-2 control-label">To date* </label>
+	        <div class="col-sm-3">
 	          {{bootstrap-datepicker autoclose=true placeholder="Select to date*"  class="form-control" value=model.end readonly=true format='dd-M-yyyy'}}         
 	        </div>
-	        <div class="col-sm-12 col-md-2 box-footer">
+	        <div class="col-sm-2 box-footer">
 		        <button type="submit"  class="btn btn-primary" {{action 'fetchStudentAttendance' model}} >Search</button>
 		    </div>
 	    </div>
@@ -150,10 +150,32 @@
          
 	     
   <div class="row">
-    <div class="col-sm-12  col-md-offset-2 col-md-10">     
+    <div class="col-sm-12">     
+		<div class="box-body no-padding">
+             <div class="table-responsive">
+                 <!-- .table - Uses sparkline charts-->
+                 <table class="table table-striped" style="border: 1px solid #c7c7c7;">
+                     <tbody><tr>
+                         <th>Date</th>
+                         <th>Time</th>
+                         <th>Status</th>
+                     </tr>
+                     {{#each rows as |row|}}
+                     <tr>
+                         <td>{{row.dateString}}</td>
+                         <td>{{row.fromTimeString}} - {{row.toTimeString}}</td>
+                         <td>{{row.status}}</td>
+                     </tr>
+                     {{else}}
+					  No student attendance found.
+					 {{/each}}
+                     
+                 </tbody></table><!-- /.table -->
+             </div>
+         </div>
 
 
- {{#light-table table  as |t|}}
+<!-- {{#light-table table  as |t|}}
 
   {{t.head     iconSortable='fa fa-sort'    iconAscending='fa fa-sort-asc'    iconDescending='fa fa-sort-desc'   }}
 
@@ -177,7 +199,7 @@
 
   {{t.foot}}
 
-	{{/light-table}}
+	{{/light-table}} -->
 	
 
            
