@@ -159,9 +159,9 @@ public class OauthController {
 			AppUserTO userTo = getGoogleUserProfile(accessToken);			
 			AppUser user = doAutoLogin(userTo, request,accessToken);
 			String recirectUrl = Constants.HOME_PAGE ;
-			if(!user.getUseGoogleDrive()){
+			/*if(!user.getUseGoogleDrive()){
 				recirectUrl ="/a/oauth/googleAllAuthorization";
-			}else if(null != CurrentContext.getCommonContext() && StringUtils.isNotBlank(CurrentContext.getCommonContext().getRedirectUrl())){
+			}else*/ if(null != CurrentContext.getCommonContext() && StringUtils.isNotBlank(CurrentContext.getCommonContext().getRedirectUrl())){
 				recirectUrl = CurrentContext.getCommonContext().getRedirectUrl();
 			}
 			response.sendRedirect(recirectUrl);
