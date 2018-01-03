@@ -8,16 +8,43 @@
     </ol>
 </section>
 
-{{#if model.isAdmin}}
-  <div class="form-group" >
-     <div class=" col-sm-12 " style="border-bottom: 1px solid #eeeeee; height: 45px; border-top: 1px solid #eeeeee; padding: 5px;">
-     	{{#link-to 'group.edit' model.id tagName="button" class="btn btn-default"}} <i class="fa fa-edit" aria-hidden="true"> Edit</i> {{/link-to}}
-	     <button type="button"  data-toggle="modal" {{action 'confirmAndDeleteGroup' model}} class="btn btn-default"> <i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
-    	<button  {{action 'showAddMemberModal' model }} class="btn btn-default" ><i class="fa fa-plus" aria-hidden="true"></i> Members</button>
+<br>
+
+<div class="row" style="margin-left:0px; margin-right:0px">
+    <div class="col-sm-12">
+    	{{#if model.isAdmin}}
+		     <button  {{action 'showJoinRquests' model}} class="btn btn-default" >Join Requests</button>
+		{{/if}}
+    	<div class="btn-group pull-right">
+	        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+	            Options<span class="caret"></span>
+	        </button>
+	        <ul class="dropdown-menu">
+	            <li>
+	            	{{#if model.isAdmin}}
+		               {{#link-to 'group.edit' model.id}}Edit{{/link-to}}
+		            {{/if}}
+				</li>
+	            <li>
+	            	{{#if model.isAdmin}}
+		               <a href="#" data-toggle="modal" {{action 'confirmAndDeleteGroup' model}}>Delete</a>
+		            {{/if}}
+				</li>
+	            <li>
+	            	{{#if model.isAdmin}}
+		               <a href="#" data-toggle="modal" {{action 'showAddMemberModal' model}}>Add Members</a>
+		            {{/if}}
+				</li>
+				<li>
+					<a href="#" data-toggle="modal" {{action 'copyPublicLink'}}>Copy public link</a>
+				</li>
+	        </ul>
+	    </div>
     </div>
-  </div>
- {{/if}}
-  
+    <!-- /.col-lg-12 -->
+</div>
+
+<hr style="margin-top: 3px">
 
 <form class="form-horizontal" name="deviceForm">
 <div class="col-sm-6">
@@ -82,15 +109,8 @@
     	</div>
   	</div>
   </div>
-   {{#if model.isAdmin}}
-  <div class="form-group" >
-     <div class=" col-sm-6 ">
-    	<button  {{action 'showJoinRquests' model}} class="btn btn-default" >Join Requests</button>
-    	<button type="button"  data-toggle="modal" {{action 'copyPublicLink' }} class="btn btn-default">Copy public link</button>
-    </div>
-       
-  </div>
-  {{/if}}</form>
+   
+  </form>
  
  {{#if model.isAdmin}}
  <div class="col-sm-12" >
@@ -102,7 +122,7 @@
                     <button  {{action 'showMembers' model}} class="btn btn-default pull-right" >Members</button>
                 </div>
 		    </div><!-- /.box-header -->
-		    <div class="box-body no-padding">
+		    <div class="box-body no-padding" style="max-height: 225px;overflow-y: scroll;">
 		        <table class="table">
 		            <tbody><tr>
 		                <th>Name</th>
@@ -134,7 +154,7 @@
 		    </div><!-- /.box-header -->
 		    
 		    
-		    <div class="box-body no-padding">
+		    <div class="box-body no-padding" style="max-height: 225px;overflow-y: scroll;">
 		        <table class="table">
 		            <tbody><tr>
 		                <th>Name</th>
