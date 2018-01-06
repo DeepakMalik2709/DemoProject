@@ -47,7 +47,7 @@ public class AttendanceService extends CommonService<Group> {
 		studentAttendenceService = new StudentAttendenceService(em);
 	}
 
-	public Event updateEvent(com.notes.nicefact.entity.Event schedule,AppUser user ) throws IOException, AllSchoolException {
+	public Event updateEvent(com.notes.nicefact.to.Event schedule,AppUser user ) throws IOException, AllSchoolException {
 		String calendarId = "primary";
 		String eventId = schedule.getId();
 		Event updatedEvent  =null;

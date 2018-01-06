@@ -74,6 +74,9 @@ public class Post extends AbstractComment {
 	@Enumerated(EnumType.STRING)
 	private POST_TYPE postType = POST_TYPE.SIMPLE;
 	
+	@ElementCollection(fetch = FetchType.LAZY)
+	private List<String> weekdays ;
+	
 int noOfSubmissions;
 	
 	@Basic
@@ -150,11 +153,11 @@ int noOfSubmissions;
 		if(post.getDeadlineTime()  >0){
 			this.deadline = new Date(post.getDeadlineTime());
 		}
-		if(post.getFromDate()  !=null){
-			this.fromDate =post.getFromDate();
+		if(post.getFromDate()    >0){
+			this.fromDate =new Date(post.getFromDate());
 		}
-		if(post.getToDate()  !=null){
-			this.toDate =post.getToDate();
+		if(post.getToDate()    >0){
+			this.toDate = new Date(post.getToDate());
 		}
 		if(post.getPostType()!=null){
 			this.postType=post.getPostType();
@@ -393,5 +396,15 @@ int noOfSubmissions;
 
 	public void setToDate(Date toDate) {
 		this.toDate = toDate;
+	}
+	
+	public List<String> getWeekdays() {
+		if(null == weekdays){
+			this.weekdays = new ArrayList<>();
+		}
+		return weekdays;
+	}
+	public void setWeekdays(List<String> weekdays) {
+		this.weekdays = weekdays;
 	}
 }

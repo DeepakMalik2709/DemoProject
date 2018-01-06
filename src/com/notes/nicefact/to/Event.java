@@ -1,4 +1,4 @@
-package com.notes.nicefact.entity;
+package com.notes.nicefact.to;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.services.calendar.model.EventAttendee;
-import com.notes.nicefact.to.FileTO;
+import com.notes.nicefact.entity.PostComment;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
@@ -22,7 +22,7 @@ public class Event {
 	private String location;
 	private String	eventType;
 	private List<EventAttendee>	attendees;
-	private List<Group> groups; 
+	private List<GroupTO> groups; 
 	private long groupId;
 	private String comment;
 	private String createdByEmail;
@@ -110,10 +110,10 @@ public class Event {
 	public void setAttendees(List<EventAttendee> attendees) {
 		this.attendees = attendees;
 	}
-	public List<Group> getGroups() {
+	public List<GroupTO> getGroups() {
 		return groups;
 	}
-	public void setGroups(List<Group> groups) {
+	public void setGroups(List<GroupTO> groups) {
 		this.groups = groups;
 	}
 	public long getPostId() {

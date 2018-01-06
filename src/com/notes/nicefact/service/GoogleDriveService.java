@@ -818,7 +818,7 @@ public class GoogleDriveService {
 			headers.add(new BasicHeader(Constants.CONTENT_TYPE, file.getMimeType()));
 
 			HttpResponse response = doGet(url, headers, user);
-			if (response.getEntity() != null) {
+			if (response!=null && response.getEntity() != null) {
 				InputStream inStream = response.getEntity().getContent();
 				fileBytes = IOUtils.toByteArray(inStream);
 			}

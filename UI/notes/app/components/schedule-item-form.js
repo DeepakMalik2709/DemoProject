@@ -21,7 +21,7 @@ export default Ember.Component.extend(authenticationMixin,{
 	    this.days=[ {id:0,name:'Sun',value:'SUNDAY',isActive:false},{id:1,name:'Mon',value:'MONDAY',isActive:false},{id:2,name:'Tues',value:'TUESDAY',isActive:false},
 	                {id:3,name:'Wed',value:'WEDNESDAY',isActive:false},{id:4,name:'Thurs',value:'THURSDAY',isActive:false},{id:5,name:'Fri',value:'FRIDAY',isActive:false},
 	              {id:6,name:'Sat',value:'SATURDAY',isActive:false}],
-	
+	    this.set("selectedGroups", []);
 	    this.initNewComment();
 	  },
 	initNewComment(){
@@ -35,7 +35,7 @@ export default Ember.Component.extend(authenticationMixin,{
 	        	if(adminGroups.length){
 	        		this.set("myGroups" ,adminGroups );
 	        	}else{
-	        		alert("You can only post tasks to groups where you are admin");
+	        		alert("You can only post schedules to groups where you are admin");
 	        	}
 	        });
 	  },   
@@ -45,11 +45,19 @@ export default Ember.Component.extend(authenticationMixin,{
 			  alert("Please enter the title");
 			  return false;
 		  }
+		  if(!Ember.get(event , "comment")){
+			  alert("Please enter a description");
+			  return false;
+		  }
 		  if(!Ember.get(event , "location")){
 			  alert("Please enter the location");
 			  return false;
 		  }
-		  if(event.start>event.end){
+		  if(!Ember.get(event , "fromDate")   || !Ember.get(event , "toDate") ){
+			  alert("From and to date are both required.");
+			  return false;
+		  }
+		  if(Ember.get(event , "fromDate")  > Ember.get(event , "toDate")){
 			  alert("Schedule End time must be greater than start time");
 			  return false;
 		  }
@@ -57,10 +65,11 @@ export default Ember.Component.extend(authenticationMixin,{
 			  alert("Please select schedule days");
 			  return false;
 		  }
-		  if(!this.attendees.id){
-			  alert("Please select at least one group as attendee.");
-			  return false;
-		  }
+		  var selectedGroups =  this.get("selectedGroups");
+ 		 if(! selectedGroups.length){
+ 			 alert("Please select group to post schedule.")
+ 			 return false;
+ 		 }
 		  
 		  
 		  return true;
@@ -98,8 +107,11 @@ export default Ember.Component.extend(authenticationMixin,{
         saveEvent(event) {
         	if(this.validation(event)){
         		this.set("submitted", true);
-            	event.groups=[];
-            	event.groupId=this.attendees.id;
+        		var selectedGroups =  this.get("selectedGroups");
+        		for(var i =0 ;i < selectedGroups.length ;i++){
+     				Ember.get(event,"groupIds").pushObject(selectedGroups[i].id);
+     			}
+
             	Ember.set(event, "showLoading", true);
             	event.weekdays=[];
             	this.selectedDay.forEach(function(item, index) {
@@ -107,14 +119,9 @@ export default Ember.Component.extend(authenticationMixin,{
 						event.weekdays.push(item.value);
 					}					 
 				});
-            	 console.log(event.toJSON());
-            	event.save(event).then((resp1) => {
-            		Ember.set(this, "isSaving", false);
- 	    			Ember.set(event, "isSaving", false);
- 	    			Ember.set(event, "showLoading", false);
- 	    			alert("Schedule posted.");
- 	    			this.get('router').transitionTo('group.posts',[event.groupId]); 	    			
- 	    		});
+            	// console.log(event.toJSON());
+            	 this.sendAction('saveEvent', event);
+            	
         	}
         }
     }

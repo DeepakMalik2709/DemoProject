@@ -66,6 +66,9 @@ public class Group extends CommonEntity {
 
 	@Basic
 	private String folderId;
+	
+	@Basic
+	private String calendarId;
 
 	@Basic
 	private String bgImageId;
@@ -312,6 +315,14 @@ public class Group extends CommonEntity {
 
 	public void setInstitute(Institute institute) {
 		this.institute = institute;
+	}
+
+	public String getCalendarId() {
+		return calendarId;
+	}
+
+	public void setCalendarId(String calendarId) {
+		this.calendarId = calendarId;
 	}
 
 	public Group() {

@@ -77,7 +77,7 @@ export default DS.Adapter.extend(ajaxMixin ,{
 				    		if(data.code == 0){
 				    			Ember.run(null, resolve, data.items[0]);
 				    		}else{
-				    			  Ember.run(null, reject, jqXHR);
+				    			  Ember.run(null, reject, data);
 				    		}
 				      }, function(jqXHR) {
 				        jqXHR.then = null; // tame jQuery's ill mannered promises
@@ -85,4 +85,20 @@ export default DS.Adapter.extend(ajaxMixin ,{
 				      });
 				    });
 				  },
+				  saveSchedule :  function( snapshot) {
+					    var json = this.serialize(snapshot, { includeId: true });
+					    return new Ember.RSVP.Promise((resolve, reject) =>{
+					   	var url = '/rest/calendar/insertEvent';
+					   	this.doPost(url , json).then(function(data) {
+				   			if(data.code == 0){
+				    			Ember.run(null, resolve,data.items[0]);
+				    		}else{
+				    			  Ember.run(null, reject, data);
+				    		}
+					     }, function(jqXHR) {
+					        jqXHR.then = null; // tame jQuery's ill mannered promises
+					        Ember.run(null, reject, jqXHR);
+					      });
+					    });
+					}
 });

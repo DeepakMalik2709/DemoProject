@@ -25,6 +25,21 @@ export default DS.Model.extend({
 	  isTask : DS.attr('boolean'),
 	  isPost : DS.attr('boolean'),
 	  isSchedule: DS.attr('boolean'),
+	  /* schedule variables */
+	  location:DS.attr(""),
+		start:DS.attr('number'),
+		end:DS.attr('number'),
+		eventType:DS.attr('string'),
+		backgroundColor:DS.attr('string'),
+		borderColor:DS.attr('string'),
+		  isSubmitted : DS.attr('boolean'),
+		  weekdays:DS.attr( {
+		    defaultValue() { return []; }
+		  }),
+		  fromDate: DS.attr('number'),
+		  toDate: DS.attr('number'),
+		  /* schedule variables */
+		  
 	  files: DS.attr( {
 		    defaultValue() { return []; }
 		  }),

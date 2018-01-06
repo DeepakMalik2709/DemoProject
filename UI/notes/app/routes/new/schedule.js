@@ -9,7 +9,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 		    this._super(...arguments);
 		   },
 		model(params) {
-			 return this.store.createRecord('new.schedule',params.id);
+			   return this.store.createRecord('post');
 	    },
 	    afterModel(transition) {
 			 var context = this.contextService.fetchContext(result=>{
@@ -32,6 +32,15 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    },
 	   
 	    actions: {
-	        
+	    	 saveEvent(event) {
+	    		 const adapter = this.store.adapterFor('post');
+            	 adapter.saveSchedule(event).then((resp1) => {
+            		Ember.set(this, "isSaving", false);
+ 	    			Ember.set(event, "isSaving", false);
+ 	    			Ember.set(event, "showLoading", false);
+ 	    			alert("Schedule posted.");
+ 	    			this.transitionTo('group.posts',  Ember.get(resp1,"groupId"));    			
+ 	    		});
+	    	 }
 	    }
 });

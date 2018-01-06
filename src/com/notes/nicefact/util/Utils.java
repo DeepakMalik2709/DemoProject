@@ -694,5 +694,15 @@ public class Utils {
 			}
 		}
 	}
+	
+	public static String[] createGoogleRecurrenceStr(List<String> list) {
+		String recurStr="RRULE:FREQ=WEEKLY;BYDAY=";
+		for (String day : list) {
+			recurStr+=day.substring(0, 2)+",";
+		}
+		String[] recurrence = new String[] { recurStr.substring(0,recurStr.length()-1) };
+		return recurrence;
+	}
+
 
 }

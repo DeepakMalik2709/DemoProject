@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +31,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
 import com.notes.nicefact.dao.TaskSubmissionDAO;
 import com.notes.nicefact.entity.AbstractFile;
 import com.notes.nicefact.entity.AbstractFile.UPLOAD_TYPE;
@@ -61,6 +67,7 @@ import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
+import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.FileTO;
@@ -1331,6 +1338,78 @@ public class BackendTaskController extends CommonController {
 		}
 
 		logger.info("exit institutePostSaveTask");
+		renderResponseRaw(true, response);
+	}
+	
+	@POST
+	@Path("schedule/afterSave")
+	public void afterScheduleSave(@QueryParam("scheduleId") Long scheduleId, @Context HttpServletResponse response) throws IOException, InterruptedException {
+		logger.info("start afterScheduleSave, scheduleId : " + scheduleId);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			NotificationService notificationService = new NotificationService(em);
+			Post post = taskService.get(scheduleId);
+			AppUser sender = CacheUtils.getAppUser(post.getCreatedBy());
+			AppUser user;
+			NotificationRecipient notificationRecipient;
+			/* tagged notification for people tagged in post */
+			Set<String> recipientEmailSet = new HashSet<>();
+			/*
+			 * add person who created post so that he does not get notification
+			 */
+			recipientEmailSet.add(post.getCreatedBy());
+			Notification notification = new Notification(post, sender);
+			notificationService.upsert(notification);
+
+
+			/* notification for members of group */
+			Group group = CacheUtils.getGroup(post.getGroupId());
+			if (group != null && group.getMembers() != null) {
+				for (GroupMember member : group.getMembers()) {
+					if (recipientEmailSet.add(member.getEmail())) {
+						user = CacheUtils.getAppUser(member.getEmail());
+						if (user == null) {
+							notificationRecipient = new NotificationRecipient(member.getEmail());
+						} else {
+							notificationRecipient = new NotificationRecipient(user);
+							notificationRecipient.setSendEmail(user.getSendGroupPostEmail());
+						}
+						notificationRecipient.setAction(NotificationAction.POSTED_GROUP);
+						notificationRecipient.setNotification(notification);
+						notification.getRecipients().add(notificationRecipient);
+						notificationService.upsertRecipient(notificationRecipient);
+					}
+				}
+			}
+
+			if (notification.getRecipients().isEmpty()) {
+				notificationService.remove(notification);
+			} else {
+				notificationService.upsert(notification);
+				BackendTaskService backendTaskService = new BackendTaskService(em);
+				backendTaskService.createSendNotificationMailsTask(notification);
+			}
+			ScheduleService scheduleService = new ScheduleService(em);
+			if(StringUtils.isBlank(group.getCalendarId())){
+				scheduleService.createCalendar(group);
+			}
+			if(StringUtils.isBlank(group.getCalendarId())){
+				logger.error("cannot add event to calendar as calendar id is null for gorup : "  + group.getId() + " , " + group.getName());
+			}else{
+				scheduleService.createGroupEvent(group,post);
+			
+			}
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+
+		logger.info("exit afterScheduleSave");
 		renderResponseRaw(true, response);
 	}
 

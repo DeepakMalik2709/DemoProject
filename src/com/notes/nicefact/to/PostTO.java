@@ -67,9 +67,10 @@ public class PostTO {
 	int reponseNo=0;
 	int reponseMaybe=0;
 	int totalAttendee=0;
-	Date fromDate;
+	long fromDate;
+	long toDate;
+	private List<String> weekdays;
 	
-	Date toDate;
 	int noOfSubmissions;
 	String weekDay;
 	public String getWeekDay() {
@@ -109,7 +110,7 @@ public class PostTO {
 		
 	}
 	
-	public PostTO(com.notes.nicefact.entity.Event schedule, AppUser user) {
+	public PostTO(com.notes.nicefact.to.Event schedule, AppUser user) {
 		this.id = schedule.getPostId();
 		this.groupId = schedule.getGroupId();
 		this.postType = POST_TYPE.SCHEDULE;
@@ -122,8 +123,8 @@ public class PostTO {
 		if(this.comment ==null){
 			this.comment = schedule.getDescription();
 		}
-		this.fromDate = schedule.getStart();
-		this.toDate = schedule.getEnd();
+		this.fromDate = schedule.getStart().getTime();
+		this.toDate = schedule.getEnd().getTime();
 		this.createdByEmail = schedule.getCreatedByEmail();
 		this.createdByName = schedule.getCreatedByName();
 		this.updatedByEmail = schedule.getUpdatedByEmail();
@@ -163,7 +164,6 @@ public class PostTO {
 		this.numberOfReactions = post.getNumberOfReactions();	
 		if(post.getPostType().equals(POST_TYPE.SCHEDULE) ){	
 			this.setScheduleAttribute(post);
-			
 		}
 		CommentTO commentTO;
 		for (PostComment comment : post.getComments()) {
@@ -217,8 +217,12 @@ public class PostTO {
 		}
 		this.googleEventId = post.getGoogleEventId();
 		this.location = post.getLocation();
-		this.fromDate = post.getFromDate();
-		this.toDate = post.getToDate();
+		if(null !=post.getFromDate()){
+			this.fromDate = post.getFromDate().getTime();
+		}
+		if(null !=post.getToDate()){
+			this.toDate = post.getToDate().getTime();
+		}
 	}
 
 	private POST_TYPE postType = POST_TYPE.SIMPLE;
@@ -529,18 +533,23 @@ public class PostTO {
 	public void setCanSubmit(Boolean canSubmit) {
 		this.canSubmit = canSubmit;
 	}
-	public Date getFromDate() {
+	public long getFromDate() {
 		return fromDate;
 	}
-	public void setFromDate(Date fromDate) {
+	public void setFromDate(long fromDate) {
 		this.fromDate = fromDate;
 	}
-	public Date getToDate() {
+	public long getToDate() {
 		return toDate;
 	}
-	public void setToDate(Date toDate) {
+	public void setToDate(long toDate) {
 		this.toDate = toDate;
 	}
-	
+	public List<String> getWeekdays() {
+		return weekdays;
+	}
+	public void setWeekdays(List<String> weekdays) {
+		this.weekdays = weekdays;
+	}
 	
 }

@@ -1,10 +1,8 @@
 package com.notes.nicefact.service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -17,6 +15,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.dao.GroupDAO;
 import com.notes.nicefact.dao.GroupMemberDAO;
@@ -27,10 +26,10 @@ import com.notes.nicefact.dao.PostReactionDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Post;
+import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostReaction;
-import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.ServiceException;
@@ -170,8 +169,7 @@ public class PostService extends CommonService<Post> {
 		Date today = new Date();
 		for (Post post : posts) {
 			if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
-				if (!post.getFromDate().before(today)
-						|| !post.getToDate().after(today)) {
+				if ((null != post.getFromDate() && !post.getFromDate().before(today)) || (null != post.getToDate() && !post.getToDate().after(today))) {
 					continue;
 				}
 			}
@@ -421,6 +419,48 @@ public class PostService extends CommonService<Post> {
 
 	public int countScheduleByDateAndDay(Date date) {		
 		return  postDAO.countScheduleByDateAndDay(date);
+	}
+	
+	public List<Post> upsertEvent(PostTO postTo, AppUser appUser) throws IOException, AllSchoolException {
+		if (postTo.getGroupId() == null && postTo.getGroupIds().isEmpty()) {
+			throw new ServiceException(" Group id cannot be null");
+		}
+		List<Post> posts = new ArrayList<>();
+		if (postTo.getGroupIds().isEmpty()) {
+			postTo.getGroupIds().add(postTo.getGroupId());
+		}
+			for (Long groupId : postTo.getGroupIds()) {
+				Post post = new Post(postTo);
+				post.setGroupId(groupId);
+				post.setWeekdays(postTo.getWeekdays());
+				post.setPostType(POST_TYPE.SCHEDULE);
+				Group group = CacheUtils.getGroup(groupId);
+				if (group.getBlocked().contains(appUser.getEmail())) {
+					throw new UnauthorizedException("User has been blocked by group admin.");
+				}
+
+				if (null == postTo.getId() || postTo.getId() <= 0) {
+					updateAttachedFiles(post, postTo);
+					postDAO.upsert(post);
+					backendTaskService.saveScheduleTask(post);
+					posts.add(post);
+				} else {
+					Post postDB = postDAO.get(postTo.getId());
+					if (postDB.getCreatedBy().equals(appUser.getEmail())) {
+						postDB.updateProps(post);
+						updateAttachedFiles(postDB, postTo);
+						postDAO.upsert(postDB);
+						backendTaskService.saveScheduleTask(postDB);
+						posts.add(postDB);
+					} else {
+						throw new UnauthorizedException("You cannot edit this post.");
+					}
+				}
+
+			}
+
+		logger.info("upsertEvent : ");
+		return posts;
 	}
 
 }

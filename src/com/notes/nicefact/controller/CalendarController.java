@@ -1,6 +1,6 @@
 package com.notes.nicefact.controller;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,18 +13,17 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 
 import com.google.api.services.calendar.model.Event;
 import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostRecipient;
-import com.notes.nicefact.service.GoogleCalendarService;
+import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.to.EventTO;
 import com.notes.nicefact.to.EventsTO;
@@ -42,7 +41,7 @@ public class CalendarController extends CommonController {
 	@POST
 	@Path("/updateEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void updateEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,
+	public void updateEvent(com.notes.nicefact.to.Event schedule, @Context HttpServletResponse response,
 			@Context HttpServletRequest request) {
 		logger.info("reactToschedule start , postId : ");
 		Map<String, Object> json = new HashMap<>();
@@ -87,18 +86,23 @@ public class CalendarController extends CommonController {
 	@POST
 	@Path("/insertEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void createEvent(com.notes.nicefact.entity.Event schedule, @Context HttpServletResponse response,
+	public void createEvent(PostTO postTo, @Context HttpServletResponse response,
 			@Context HttpServletRequest request) {
 		logger.info("createEvent start , postId : ");
-		System.out.println("schedule :" + schedule);
+		System.out.println("schedule :" + postTo);
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
-			ScheduleService scheduleService = new ScheduleService(em);
+			PostService postService = new PostService(em);
 			AppUser user = (AppUser) request.getSession().getAttribute(Constants.SESSION_KEY_lOGIN_USER);
-			List<PostTO> createdEvents = scheduleService.createEvent(schedule, user);		
+			List<Post> posts = postService.upsertEvent(postTo, user);	
+			 List<PostTO> savedTOs = new ArrayList<>();
+			 for(Post post : posts){
+				 PostTO savedTO = new PostTO(post);
+				 savedTOs.add(savedTO);
+			 }
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEMS, createdEvents);
+			json.put(Constants.DATA_ITEMS, savedTOs);
 		} catch (AllSchoolException e) {
 			logger.error(e.getMessage(), e);
 
@@ -119,13 +123,13 @@ public class CalendarController extends CommonController {
 
 	}
 
-	@GET
+/*	@GET
 	@Path(GoogleCalendarService.CALENDAR_CALLBACK)
 	public void googleDriveCallback(@QueryParam("code") String code, @QueryParam("error") String error,
 			@Context HttpServletResponse response, @Context HttpServletRequest request) throws IOException,
 			JSONException {
 		System.out.println("code :" + code + " error " + error + " response " + response.getStatus());
-	}
+	}*/
 
 	@GET
 	@Path("/calendars")

@@ -101,7 +101,22 @@ public class BackendTaskService extends CommonService<BackendTask> {
 		}
 	}
 
+	
+	public void saveScheduleTask(Post post) {
+		BackendTask task = new BackendTask();
+		task.setPath("schedule/afterSave");
+		task.addToParamsMap("scheduleId", post.getId());
+		saveAndTrigger(task);
+		if (!post.getFiles().isEmpty()) {
+			task = new BackendTask();
+			task.setPath("task/addThumbnail");
+			task.addToParamsMap("taskId", post.getId());
+			saveAndTrigger(task);
 
+		}
+	}
+
+	
 	public void createGoogleDriveFolderForUserTask(AppUser user) {
 		BackendTask task = new BackendTask();
 		task.setPath("user/createGoogleDriveFolder");

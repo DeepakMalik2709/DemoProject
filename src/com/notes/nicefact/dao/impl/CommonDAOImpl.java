@@ -33,7 +33,7 @@ import com.notes.nicefact.util.Pagination;
  */
 public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO<E> {
 
-	protected final Logger log = Logger.getLogger(getClass().getName());
+	protected final Logger logger = Logger.getLogger(getClass().getName());
 
 	protected Class<E> clazz;
 	
@@ -74,7 +74,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			}
 			tx.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			if (tx.isActive()) {
 				tx.rollback();
 			}
@@ -94,7 +94,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 	 */
 
 	public Collection<E> upsertAll(Collection<E> entities) {
-		log.info("Create method started for all entities in collection.");
+		logger.info("Create method started for all entities in collection.");
 		EntityManager pm = getEntityManager();
 		try {
 			pm.getTransaction().begin();
@@ -107,7 +107,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			}
 			pm.getTransaction().commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			pm.getTransaction().rollback();
 		} finally {
 			
@@ -125,7 +125,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			pm.getTransaction().commit();
 			success = true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			pm.getTransaction().rollback();
 		} finally {
 			
@@ -148,7 +148,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			pm.getTransaction().commit();
 			success = true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			pm.getTransaction().rollback();
 		} finally {
 			
@@ -167,7 +167,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			pm.getTransaction().commit();
 			success = true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			pm.getTransaction().rollback();
 		} finally {
 			
@@ -192,7 +192,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 		} catch (Exception e) {
 			success = false;
 			pm.getTransaction().rollback();
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		} finally {
 			
 		}
@@ -214,7 +214,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 		} catch (Exception e) {
 			success = false;
 			pm.getTransaction().rollback();
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		} finally {
 			
 		}
@@ -228,7 +228,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			object = (E) pm.find(clazz, id);
 		} catch (NoResultException nre) {
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		} finally {
 			//
 		}
@@ -265,7 +265,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 		try {
 			results = query.getResultList();
 		} catch (NoResultException nre) {
-			log.warn("0 result for : " + queryStr);
+			logger.warn("0 result for : " + queryStr);
 		} finally {
 			
 		}
@@ -282,9 +282,9 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			obj = (E) query.getSingleResult();
 			pm.detach(obj);
 		} catch (NoResultException nre) {
-			log.warn(nre.getMessage());
+			logger.warn(nre.getMessage());
 		} catch (Exception e) {
-			log.warn(e.getMessage());
+			logger.warn(e.getMessage());
 		} finally {
 			
 		}
@@ -305,10 +305,10 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			}
 
 		} catch (NoResultException nre) {
-			log.warn(nre.getMessage());
+			logger.warn(nre.getMessage());
 			objects = new ArrayList<>();
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		} finally {
 			
 		}
@@ -325,9 +325,9 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			obj = (E) query.getSingleResult();
 			pm.detach(obj);
 		} catch (NoResultException nre) {
-			log.warn(nre.getMessage());
+			logger.warn(nre.getMessage());
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		} finally {
 			
 		}
@@ -349,10 +349,10 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			}
 
 		} catch (NoResultException nre) {
-			log.warn(nre.getMessage());
+			logger.warn(nre.getMessage());
 			objects = new ArrayList<>();
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		} finally {
 			
 		}
@@ -373,10 +373,10 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			}
 
 		} catch (NoResultException nre) {
-			log.warn(nre.getMessage());
+			logger.warn(nre.getMessage());
 			objects = new ArrayList<>();
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		} finally {
 			
 		}
@@ -395,12 +395,12 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			}
 			pm.getTransaction().commit();
 		} catch (NoResultException nre) {
-			log.warn(nre.getMessage());
+			logger.warn(nre.getMessage());
 			success = false;
 		} catch (Exception e) {
 			success = false;
 			pm.getTransaction().rollback();
-			log.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		} finally {
 			
 		}
@@ -418,7 +418,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 			list = query.getResultList();
 		} catch (NoResultException nre) {
 			list = new ArrayList<>();
-			log.warn(nre.getMessage());
+			logger.warn(nre.getMessage());
 		} finally {
 			
 		}
@@ -436,9 +436,9 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 				em.detach(obj);
 			}
 		} catch (NoResultException nre) {
-			log.warn(nre.getMessage());
+			logger.warn(nre.getMessage());
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		} finally {
 			
 		}

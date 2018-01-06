@@ -37,7 +37,7 @@ public class GroupTO {
 	private Long instituteId;
 	
 	private String instituteName;
-
+	private String calendarId;
 	boolean isAdmin;
 	boolean isMember;
 	boolean isBlocked;
@@ -87,6 +87,7 @@ public class GroupTO {
 		this.icon = group.getIcon();
 		this.bgImageId = group.getBgImageId();
 		this.folderId = group.getFolderId();
+		this.calendarId = group.getCalendarId();
 		this.lastModified = group.getUpdatedTime().getTime();
 		this.created = group.getCreatedTime().getTime();
 		this.languages.addAll(group.getLanguages());
@@ -325,6 +326,13 @@ public class GroupTO {
 
 	public void setCanMarkAttendance(boolean canMarkAttendance) {
 		this.canMarkAttendance = canMarkAttendance;
+	}
+	public String getCalendarId() {
+		return calendarId;
+	}
+
+	public void setCalendarId(String calendarId) {
+		this.calendarId = calendarId;
 	}
 
 }
