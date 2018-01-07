@@ -37,7 +37,7 @@ import com.notes.nicefact.util.EntityManagerHelper;
 public class CalendarController extends CommonController {
 
 	private final static Logger logger = Logger.getLogger(CalendarController.class.getName());
-
+/*
 	@POST
 	@Path("/updateEvent")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -70,7 +70,7 @@ public class CalendarController extends CommonController {
 		}
 		renderResponseJson(json, response);
 		logger.info("reactToschedule exit");
-	}
+	}*/
 
 	/*
 	 * jkb : use following code to move files to shcedule foleer

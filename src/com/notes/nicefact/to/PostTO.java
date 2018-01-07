@@ -72,14 +72,7 @@ public class PostTO {
 	private List<String> weekdays;
 	
 	int noOfSubmissions;
-	String weekDay;
-	public String getWeekDay() {
-		return weekDay;
-	}
-	public void setWeekDay(String weekDay) {
-		this.weekDay = weekDay;
-	}
-
+	Boolean allDayEvent;
 	long deadlineTime;
 	private String googleEventId;
 	public String getGoogleEventId() {
@@ -110,7 +103,7 @@ public class PostTO {
 		
 	}
 	
-	public PostTO(com.notes.nicefact.to.Event schedule, AppUser user) {
+/*	public PostTO(com.notes.nicefact.to.Event schedule, AppUser user) {
 		this.id = schedule.getPostId();
 		this.groupId = schedule.getGroupId();
 		this.postType = POST_TYPE.SCHEDULE;
@@ -144,7 +137,7 @@ public class PostTO {
 		}
 		this.title = schedule.getTitle();
 		this.googleEventId=schedule.getGoogleEventId();
-	}
+	}*/
 	public PostTO(Post post) {
 		this.id = post.getId();
 		this.groupId = post.getGroupId();
@@ -223,6 +216,8 @@ public class PostTO {
 		if(null !=post.getToDate()){
 			this.toDate = post.getToDate().getTime();
 		}
+		this.allDayEvent = post.getAllDayEvent();
+		this.weekdays = new ArrayList<>(post.getWeekdays());
 	}
 
 	private POST_TYPE postType = POST_TYPE.SIMPLE;
@@ -550,6 +545,12 @@ public class PostTO {
 	}
 	public void setWeekdays(List<String> weekdays) {
 		this.weekdays = weekdays;
+	}
+	public Boolean getAllDayEvent() {
+		return allDayEvent;
+	}
+	public void setAllDayEvent(Boolean allDayEvent) {
+		this.allDayEvent = allDayEvent;
 	}
 	
 }

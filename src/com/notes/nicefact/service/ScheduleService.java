@@ -1,6 +1,8 @@
 package com.notes.nicefact.service;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -9,6 +11,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.google.api.client.util.DateTime;
@@ -23,7 +26,7 @@ import com.notes.nicefact.content.AllSchoolError;
 import com.notes.nicefact.content.AllSchoolException;
 import com.notes.nicefact.controller.CalendarController;
 import com.notes.nicefact.dao.CommonDAO;
-import com.notes.nicefact.dao.GroupDAO;
+import com.notes.nicefact.dao.GroupMemberDAO;
 import com.notes.nicefact.dao.PostDAO;
 import com.notes.nicefact.dao.PostRecipientDAO;
 import com.notes.nicefact.entity.AppUser;
@@ -39,7 +42,6 @@ import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
-import com.notes.nicefact.util.CurrentContext;
 import com.notes.nicefact.util.Utils;
 
 public class ScheduleService extends CommonService<Post> {
@@ -60,7 +62,8 @@ public class ScheduleService extends CommonService<Post> {
 		postDAO = new PostDAO(em);
 	}
 
-	public Event updateEvent(com.notes.nicefact.to.Event schedule, AppUser user) throws IOException, AllSchoolException {
+/* 	 Use post service create event
+ * 	public Event updateEvent(com.notes.nicefact.to.Event schedule, AppUser user) throws IOException, AllSchoolException {
 		String calendarId = "primary";
 		String eventId = schedule.getId();
 		Event updatedEvent = null;
@@ -80,7 +83,8 @@ public class ScheduleService extends CommonService<Post> {
 		}
 		return updatedEvent;
 	}
-
+*/
+	/* Use post service create event
 	public List<PostTO> createEvent(com.notes.nicefact.to.Event schedule,
 			AppUser user) throws IOException, AllSchoolException {
 		com.google.api.services.calendar.Calendar service = GoogleAppUtils
@@ -111,8 +115,8 @@ public class ScheduleService extends CommonService<Post> {
 			Event.Reminders reminders = new Event.Reminders().setUseDefault(false).setOverrides(Arrays.asList(reminderOverrides));
 			event.setReminders(reminders);
 
-			/*String calendarId = "primary";
-			event = service.events().insert(calendarId, event).execute();*/
+			String calendarId = "primary";
+			event = service.events().insert(calendarId, event).execute();
 			schedule.setGoogleEventId(event.getId());
 			System.out.printf("Event created: %s\n", event.getHtmlLink());
 
@@ -124,7 +128,6 @@ public class ScheduleService extends CommonService<Post> {
 		for (String day : schedule.getWeekdays()) {
 			try{
 			PostTO postTo = new PostTO(schedule, user);
-			postTo.setWeekDay(day);
 			Post post = postService.upsert(postTo, CurrentContext.getAppUser());
 			PostTO savedTO = new PostTO(post);
 			postTos.add(savedTO);
@@ -138,7 +141,7 @@ public class ScheduleService extends CommonService<Post> {
 		logger.info("createEvent : " + postTos.size());
 		return postTos;
 	}
-
+*/
 
 	@Override
 	protected CommonDAO<Post> getDAO() {
@@ -265,7 +268,8 @@ public class ScheduleService extends CommonService<Post> {
 		 return  events.getItems().size();		
 	}
 
-	public void createCalendar(Group group) {
+	public void createGroupCalendar(Group group) {
+		logger.info("createGroupCalendar start");
 		AppUser groupAdmin =null;
 		for(String admin : group.getAdmins()){
 			groupAdmin = CacheUtils.getAppUser(admin);
@@ -298,37 +302,68 @@ public class ScheduleService extends CommonService<Post> {
 					AclRule rule = new AclRule();
 					Scope scope = new Scope();
 					scope.setType("default");
-					rule.setScope(scope).setRole("reader");
-
+					rule.setScope(scope).setRole(Constants.READER);
 					// Insert new access rule
 					AclRule createdRule = service.acl().insert(createdCalendar.getId(), rule).execute();
 					if(createdRule == null){
 						logger.error("cannot make calendar public : " + group.getId() + " , " + group.getName() + " , cal id : " +  createdCalendar.getId());
 					}
-					
-					for(String admin : group.getAdmins()){
-						if (!admin.equals(groupAdmin.getEmail())) {
-							rule = new AclRule();
-							scope = new Scope();
-							scope.setType("user").setValue(admin);
-							rule.setScope(scope).setRole("owner");
-							// Insert new access rule
-							createdRule = service.acl().insert(createdCalendar.getId(), rule).execute();
-							if (createdRule == null) {
-								logger.error("cannot add user as owner to calendar : " + group.getId() + " , " + group.getName() + " , cal id : " + createdCalendar.getId());
-							} 
-						}
-					}
+					updateGroupMemberPermissionsOnCalendar(group.getId());
+			
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);
 			}
 		}
-		
+		logger.info("createGroupCalendar exit");
+	}
+	
+	public void updateGroupMemberPermissionsOnCalendar(Long groupId){
+		logger.info("updateGroupMemberPermissionsOnCalendar start");
+		try {
+			Group group = groupService.get(groupId);
+			if(StringUtils.isBlank(group.getCalendarId())){
+				logger.warn("exit updateGroupMemberPermissionsOnCalendar as calendar id is null for group : " + group.getName() + " , " + group.getId() );
+				return;
+			}
+			GroupMemberDAO groupMemberDAO = new GroupMemberDAO(em);
+			AppUser groupAdmin = null;
+			for (String admin : group.getAdmins()) {
+				groupAdmin = CacheUtils.getAppUser(admin);
+				if (groupAdmin.getUseGoogleCalendar()) {
+					break;
+				}
+			}
+			AclRule rule;
+			Scope scope;
+			Utils.refreshToken(groupAdmin);
+			com.google.api.services.calendar.Calendar service = GoogleAppUtils.getCalendarService(groupAdmin);
+			for (GroupMember member : group.getMembers()) {
+				if (!StringUtils.isBlank(member.getCalendarPermissionId())) {
+					String scopeValue = member.getIsAdmin() ? Constants.OWNER : Constants.READER;
+					rule = new AclRule();
+					scope = new Scope();
+					scope.setType("user").setValue(member.getEmail());
+					rule.setScope(scope).setRole(scopeValue);
+					// Insert new access rule
+					AclRule createdRule = service.acl().insert(group.getCalendarId(), rule).execute();
+					if (createdRule == null) {
+						logger.error("cannot add user as " + scopeValue + " to calendar : " + group.getId() + " , " + group.getName() + " , cal id : " + group.getCalendarId());
+					} else {
+						member.setCalendarPermissionId(createdRule.getId());
+						member.setCalendarPermissionScope(scopeValue);
+						groupMemberDAO.upsert(member);
+					}
+				}
+			} 
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		logger.info("updateGroupMemberPermissionsOnCalendar exit");
 	}
 
-	public void createGroupEvent(Group group, Post post) {
-		AppUser groupAdmin =  CacheUtils.getAppUser(post.getCreatedBy());
+	public void createScheduleEvent(Group group, Post post) {
+		AppUser groupAdmin = CacheUtils.getAppUser(post.getCreatedBy());
 
 		if (null == groupAdmin || !groupAdmin.getUseGoogleCalendar()) {
 			logger.error("Cannot create event for admin : " + groupAdmin + ", post : " + post.getId() + " , " + post.getTitle());
@@ -339,13 +374,29 @@ public class ScheduleService extends CommonService<Post> {
 				com.google.api.services.calendar.Calendar calService = GoogleAppUtils.getCalendarService(groupAdmin);
 				Event event = new Event().set("sendNotifications", true).setSummary(post.getTitle()).setLocation(post.getLocation()).setDescription(post.getComment());
 				Date today = new Date();
-				DateTime startDateTime = new DateTime(post.getFromDate() == null ? today : post.getFromDate());
-				EventDateTime start = new EventDateTime().setDateTime(startDateTime).setTimeZone(Constants.INDIA_TIMEZONE);
-				event.setStart(start);
+				if (post.getAllDayEvent()) {
+					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+					String startDateStr = dateFormat.format(post.getFromDate());
+					DateTime startDateTime = new DateTime(startDateStr);
+					EventDateTime start = new EventDateTime().setDate(startDateTime).setTimeZone(Constants.INDIA_TIMEZONE);
+					event.setStart(start);
 
-				DateTime endDateTime = new DateTime(post.getToDate() == null ? today : post.getToDate());
-				EventDateTime end = new EventDateTime().setDateTime(endDateTime).setTimeZone(Constants.INDIA_TIMEZONE);
-				event.setEnd(end);
+					if (post.getToDate() != null) {
+						String endDateStr = dateFormat.format(post.getToDate());
+						DateTime endDateTime = new DateTime(endDateStr);
+						EventDateTime end = new EventDateTime().setDate(endDateTime).setTimeZone(Constants.INDIA_TIMEZONE);
+						event.setEnd(end);
+					}
+
+				} else {
+					DateTime startDateTime = new DateTime(post.getFromDate() == null ? today : post.getFromDate());
+					EventDateTime start = new EventDateTime().setDateTime(startDateTime).setTimeZone(Constants.INDIA_TIMEZONE);
+					event.setStart(start);
+
+					DateTime endDateTime = new DateTime(post.getToDate() == null ? today : post.getToDate());
+					EventDateTime end = new EventDateTime().setDateTime(endDateTime).setTimeZone(Constants.INDIA_TIMEZONE);
+					event.setEnd(end);
+				}
 
 				if (!post.getWeekdays().isEmpty()) {
 					String[] recurrence = Utils.createGoogleRecurrenceStr(post.getWeekdays());
@@ -376,6 +427,61 @@ public class ScheduleService extends CommonService<Post> {
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
+		}
+	}
+
+	public void createTaskEvent( Post post) {
+		Group group = CacheUtils.getGroup(post.getGroupId());
+		if(StringUtils.isBlank(group.getCalendarId())){
+			createGroupCalendar(group);
+		}
+		if(StringUtils.isBlank(group.getCalendarId())){
+			logger.error("cannot add event to calendar as calendar id is null for gorup : "  + group.getId() + " , " + group.getName());
+		}else{
+			AppUser groupAdmin = CacheUtils.getAppUser(post.getCreatedBy());
+
+			if (null == groupAdmin || !groupAdmin.getUseGoogleCalendar()) {
+				logger.error("Cannot create event for admin : " + groupAdmin + ", post : " + post.getId() + " , " + post.getTitle());
+			} else {
+
+				try {
+					Utils.refreshToken(groupAdmin);
+					com.google.api.services.calendar.Calendar calService = GoogleAppUtils.getCalendarService(groupAdmin);
+					Event event = new Event().set("sendNotifications", true).setSummary(post.getTitle()).setLocation(post.getLocation()).setDescription(post.getComment());
+					DateTime startDateTime = new DateTime(post.getDeadline());
+					EventDateTime start = new EventDateTime().setDateTime(startDateTime).setTimeZone(Constants.INDIA_TIMEZONE);
+					event.setStart(start);
+
+					DateTime endDateTime = new DateTime(post.getDeadline());
+					EventDateTime end = new EventDateTime().setDateTime(endDateTime).setTimeZone(Constants.INDIA_TIMEZONE);
+					event.setEnd(end);
+
+					EventReminder[] reminderOverrides = new EventReminder[] { new EventReminder().setMethod("email").setMinutes(24 * 60), new EventReminder().setMethod("popup").setMinutes(10), };
+					Event.Reminders reminders = new Event.Reminders().setUseDefault(false).setOverrides(Arrays.asList(reminderOverrides));
+					event.setReminders(reminders);
+					EventAttendee attendee;
+					List<EventAttendee> attendees = new ArrayList<>();
+					for (GroupMember member : group.getMembers()) {
+						if (!groupAdmin.getEmail().equals(member.getEmail())) {
+							attendee = new EventAttendee();
+							attendee = attendee.setEmail(member.getEmail());
+							attendees.add(attendee);
+						}
+					}
+					if (!attendees.isEmpty()) {
+						event.setAttendees(attendees);
+					}
+
+					event = calService.events().insert(group.getCalendarId(), event).execute();
+					post.setGoogleEventId(event.getId());
+					postDAO.upsert(post);
+					logger.info("Event created:: " + event.getHtmlLink());
+
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		
 		}
 	}
 

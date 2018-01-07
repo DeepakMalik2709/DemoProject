@@ -104,12 +104,19 @@ public class Group extends CommonEntity {
 
 	String taskFolderId;
 	String postFolderId;
+	String scheduleFolderId;
 	
 	String assignmentFolderId;
 	
 	
 	
+	public String getScheduleFolderId() {
+		return scheduleFolderId;
+	}
 
+	public void setScheduleFolderId(String scheduleFolderId) {
+		this.scheduleFolderId = scheduleFolderId;
+	}
 
 	public Boolean getIsGroupAttendaceAllowed() {
 		if(null == isGroupAttendaceAllowed){

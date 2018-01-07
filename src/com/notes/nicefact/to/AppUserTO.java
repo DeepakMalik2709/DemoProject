@@ -46,8 +46,6 @@ public class AppUserTO  implements Serializable  {
 	
 	Boolean deleted;
 	
-	String position;
-	
 	String department;
 	
 	String organization;
@@ -212,14 +210,6 @@ public class AppUserTO  implements Serializable  {
 		this.displayName = displayName;
 	}
 
-
-	public String getPosition() {
-		return position;
-	}
-
-	public void setPosition(String position) {
-		this.position = position;
-	}
 
 	public String getDepartment() {
 		return department;

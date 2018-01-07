@@ -1159,6 +1159,8 @@ public class SecureController extends CommonController {
 					if (StringUtils.isNotBlank(postFile.getThumbnail()) && Files.exists(Paths.get(postFile.getThumbnail()))) {
 						fileBytes = Utils.readFileBytes(postFile.getThumbnail());
 						CacheUtils.putInCache(cacheKey, fileBytes);
+					}else if(StringUtils.isNotBlank(postFile.getGoogleDriveId())){
+						noPreviewImage = "https://drive.google.com/thumbnail?sz=w200-h200&id=" + postFile.getGoogleDriveId();
 					}else if(postFile.getMimeType().contains("pdf")){
 						noPreviewImage = Constants.NO_PREVIEW_PDF;
 					}else if(postFile.getMimeType().contains("doc") || postFile.getMimeType().contains("docx")){

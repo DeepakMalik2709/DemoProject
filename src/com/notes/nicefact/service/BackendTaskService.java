@@ -109,7 +109,7 @@ public class BackendTaskService extends CommonService<BackendTask> {
 		saveAndTrigger(task);
 		if (!post.getFiles().isEmpty()) {
 			task = new BackendTask();
-			task.setPath("task/addThumbnail");
+			task.setPath("schedule/addThumbnail");
 			task.addToParamsMap("taskId", post.getId());
 			saveAndTrigger(task);
 

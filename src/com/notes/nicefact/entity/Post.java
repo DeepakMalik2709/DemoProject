@@ -25,6 +25,7 @@ import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.to.PostRecipientTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.CacheUtils;
+import com.notes.nicefact.util.Utils;
 
 @Entity
 public class Post extends AbstractComment {
@@ -102,8 +103,9 @@ int noOfSubmissions;
 	String title;
 	
 	String location;
-	String weekday;
 	private String googleEventId;
+	Boolean allDayEvent;
+	
 	public String getGoogleEventId() {
 		return googleEventId;
 	}
@@ -153,12 +155,20 @@ int noOfSubmissions;
 		if(post.getDeadlineTime()  >0){
 			this.deadline = new Date(post.getDeadlineTime());
 		}
+		this.allDayEvent = post.getAllDayEvent();
 		if(post.getFromDate()    >0){
 			this.fromDate =new Date(post.getFromDate());
+			if(this.allDayEvent!=null && this.allDayEvent == true){
+				this.fromDate = Utils.removeTimeFromDate(this.fromDate);
+			}
 		}
 		if(post.getToDate()    >0){
 			this.toDate = new Date(post.getToDate());
+			if(this.allDayEvent!=null && this.allDayEvent == true){
+				this.toDate = Utils.removeTimeFromDate(this.toDate);
+			}
 		}
+		setWeekdays(post.getWeekdays());
 		if(post.getPostType()!=null){
 			this.postType=post.getPostType();
 		}
@@ -168,17 +178,28 @@ int noOfSubmissions;
 		
 		this.title = post.getTitle();
 		this.googleEventId = post.getGoogleEventId();
-		this.weekday= post.getWeekDay();
+		
 	}
 
 	public void updateProps(Post post) {
 		this.tags = post.getTags();
 		this.comment = post.getComment();
 		this.isEdited=true;
-		if(post.getDeadline()  !=null){
+		setWeekdays(post.getWeekdays());
+		if(post.getDeadline()  ==null){
+			this.deadline = null;
+		}else{
 			this.deadline = new Date(post.getDeadline().getTime());
 		}
-		this.title = post.getTitle();
+		if(null !=post.getTitle()){
+			this.title = post.getTitle();
+		}
+		/*this.fromDate = post.getFromDate();
+		this.toDate =  post.getToDate();
+		setWeekdays(post.getWeekdays());
+		this.location = post.getLocation();
+		this.allDayEvent = post.getAllDayEvent();
+		*/
 	}
 
 	public Long getCompanyId() {
@@ -406,5 +427,11 @@ int noOfSubmissions;
 	}
 	public void setWeekdays(List<String> weekdays) {
 		this.weekdays = weekdays;
+	}
+	public Boolean getAllDayEvent() {
+		return allDayEvent;
+	}
+	public void setAllDayEvent(Boolean allDayEvent) {
+		this.allDayEvent = allDayEvent;
 	}
 }

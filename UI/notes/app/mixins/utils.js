@@ -25,14 +25,23 @@ export default Ember.Mixin.create({
 		if(item.updatedTime){
 			Ember.set(item, "updatedDisplayTime", this.getTimeDifference(Ember.get(item, 'updatedTime')));
 		}
-		if(item.deadlineTime){
+		if(Ember.get(item,'deadlineTime')){
 			Ember.set(item, "deadlineDisplayTime", this.getFullTime(Ember.get(item, 'deadlineTime')));
 		}
-		if(item.fromDate){
-			Ember.set(item, "fromDisplayTime", this.getFullTime(Ember.get(item, 'fromDate')));
+		if(Ember.get(item,'fromDate')){
+			if(Ember.get(item,'allDayEvent')){
+				Ember.set(item, "fromDisplayTime", this.getDate(Ember.get(item, 'fromDate')));
+			}else{
+				Ember.set(item, "fromDisplayTime", this.getFullTime(Ember.get(item, 'fromDate')));
+			}
 		}
-		if(item.toDate){
-			Ember.set(item, "toDisplayTime", this.getFullTime(Ember.get(item, 'toDate')));
+		if(Ember.get(item,'toDate')){
+			if(Ember.get(item,'allDayEvent')){
+				Ember.set(item, "toDisplayTime", this.getDate(Ember.get(item, 'toDate')));
+			}else{
+				Ember.set(item, "toDisplayTime", this.getFullTime(Ember.get(item, 'toDate')));
+			}
+			
 		}
     },
 	   getTimeDifference(time) {
@@ -68,6 +77,9 @@ export default Ember.Mixin.create({
     },
     getFullTime(time){
     	return moment(time).format("Do MMM YYYY hh:mm a");
+    },
+    getDate(time){
+    	return moment(time).format("Do MMM YYYY");
     },
     
     dateTimeFormatAMPM: function(date) {

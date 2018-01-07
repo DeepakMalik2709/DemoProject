@@ -704,5 +704,12 @@ public class Utils {
 		return recurrence;
 	}
 
-
+	public static Date removeTimeFromDate(Date date){
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		for(int i = Calendar.HOUR_OF_DAY; i<= Calendar.MILLISECOND; i++){
+			cal.set(i, 0);
+		}
+		return cal.getTime();
+	} 
 }

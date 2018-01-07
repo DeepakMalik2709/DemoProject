@@ -38,6 +38,7 @@ export default DS.Model.extend({
 		  }),
 		  fromDate: DS.attr('number'),
 		  toDate: DS.attr('number'),
+		  allDayEvent : DS.attr('boolean'),
 		  /* schedule variables */
 		  
 	  files: DS.attr( {

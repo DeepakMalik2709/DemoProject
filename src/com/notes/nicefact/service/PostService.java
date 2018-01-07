@@ -168,11 +168,11 @@ public class PostService extends CommonService<Post> {
 		PostTO postTO;
 		Date today = new Date();
 		for (Post post : posts) {
-			if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
+			/*if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
 				if ((null != post.getFromDate() && !post.getFromDate().before(today)) || (null != post.getToDate() && !post.getToDate().after(today))) {
 					continue;
 				}
-			}
+			}*/
 			postTO = new PostTO(post);
 			toList.add(postTO);
 		}
@@ -331,12 +331,12 @@ public class PostService extends CommonService<Post> {
 		PostTO postTO;
 		Date today = new Date();
 		for (Post post : posts) {
-			if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
+/*			if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
 				if (!post.getFromDate().before(today)
 						|| !post.getToDate().after(today)) {
 					continue;
 				}
-			}
+			}*/
 			postTO = new PostTO(post);
 			toList.add(postTO);
 		}
@@ -432,7 +432,6 @@ public class PostService extends CommonService<Post> {
 			for (Long groupId : postTo.getGroupIds()) {
 				Post post = new Post(postTo);
 				post.setGroupId(groupId);
-				post.setWeekdays(postTo.getWeekdays());
 				post.setPostType(POST_TYPE.SCHEDULE);
 				Group group = CacheUtils.getGroup(groupId);
 				if (group.getBlocked().contains(appUser.getEmail())) {

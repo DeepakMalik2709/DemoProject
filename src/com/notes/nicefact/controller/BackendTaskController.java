@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,10 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.EventReminder;
 import com.notes.nicefact.dao.TaskSubmissionDAO;
 import com.notes.nicefact.entity.AbstractFile;
 import com.notes.nicefact.entity.AbstractFile.UPLOAD_TYPE;
@@ -844,8 +838,10 @@ public class BackendTaskController extends CommonController {
 		try {
 			GroupService groupService = new GroupService(em);
 			Group group = groupService.get(groupId);
+			ScheduleService scheduleService = new ScheduleService(em);
 			if (null != group) {
 				groupService.updateGroupMemberAccessPermissions(group);
+				scheduleService.updateGroupMemberPermissionsOnCalendar(groupId);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -1094,6 +1090,11 @@ public class BackendTaskController extends CommonController {
 				notificationService.upsert(notification);
 				BackendTaskService backendTaskService = new BackendTaskService(em);
 				backendTaskService.createSendNotificationMailsTask(notification);
+			}
+			
+			if(post.getDeadline() !=null){
+				ScheduleService scheduleService = new ScheduleService(em);
+				scheduleService.createTaskEvent(post);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -1392,13 +1393,12 @@ public class BackendTaskController extends CommonController {
 			}
 			ScheduleService scheduleService = new ScheduleService(em);
 			if(StringUtils.isBlank(group.getCalendarId())){
-				scheduleService.createCalendar(group);
+				scheduleService.createGroupCalendar(group);
 			}
 			if(StringUtils.isBlank(group.getCalendarId())){
 				logger.error("cannot add event to calendar as calendar id is null for gorup : "  + group.getId() + " , " + group.getName());
 			}else{
-				scheduleService.createGroupEvent(group,post);
-			
+				scheduleService.createScheduleEvent(group,post);
 			}
 			
 		} catch (Exception e) {
@@ -1413,4 +1413,69 @@ public class BackendTaskController extends CommonController {
 		renderResponseRaw(true, response);
 	}
 
+	@POST
+	@Path("schedule/addThumbnail")
+	public void addThumbnailToSchduleFiles(@QueryParam("taskId") Long taskId, @Context HttpServletResponse response) throws IOException, InterruptedException {
+		logger.info("addThumbnailToSchduleFiles, taskId : " + taskId);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			TaskService taskService = new TaskService(em);
+			Post post = taskService.get(taskId);
+			AppUser user = CacheUtils.getAppUser(post.getCreatedBy());
+			if (user.getUseGoogleDrive() ) {
+				moveSchduleFilesToUserGoogleDrive(post, user, em);
+			}
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+
+		logger.info("exit addThumbnailToSchduleFiles");
+		renderResponseRaw(true, response);
+	}
+	
+	private void moveSchduleFilesToUserGoogleDrive(Post task, AppUser user, EntityManager em) {
+		CommonEntityService commonService = new CommonEntityService(em);
+		GoogleDriveService driveService = GoogleDriveService.getInstance();
+		List<PostFile> files = task.getFiles();
+		GoogleDriveFile driveFile;
+		MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(task.getGroupId()).addParents( FOLDER.Attachments, FOLDER.Schedule).setUser(user);
+		for (int index = 0 ; index < files.size(); index++) {
+			PostFile postFile = files.get(index);
+			if (StringUtils.isBlank(postFile.getGoogleDriveId())) {
+				logger.info("upload to drive , " + postFile.getName() + " , " + postFile.getMimeType());
+				try {
+					driveFile = driveService.uploadFileToUserAccount(postFile, user);
+					if (null != driveFile) {
+						moveFileTO.addFileIds(driveFile.getId());
+						driveService.renameFile(driveFile.getId(), postFile.getName(), user);
+						postFile.setGoogleDriveId(driveFile.getId());
+						postFile.setIcon(driveFile.getIconLink());
+						postFile.setDriveLink(driveFile.getEditLink());
+						postFile.setEmbedLink(driveFile.getEmbedLink());
+						postFile.setUploadType(UPLOAD_TYPE.GOOGLE_DRIVE);
+						commonService.upsert(postFile);
+						try {
+							Files.deleteIfExists(Paths.get(postFile.getPath()));
+						} catch (IOException e) {
+							logger.error("could not delete : " + postFile.getPath() + " , " + e.getMessage(), e);
+						}
+						getGroupPostFilesThumbnailFromDriveFile(driveFile, task.getGroupId(), postFile, user, commonService);
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			} else if (StringUtils.isBlank(postFile.getThumbnail())) {
+				driveFile = driveService.getFileFields(postFile.getGoogleDriveId(), "thumbnailLink", user);
+				getGroupPostFilesThumbnailFromDriveFile(driveFile, task.getGroupId(), postFile, user, commonService);
+			}else {
+				logger.info("File is already on google drive , " + postFile.getName() + " , " + postFile.getMimeType());
+			}
+		}
+		driveService.moveFile(moveFileTO);
+	}
 }

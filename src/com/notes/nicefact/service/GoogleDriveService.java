@@ -916,9 +916,10 @@ public class GoogleDriveService {
 					case Task:
 						fileParentId = group.getTaskFolderId();
 						break;
-						/*case Schedule:
+					case Schedule:
 						fileParentId = group.getScheduleFolderId();
 						break;
+						/*
 					case Assignment:
 						fileParentId = group.getAssignmentFolderId();
 						break;*/
@@ -1084,12 +1085,12 @@ public class GoogleDriveService {
 					db.setTaskFolderId(taskFolder.getId());
 				}
 
-/*				GoogleDriveFile scheduleFolder = StringUtils.isBlank(group.getScheduleFolderId()) ? null : getFileFields(group.getScheduleFolderId(), null, user);
+				GoogleDriveFile scheduleFolder = StringUtils.isBlank(group.getScheduleFolderId()) ? null : getFileFields(group.getScheduleFolderId(), null, user);
 				if (null == scheduleFolder) {
 					scheduleFolder = createNewFile(FOLDER.Schedule.toString(), GoogleFileTypes.FOLDER, user);
 					moveFile(scheduleFolder.getId(), fileId, user);
 					db.setScheduleFolderId(scheduleFolder.getId());
-				}*/
+				}
 
 /*				GoogleDriveFile assignmentFolder = StringUtils.isBlank(group.getAssignmentFolderId()) ? null : getFileFields(group.getAssignmentFolderId(), null, user);
 				if (null == assignmentFolder) {
@@ -1141,9 +1142,9 @@ public class GoogleDriveService {
 			case Tutorial:
 				fileId = user.getTutorialFolderId();
 				break;
-			case Schedule:
+			/*case Schedule:
 				fileId = user.getScheduleFolderId();
-				break;
+				break;*/
 			default:
 				/* return as not valid for level 0 or 1 folders */
 				return null;
@@ -1186,24 +1187,24 @@ public class GoogleDriveService {
 						user.setTutorialFolderId(fileId);
 						updatePermission(fileId, null, Constants.READER, Constants.ANYONE, "", true, false, user);
 						break;
-					case Schedule:
+					/*case Schedule:
 						dbUser.setScheduleFolderId(fileId);
 						user.setScheduleFolderId(fileId);
-						break;
+						break;*/
 					default:
 						return null;
 					}
 					appUserService.upsert(dbUser);
 
 					List<FOLDER> level1 = Arrays.asList(new FOLDER[] { FOLDER.Attachments, FOLDER.Library , FOLDER.Task_Submission, FOLDER.Tutorial});
-					List<FOLDER> attachmentLevels = Arrays.asList(new FOLDER[] { FOLDER.Schedule});
+					/*List<FOLDER> attachmentLevels = Arrays.asList(new FOLDER[] { FOLDER.Schedule});*/
 					if (FOLDER.AllSchool.equals(folder)) {
 						// any changes for main folder
 					} else if (level1.contains(folder)) {
 						moveFile(fileId, user.getGoogleDriveFolderId(), user);
-					} else if (attachmentLevels.contains(folder)) {
+					}/* else if (attachmentLevels.contains(folder)) {
 						moveFile(fileId, user.getGoogleDriveAttachmentsFolderId(), user);
-					}
+					}*/
 					if (em.isOpen()) {
 						em.close();
 					}

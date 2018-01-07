@@ -45,10 +45,11 @@ public class GroupMember extends CommonEntity{
 
 	String joinRequestApprover ;
 	
+	String calendarPermissionId;
+	String calendarPermissionScope;
+	
 	@Basic
 	Date  joinRequestApproveDate;
-	
-	private String position;
 	
 	private String folderPermissionId;
 	
@@ -78,7 +79,6 @@ public class GroupMember extends CommonEntity{
 		super();
 		this.email = appuser.getEmail();
 		this.name = appuser.getDisplayName();
-		this.position = appuser.getPosition();
 		this.department = appuser.getDepartment();
 		this.organization = appuser.getOrganization();
 	}
@@ -87,7 +87,6 @@ public class GroupMember extends CommonEntity{
 		super();
 		this.email = appuser.getEmail();
 		this.name = appuser.getDisplayName();
-		this.position = appuser.getPosition();
 		this.department = appuser.getDepartment();
 		this.organization = appuser.getOrganization();
 	}
@@ -139,17 +138,13 @@ public class GroupMember extends CommonEntity{
 		this.email = email;
 	}
 
-	public String getPosition() {
-		return position;
-	}
 
-	public void setPosition(String position) {
-		this.position = position;
-	}
-
-
-	public Boolean getIsAdmin() {
+/*	public Boolean getIsAdmin() {
 		return isAdmin;
+	}*/
+	
+	public Boolean getIsAdmin() {
+		return getPositions().contains(UserPosition.ADMIN);
 	}
 
 
@@ -247,9 +242,25 @@ public class GroupMember extends CommonEntity{
 	}
 
 
+	public String getCalendarPermissionId() {
+		return calendarPermissionId;
+	}
+
+	public void setCalendarPermissionId(String calendarPermissionId) {
+		this.calendarPermissionId = calendarPermissionId;
+	}
+
+	public String getCalendarPermissionScope() {
+		return calendarPermissionScope;
+	}
+
+	public void setCalendarPermissionScope(String calendarPermissionScope) {
+		this.calendarPermissionScope = calendarPermissionScope;
+	}
+
 	@Override
 	public String toString() {
-		return "GroupMember [email=" + email + ", name=" + name + ", isAdmin=" + isAdmin + ", isBlocked=" + isBlocked + ", isAppUser=" + isAppUser + ", position=" + position + ", folderPermissionId="
+		return "GroupMember [email=" + email + ", name=" + name + ", isAdmin=" + isAdmin + ", isBlocked=" + isBlocked + ", isAppUser=" + isAppUser  + ", folderPermissionId="
 				+ folderPermissionId + ", libraryFolderId=" + libraryFolderId + ", taskSubmissionFolderId=" + taskSubmissionFolderId + ", error=" + error + ", department=" + department
 				+ ", organization=" + organization + ", isNotificationSent=" + isNotificationSent + "]";
 	}
