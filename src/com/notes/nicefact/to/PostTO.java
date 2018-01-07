@@ -155,7 +155,7 @@ public class PostTO {
 		this.updatedTime = post.getUpdatedTime().getTime();
 		this.numberOfComments = post.getNumberOfComments();
 		this.numberOfReactions = post.getNumberOfReactions();	
-		if(post.getPostType().equals(POST_TYPE.SCHEDULE) ){	
+		if(POST_TYPE.SCHEDULE.equals(post.getPostType()) ){	
 			this.setScheduleAttribute(post);
 		}
 		CommentTO commentTO;

@@ -707,6 +707,10 @@ public class Utils {
 	public static Date removeTimeFromDate(Date date){
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
+		/* first convert from UTC to IST */
+		cal.add(Calendar.HOUR_OF_DAY, 5);
+		cal.add(Calendar.MINUTE, 30);
+		cal.getTime();
 		for(int i = Calendar.HOUR_OF_DAY; i<= Calendar.MILLISECOND; i++){
 			cal.set(i, 0);
 		}
