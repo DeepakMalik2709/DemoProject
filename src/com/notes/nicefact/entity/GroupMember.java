@@ -42,6 +42,9 @@ public class GroupMember extends CommonEntity{
 	Boolean isAppUser = true;
 
 	Boolean isJoinRequestApproved = false;
+	
+	/* to track if allschool drive folders are moved in correct order */
+	Boolean isFolderHierarchyCorrect = false;
 
 	String joinRequestApprover ;
 	
@@ -256,6 +259,17 @@ public class GroupMember extends CommonEntity{
 
 	public void setCalendarPermissionScope(String calendarPermissionScope) {
 		this.calendarPermissionScope = calendarPermissionScope;
+	}
+
+	public Boolean getIsFolderHierarchyCorrect() {
+		if(null == isFolderHierarchyCorrect){
+			isFolderHierarchyCorrect = false;
+		}
+		return isFolderHierarchyCorrect;
+	}
+
+	public void setIsFolderHierarchyCorrect(Boolean isFolderHierarchyCorrect) {
+		this.isFolderHierarchyCorrect = isFolderHierarchyCorrect;
 	}
 
 	@Override

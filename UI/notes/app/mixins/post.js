@@ -12,10 +12,10 @@ export default Ember.Mixin.create(utilsMixin , {
 	  }),
 	  canDelete :Ember.computed('item', 'contextService', function() {
 			if(typeof this.get('group') !=undefined){
-				if(this.get('contextService.context.loginUser')){
-					return this.get('item.createdByEmail') ==  this.get('contextService.context.loginUser.email');
-				}else if(this.get('group.isAdmin')){
+				if(this.get('group.isAdmin')){
 					return true;
+				}else if(this.get('contextService.context.loginUser')){
+					return this.get('item.createdByEmail') ==  this.get('contextService.context.loginUser.email');
 				}else if(this.get('group.isBlocked')){
 					return false;
 				}else if(!this.get('group.isMember')){

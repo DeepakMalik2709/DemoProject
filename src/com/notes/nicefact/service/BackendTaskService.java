@@ -158,17 +158,17 @@ public class BackendTaskService extends CommonService<BackendTask> {
 		saveAndTrigger(task);
 	}
 	
-	public void createUpdateGroupMemberAccessPermissionsTask(Long groupId) {
-		BackendTask task = new BackendTask();
-		task.setPath("group/updateGroupMemberAccessPermissions");
-		task.addToParamsMap("groupId", groupId);
-		saveAndTrigger(task);
-	}
-	
 	
 	public void createSendGroupAddNotificationTask(Long groupId) {
 		BackendTask task = new BackendTask();
 		task.setPath("group/sendGroupAddNotification");
+		task.addToParamsMap("groupId", groupId);
+		saveAndTrigger(task);
+	}
+	
+	public void createAfterGroupSaveTask(Long groupId) {
+		BackendTask task = new BackendTask();
+		task.setPath("group/afterSave");
 		task.addToParamsMap("groupId", groupId);
 		saveAndTrigger(task);
 	}

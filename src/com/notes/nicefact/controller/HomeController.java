@@ -47,7 +47,6 @@ import com.notes.nicefact.to.GroupTO;
 import com.notes.nicefact.to.InstituteTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TutorialTO;
-import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CommonContext;
 import com.notes.nicefact.util.Constants;

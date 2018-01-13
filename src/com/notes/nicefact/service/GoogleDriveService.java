@@ -38,7 +38,6 @@ import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.exception.ServiceException;
-import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GoogleDriveFile;
 import com.notes.nicefact.to.GoogleFilePermission;
 import com.notes.nicefact.to.MoveFileTO;
@@ -256,6 +255,9 @@ public class GoogleDriveService {
 				} else if (response.getEntity() != null) {
 					String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
 					logger.info(respStr);
+					if(respStr.contains("invalidSharingRequest")){
+						return null;
+					}
 				}
 				request1.releaseConnection();
 				Thread.sleep((i * 1000) + new Random().nextInt(1000));
@@ -457,6 +459,8 @@ public class GoogleDriveService {
 
 			if (resp != null) {
 				googleFilerPermission = new GoogleFilePermission(resp);
+			}else if(!sendNotificationEmails){
+				return updatePermission(fileId, permissionId, postData, user, true, withLink);
 			}
 		} catch (UnsupportedEncodingException e) {
 			logger.error(e.getMessage(), e);
@@ -520,7 +524,7 @@ public class GoogleDriveService {
 		return driveFile;
 	}
 
-	private void moveFile(String fileId, String parentId, AppUser user) {
+	void moveFile(String fileId, String parentId, AppUser user) {
 		logger.info("moveFile start , fileId : " + fileId +" , parentId:  " + parentId );
 		String url = DRIVE_FILES_URL + fileId + "/parents";
 		JSONObject postData = new JSONObject();
@@ -867,7 +871,7 @@ public class GoogleDriveService {
 	 */
 	public void moveFile(MoveFileTO moveFileTO) {
 		logger.info("start moveFile , moveFileTO : "+  moveFileTO);
-		if(moveFileTO.getFileIds().isEmpty() && Constants.FIRST_LOGIN_TEST_GROUP != moveFileTO.getGroupId()){
+		if(moveFileTO.getFileIds().isEmpty() &&  moveFileTO.isTest()){
 			logger.warn("file ids is empty : " + moveFileTO);
 			return ;
 		}
@@ -880,10 +884,6 @@ public class GoogleDriveService {
 				}
 		}
 		
-		if( Constants.FIRST_LOGIN_TEST_GROUP == moveFileTO.getGroupId()){
-			logger.warn("first login folders task exit  ");
-			return;
-		}
 		
 		if( moveFileTO.getGroupId() !=null ){
 			FOLDER parent = moveFileTO.getParents().get(0);
@@ -1061,7 +1061,6 @@ public class GoogleDriveService {
 					db = groupService.get(groupId);
 					db.setFolderId(file.getId());
 					groupService.upsert(db);
-
 				}
 			}
 

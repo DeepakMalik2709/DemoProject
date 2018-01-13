@@ -150,6 +150,7 @@ public class CacheUtils {
 	public static void addUserToCache(AppUser user){
 		if (null!= user) {
 			user.getGroupIds().size();
+			user.getJoinRequestGroups();
 			user.getScopes().size();
 			String cacheKey = generateUserKey(user.getEmail());
 			putInCache(cacheKey, user);

@@ -70,7 +70,6 @@ import com.notes.nicefact.to.MoveFileTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
-import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.MailService;
 import com.notes.nicefact.util.Utils;
@@ -830,9 +829,7 @@ public class BackendTaskController extends CommonController {
 		renderResponseRaw(true, response);
 	}
 
-	@POST
-	@Path("group/updateGroupMemberAccessPermissions")
-	public void updateGroupMemberAccessPermissions(@QueryParam("groupId") Long groupId, @Context HttpServletResponse response) throws IOException, InterruptedException {
+	public void updateGroupMemberAccessPermissions( Long groupId) {
 		logger.info("start updateGroupMemberAccessPermissions, groupId : " + groupId);
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
@@ -852,6 +849,32 @@ public class BackendTaskController extends CommonController {
 		}
 
 		logger.info("exit updateGroupMemberAccessPermissions");
+	}
+	
+
+	@POST
+	@Path("group/afterSave")
+	public void afterGroupSave(@QueryParam("groupId") Long groupId, @Context HttpServletResponse response) throws IOException, InterruptedException {
+		logger.info("start afterGroupSave, groupId : " + groupId);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			GroupService groupService = new GroupService(em);
+			Group group = groupService.get(groupId);
+			ScheduleService scheduleService = new ScheduleService(em);
+			if (null != group) {
+				groupService.updateGroupMemberAccessPermissions(group);
+				groupService.updateGroupFolderPermissions(groupId);
+				scheduleService.updateGroupMemberPermissionsOnCalendar(groupId);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+
+		logger.info("exit afterGroupSave");
 		renderResponseRaw(true, response);
 	}
 
@@ -940,7 +963,7 @@ public class BackendTaskController extends CommonController {
 			GoogleDriveService googleDriveService = GoogleDriveService.getInstance();
 			AppUser user = appUserService.getAppUserByEmail(email);
 			if (StringUtils.isNotBlank(user.getRefreshToken())) {
-				MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setGroupId(Constants.FIRST_LOGIN_TEST_GROUP).addParents( FOLDER.Attachments,  FOLDER.Library, FOLDER.Task_Submission).setUser(user);
+				MoveFileTO moveFileTO =  MoveFileTO.getInstances().setFileOwner(user.getEmail()).setTest().addParents( FOLDER.Attachments,  FOLDER.Library, FOLDER.Task_Submission).setUser(user);
 				googleDriveService.moveFile(moveFileTO);
 			}
 		} catch (Exception e) {

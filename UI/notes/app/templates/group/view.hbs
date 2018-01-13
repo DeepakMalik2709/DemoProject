@@ -122,7 +122,7 @@
                     <button  {{action 'showMembers' model}} class="btn btn-default pull-right" >Members</button>
                 </div>
 		    </div><!-- /.box-header -->
-		    <div class="box-body no-padding" style="max-height: 225px;overflow-y: scroll;">
+		    <div class="box-body no-padding group-view-member-list" style="max-height: 225px;overflow-y: scroll;">
 		        <table class="table">
 		            <tbody><tr>
 		                <th>Name</th>
@@ -254,71 +254,7 @@
  
  
 <!-- view members in  group Popup-->
-{{group-item-view-members model=model   updateMember="updateMember" deleteMember="deleteMember" toggleBlockMember="toggleBlockMember" deleteGroupMember="deleteGroupMember"}}
-<!-- 
-<div class="modal vcenter" id="members-list-modal" tabindex="-1" role="dialog" aria-labelledby="PopUp" data-backdrop="static" >
-  <div class="modal-dialog modal-md" role="document">
-    <div class="modal-content">
-      <div class="modal-header noborder"> 
-      	<a class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></a>
-        <h4 class="modal-title" id="myModalLabel"> 
-        	{{model.name}} : members list <span class="{{if isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
-      	</h4>
-      	
-      	<ul class="nav nav-tabs">
-  <li class="{{unless model.showGroupMembers 'active' ''}}"><a href="javascript:void(0);" {{action "toggleUserList"}} >Users</a></li>
-  <li  class="{{if model.showGroupMembers 'active' ''}}"><a href="javascript:void(0);" {{action "toggleUserList"}}>Groups</a></li>
-</ul>
-      </div>
-      <div class="modal-body">
-      	<div class="form-box group-form mtop-15"  class="{{unless model.showGroupMembers 'show' 'hide'}}">
-          <div class="form-group">
-            <div class="ol-user-list"> 
-            {{#each model.members as |user| }}    	
-                <div class="user-with-email" >
-                    <div class="s-list">
-                        {{user.email}}
-                         <button type="button" {{action "deleteMember" user}} class="btn btn-sm btn-default mr-5" ><i class="fa fa-trash" aria-hidden="true"></i>Delete</button>
-                         <button type="button" {{action "toggleBlockMember" user}} class="btn btn-sm btn-default mr-5  {{if user.isBlocked 'black-border-1px' ''}}" ><i class="fa fa-ban {{if user.isBlocked 'text-danger'}}" aria-hidden="true"></i>Block</button>
-                         <button type="button" {{action "toggleAdminMember" user}} class="btn btn-sm btn-default mr-5 {{if user.isAdmin 'black-border-1px' ''}}"><i class="fa {{if user.isAdmin 'fa-unlock' 'fa-lock'}}" aria-hidden="true"></i>Admin</button>
-                   <span class="{{if user.isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
-                    </div>
-                </div>
-              {{/each}}
-              
-            </div>
-          </div>
-        </div>
-        
-        user list end
-        
-        group list start
-        <div class="form-box group-form mtop-15"  class="{{if model.showGroupMembers 'show' 'hide'}}">
-          <div class="form-group">
-            <div class="ol-user-list"> 
-            {{#each model.memberGroups as |memberGroup| }}    	
-                <div class="user-with-email" >
-                    <div class="s-list">
-                          {{memberGroup.name}}
-                         <button type="button" {{action "deleteGroupMember" memberGroup}} class="btn btn-sm btn-default mr-5" ><i class="fa fa-trash" aria-hidden="true"></i>Delete</button>
-                   	 <span class="{{if user.isLoading 'inlinedisplay' 'nodisplay'}}"><img src="/img/loading.gif" /></span>
-                    </div>
-                </div>
-              {{/each}}
-            </div>
-          </div>
-        </div>
-        group list end
-      </div>
-      <div class="modal-footer" >
-      	<div class="footer-btn-box">
-            <button type="button" class="btn btn-lg btn-default mr-5" data-dismiss="modal"><i class="fa fa-chevron-left" aria-hidden="true"></i>Cancel</button>
-            <button type="button"  class="btn btn-lg btn-primary" {{action "saveGroupMembers"}} data-dismiss="modal"><i class="fa fa-plus" aria-hidden="true"></i>Add</button>
-          </div>
-      </div>
- 	</div>
- </div>
-</div> -->
+{{group-item-view-members model=model   updateMember="updateMember" deleteMember="deleteMember" toggleBlockMember="toggleBlockMember" deleteGroupMember="deleteGroupMember" fetchMoreMembers="fetchMoreMembers"}}
 
 <div class="modal vcenter" id="members-request-modal" tabindex="-1" role="dialog" aria-labelledby="PopUp" data-backdrop="static" >
   <div class="modal-dialog modal-md" role="document">

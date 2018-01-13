@@ -27,7 +27,7 @@
         {{#if singleInstitute}}
         {{firstInstitute.label}}
         {{else}}
-			{{select-box  content=institutes
+			{{select-box  prompt='Select' content=institutes
 			selection=item.institute className='form-control'
 			didChangeAction='setInstitute' }} 
 			{{/if}}

@@ -3314,3 +3314,8 @@ display: inline-block;
 .navbar-nav > li > a.no-padding{
 	padding:0 !important;
 }
+
+.group-user-list{
+	    height: 300px;
+    overflow-y: auto;
+}

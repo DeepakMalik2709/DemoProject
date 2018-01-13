@@ -9,6 +9,22 @@ export default Ember.Route.extend(authenticationMixin, {
 
     },
     groupService: Ember.inject.service('group'),
+    contextService: Ember.inject.service('context'),
+    afterModel(transition) {
+		 var context = this.contextService.fetchContext(result=>{
+				if(result && result.code==0){
+					 var useGoogleDrive = Ember.get(result , "loginUser.useGoogleDrive")
+					 if(false == useGoogleDrive){
+			        		if(confirm("AllSchool needs access to Google Drive and Calendar to create Groups. Would you like to grant permission now ?")){
+			        			window.location.href= "/a/oauth/googleAllAuthorization";
+			        		}else{
+								 this.transitionTo('home');
+							 }
+			        	}
+				}
+			});
+		  },
+   
     setupController: function(controller, model) {
         this._super(controller, model);
         controller.set('pageTitle', 'Create Group');

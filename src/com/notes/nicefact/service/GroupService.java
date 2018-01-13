@@ -15,6 +15,7 @@ import com.google.api.services.calendar.model.EventAttendee;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.dao.GroupDAO;
 import com.notes.nicefact.dao.GroupMemberDAO;
+import com.notes.nicefact.dao.PostFileDAO;
 import com.notes.nicefact.dao.TagDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
@@ -23,6 +24,8 @@ import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.Notification;
 import com.notes.nicefact.entity.NotificationRecipient;
+import com.notes.nicefact.entity.Post.POST_TYPE;
+import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.NotificationAction;
@@ -30,14 +33,18 @@ import com.notes.nicefact.enums.NotificationType;
 import com.notes.nicefact.enums.UserPosition;
 import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.exception.UnauthorizedException;
+import com.notes.nicefact.service.GoogleDriveService.FOLDER;
 import com.notes.nicefact.to.AttendanceMemberTO;
+import com.notes.nicefact.to.GoogleFilePermission;
 import com.notes.nicefact.to.GroupAttendanceTO;
 import com.notes.nicefact.to.GroupChildrenTO;
 import com.notes.nicefact.to.GroupMemberTO;
 import com.notes.nicefact.to.GroupTO;
+import com.notes.nicefact.to.MoveFileTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.SelectBoxTO;
 import com.notes.nicefact.util.CacheUtils;
+import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
 import com.notes.nicefact.util.Utils;
 
@@ -123,9 +130,10 @@ public class GroupService extends CommonService<Group> {
 			addMembersToNewGroup(groupTO, group, appUser);
 			upsert(group);
 			appUser.getGroupIds().add(group.getId());
+			
 		}
 		backendTaskService.createSendGroupAddNotificationTask(group.getId());
-		backendTaskService.createUpdateGroupMemberAccessPermissionsTask(group.getId());
+		backendTaskService.createAfterGroupSaveTask(group.getId());
 		return group;
 	}
 
@@ -220,9 +228,8 @@ public class GroupService extends CommonService<Group> {
 					groupVO.getMembers().add(to);
 				}
 			}
-
+			backendTaskService.createAfterGroupSaveTask(group.getId());
 			backendTaskService.createSendGroupAddNotificationTask(groupId);
-			backendTaskService.createUpdateGroupMemberAccessPermissionsTask(groupId);
 		} else {
 			throw new UnauthorizedException(appuser.getEmail() + " does not have permission to edit this group.");
 		}
@@ -408,7 +415,7 @@ public GroupAttendanceTO fetchStudentAttendance(SearchTO searchTO,long groupId, 
 			if (group.getAdmins().contains(appuser.getEmail())) {
 				group.getMemberGroupsIds().remove(memberGroupId);
 				upsert(group);
-				backendTaskService.createUpdateGroupMemberAccessPermissionsTask(groupId);
+				backendTaskService.createAfterGroupSaveTask(group.getId());
 			} else {
 				throw new UnauthorizedException();
 			}
@@ -460,6 +467,7 @@ public GroupAttendanceTO fetchStudentAttendance(SearchTO searchTO,long groupId, 
 				if(StringUtils.isBlank(member.getName())){
 					member.setName(appUser.getDisplayName());
 					groupMemberDAO.upsert(member);
+					updateGroupFolderPermissions(member.getGroup().getId());
 				}
 			}
 		}
@@ -579,5 +587,109 @@ public GroupMember fetchGroupMemberByEmail(long groupId, String email) {
 
 	public List<Group> fetchInstituteChildren(long instituteId, SearchTO searchTO) {
 		return groupDao.fetchInstituteChildren(instituteId, searchTO);
+	}
+
+	public void updateGroupFolderPermissions(Long groupId) {
+		logger.info("updateGroupFolderPermissions start");
+		try {
+			Group group = get(groupId);
+			if (null == group) {
+				logger.error("group is null for groupId : " + groupId);
+			} else {
+				GoogleDriveService driveService = GoogleDriveService.getInstance();
+				AppUser groupAdmin = null;
+				for (String admin : group.getAdmins()) {
+					groupAdmin = CacheUtils.getAppUser(admin);
+					if (groupAdmin.getUseGoogleDrive()) {
+						break;
+					}
+				}
+				if (null == groupAdmin || !groupAdmin.getUseGoogleDrive()) {
+					logger.error("no group admin with drive permission for groupId : " + groupId);
+				} else {
+					if (StringUtils.isBlank(group.getFolderId())) {
+						logger.info("make folder for groupId : " + groupId  + " , name : " + group.getName());
+						MoveFileTO moveFileTO = MoveFileTO.getInstances().setFileOwner(groupAdmin.getEmail()).setGroupId(groupId).addParents(FOLDER.Attachments).setUser(groupAdmin).setTest();
+						driveService.moveFile(moveFileTO);
+						em.refresh(group);
+					}
+					if (StringUtils.isBlank(group.getFolderId())) {
+						logger.error("failed to make drive folder for groupId : " + groupId);
+					} else {
+						logger.info("members size : "  + group.getMembers().size());
+						for (GroupMember member : group.getMembers()) {
+							if (StringUtils.isBlank(member.getFolderPermissionId())) {
+								AppUser user = CacheUtils.getAppUser( member.getEmail());
+								if(null == user){
+									logger.error (" user is null so not adding permission :  " +  member.getEmail());
+								}else{
+									GoogleFilePermission permission = driveService.updatePermission(group.getFolderId(), null, Constants.WRITER, Constants.USER, member.getEmail(), false, false,
+											groupAdmin);
+									if (permission == null) {
+										logger.error("cannot add user  to drive folder : " + group.getId() + " , " + group.getName() + " , folder id : " + group.getFolderId());
+									} else {
+										logger.info("writer permission added for " + member.getEmail());
+										member.setFolderPermissionId(permission.getId());
+										if(StringUtils.isBlank(user.getGoogleDriveAttachmentsFolderId())){
+											MoveFileTO moveFileTO = MoveFileTO.getInstances().setFileOwner(user.getEmail()).addParents(FOLDER.Attachments).setUser(user).setTest();
+											driveService.moveFile(moveFileTO);
+											user = CacheUtils.getAppUser( member.getEmail());
+										}
+										if(StringUtils.isNotBlank(user.getGoogleDriveAttachmentsFolderId())){
+											driveService.moveFile(group.getFolderId(), user.getGoogleDriveAttachmentsFolderId(), user);
+											member.setIsFolderHierarchyCorrect(true);
+										}
+										groupMemberDAO.upsert(member);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		logger.info("updateGroupFolderPermissions exit");
+
+	}
+	
+	public void moveUploadedFilesToGroupFolder(Long groupId) {
+		logger.info("moveUploadedFilesToGroupFolder start");
+		try {
+			Group group = get(groupId);
+			if (null == group) {
+				logger.error("group is null for groupId : " + groupId);
+			} else {
+				GoogleDriveService driveService = GoogleDriveService.getInstance();
+				PostFileDAO postFileDAO = new  PostFileDAO(em);
+				List<PostFile> files = postFileDAO.getAllFilesFromGroup(groupId);
+				logger.info("files len : " + files.size());
+				for (PostFile postFile : files) {
+					if(StringUtils.isNotBlank(postFile.getGoogleDriveId())){
+						AppUser user = CacheUtils.getAppUser(postFile.getCreatedBy());
+						if(null == user){
+							logger.error (" file uploader is null , post file Id : " + postFile.getId()  + " , created by : " + postFile.getCreatedBy());
+						}else{
+							logger.info("move file id : " +  postFile.getId() + " , name : " +  postFile.getName());
+							FOLDER folder = FOLDER.Post;
+							if(POST_TYPE.TASK.equals(postFile.getPost().getPostType())){
+								folder = FOLDER.Task;
+							}else if(POST_TYPE.SCHEDULE.equals(postFile.getPost().getPostType())){
+								folder = FOLDER.Schedule;
+							}
+									
+							MoveFileTO moveFileTO = MoveFileTO.getInstances().setFileOwner(postFile.getCreatedBy()).setGroupId(groupId).addParents(FOLDER.Attachments, folder).setUser(user);
+							moveFileTO.addFileIds(postFile.getGoogleDriveId());
+							driveService.moveFile(moveFileTO);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		logger.info("moveUploadedFilesToGroupFolder exit");
+
 	}
 }

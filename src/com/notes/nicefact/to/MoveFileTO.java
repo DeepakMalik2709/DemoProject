@@ -26,6 +26,8 @@ public class MoveFileTO {
 	
 	Post post; 
 	
+	boolean isTest = false;
+	
 	List<FOLDER> parents = new ArrayList<>();
 	
 	public List<String> getFileIds() {
@@ -89,6 +91,15 @@ public class MoveFileTO {
 	public static MoveFileTO getInstances(){
 		MoveFileTO x = new MoveFileTO();
 		return x;
+	}
+
+	public boolean isTest() {
+		return isTest;
+	}
+
+	public MoveFileTO setTest() {
+		this.isTest = true;
+		return this;
 	}
 
 	@Override

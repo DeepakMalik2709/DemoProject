@@ -269,6 +269,13 @@ public class PostService extends CommonService<Post> {
 		Post post = CacheUtils.getPost(postId);
 		if (post.getCreatedBy().equals(appUser.getEmail())) {
 			remove(postId);
+		}else if (post.getGroupId()!=null){
+			Group group = CacheUtils.getGroup(post.getGroupId());
+			if(group.getAdmins().contains(appUser.getEmail())){
+				remove(postId);
+			}else{
+				throw new UnauthorizedException("You cannot delete this post.");
+			}
 		} else {
 			throw new UnauthorizedException("You cannot delete this post.");
 		}

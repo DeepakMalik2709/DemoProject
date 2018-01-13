@@ -150,6 +150,10 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin, instituteMixin,
 			}
         	Ember.$("#members-list-modal").modal("show");
         },
+        fetchMoreMembers(){
+        	var model = this.controller.get('model');
+	         this.fetchMembers(model);
+        },
         showJoinRquests(){
         	var model = this.controller.get('model');
 	    	if(typeof model.get("joinRequests") == 'undefined' || model.get("joinRequests").length <=0){
