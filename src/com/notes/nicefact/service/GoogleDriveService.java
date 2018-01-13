@@ -871,7 +871,7 @@ public class GoogleDriveService {
 	 */
 	public void moveFile(MoveFileTO moveFileTO) {
 		logger.info("start moveFile , moveFileTO : "+  moveFileTO);
-		if(moveFileTO.getFileIds().isEmpty() &&  moveFileTO.isTest()){
+		if(moveFileTO.getFileIds().isEmpty() &&  !moveFileTO.isTest()){
 			logger.warn("file ids is empty : " + moveFileTO);
 			return ;
 		}

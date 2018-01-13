@@ -1911,32 +1911,4 @@ public class SecureController extends CommonController {
 		logger.info("exit : updateGroupFiles");
 	}
 	
-	@GET
-	@Path("/test")
-	public void test(@Context HttpServletResponse response, @Context HttpServletRequest request) {
-		logger.info("start : updateGroupMemberPositions");
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			InstituteService instituteService = new InstituteService(em);
-			InstituteMemberDAO memberDAO = new InstituteMemberDAO(em);
-			Institute group = instituteService.get(1l);
-			for(int i =0; i < 100; i++){
-				InstituteMember member = new InstituteMember();
-				member.setEmail("test" + i + "nicefact123.co.in");
-				member.setName(member.getEmail());
-				member.setInstitute(group);
-				member.setIsJoinRequestApproved(true);
-				memberDAO.upsert(member);
-			}
-			
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		json.put(Constants.CODE, Constants.RESPONSE_OK);
-		renderResponseJson(json, response);
-		logger.info("exit : updateGroupFiles");
-	}
 }
