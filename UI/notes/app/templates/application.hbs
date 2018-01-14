@@ -30,16 +30,15 @@
                     <!-- /.search form -->
                     <!-- sidebar menu: : style can be found in sidebar.less -->
                     <ul class="sidebar-menu">
-   		               {{#nav-link-to 'dashboard'  tagName="li"}}                           
+   		        <!--        {{#nav-link-to 'dashboard'  tagName="li"}}                           
                              <i class="fa fa-dashboard"></i><span>Dashboard</span>                           
-                        {{/nav-link-to}}
+                        {{/nav-link-to}} -->
                         <li class="treeview">
                        
                              <a href="javascript:void(0);">
                                 <i class="fa fa-group fa-fw"></i> <span>Groups</span> <i class="fa fa-angle-left pull-right"></i>
                              </a>
-                             <ul class="treeview-menu">
-                                    {{#nav-link-to 'group.create'  tagName="li"}} <i class="fa fa-edit fa-fw"></i>Create  {{/nav-link-to}}
+                             <ul class="treeview-menu" style='max-height : 125px;overflow-y : auto'>
                       
                      					 {{#each myGroups as |group|}}
                                {{#nav-link-to 'group.posts' group.id   tagName="li"}}<i class="fa fa-th"></i>{{group.name}}{{/nav-link-to}}
@@ -50,18 +49,19 @@
                         <li class="treeview">
                        
                              <a href="#">
-                                <i class="fa fa-edit"></i> <span>New</span> <i class="fa fa-angle-left pull-right"></i>
+                                <i class="fa fa-edit"></i> <span>Create</span> <i class="fa fa-angle-left pull-right"></i>
                              </a>
                              <ul class="treeview-menu">
                                     {{#nav-link-to 'new.schedule'  tagName="li"}} <i class="fa fa-angle-double-right"></i>Schedule  {{/nav-link-to}}
                                     {{#nav-link-to 'group.task.create'  tagName="li"}} <i class="fa fa-angle-double-right"></i>Task  {{/nav-link-to}}
+                                     {{#nav-link-to 'group.create'  tagName="li"}} <i class="fa fa-angle-double-right"></i>Group  {{/nav-link-to}}
                       		</ul>
                            
                         </li>
                          <li class="treeview">
                                 <div style="cursor:pointer; color: white;padding: 12px 15px 12px 15px;"  {{action "checkCalendarAauthentication" model on="click" on="touchEnd"}} >
 	                                <i class="fa fa-calendar"></i> <span>Calendar</span>
-	                                <small class="badge pull-right bg-red">{{todayScheduleCount}}</small>
+	                     <!--            <small class="badge pull-right bg-red">{{todayScheduleCount}}</small> -->
                                 </div>
                                 
                     	 </li>

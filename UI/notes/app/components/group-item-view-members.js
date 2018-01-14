@@ -7,19 +7,16 @@ export default Ember.Component.extend(instituteMixin, {
 		
 	},
 	  didInsertElement() {
-	    let _this = this;
-	    Ember.$(".group-user-list").scroll(function() {
-	      if(Ember.$(this).scrollTop() + Ember.$(this).innerHeight() >= Ember.$(this)[0].scrollHeight) {
-	        _this.sendAction('fetchMoreMembers'); // Triggering passed controller’s action
-	      }
-	    });
+
 	  },
 	 actions: {
 		 onchangeMemberPosition(member, roles, selectBox){
 			  Ember.set(member, "roles", roles);
 			  Ember.set(member, "isUpdated" ,true);
 	    	},
-	    	
+	    	fetchMoreMembers(){
+	    		 this.sendAction('fetchMoreMembers');
+	    	},
 	    	updateMember(user){
 	    		 this.sendAction('updateMember', user);
 	    	},

@@ -39,21 +39,6 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
          this.set('hasMoreRecords', true);
 	    this.set('nextPageLink', null);
 	    this.fetchMembers(model);
-	    this.setupScroll(this);
-    },
-	setupScroll (_this){
-    	if( Ember.$(".group-view-member-list").length){
-		    Ember.$(".group-view-member-list").scroll(function() {
-		      if(Ember.$(this).scrollTop() + Ember.$(this).innerHeight() >= Ember.$(this)[0].scrollHeight) {
-		    	  var model = _this.get("controller").get('model');
-		    	  _this.fetchMembers(model);
-		      }
-		    });
-    	}else{
-    		setTimeout(function(){
-    			_this.setupScroll(_this);
-    		} , 100);
-    	}
     },
     fetchMembers (group){
     	var controller = this.get("controller");
@@ -70,12 +55,6 @@ export default Ember.Route.extend(ajaxMixin,authenticationMixin,instituteMixin, 
     			if(result.code ==0){
     				if(result.items){
     					this.addMembersToGroup( result.items);
-    					
-    					if(Ember.get(group, "members")){
-    						Ember.get(group, "members").pushObjects(result.items);
-    					}else{
-    						Ember.set(group, "members" ,result.items);
-    					}
     					if(!Ember.get(group,"memberGroups")){
     						Ember.set(group, "memberGroups" ,result.memberGroups);
     					}
