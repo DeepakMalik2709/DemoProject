@@ -1,0 +1,47 @@
+ <section class="content-header institute-public-section pos-rel"  >
+    <h1>
+       {{model.name}} - <small>Group</small> 
+    </h1>
+    
+    
+    <div>
+       <div class="  buttons ">
+        {{#if model.isAdmin}}
+    {{#link-to 'group.view' model.id tagName="button" class="btn btn-default"}}Manage
+      {{/link-to}}
+      {{/if}}
+       {{#if model.showJoinButton}}
+      <button  {{action 'joinInstituteClick'  }} class="btn btn-default" >Join</button>
+      {{else if model.isJoinRequested}}
+       <button  class="btn btn-default disabled" >Request sent</button>
+      {{/if}}
+    </div>
+    
+    
+     <div class='clear'></div>
+    </div>
+</section>
+ 
+            
+            <div class="col-sm-9" >
+<h3>About {{model.name}}</h3>
+ <div>
+ {{model.description}}
+ </div>
+ 
+  <hr>
+ {{# if childGroups.length}}
+ <div>
+ <h5>Child Groups of {{model.name}}</h5>
+  <ul class="">
+  {{#each childGroups as |group|}}
+      {{#nav-link-to 'group.public' group.id   tagName="li"}}{{group.name}}{{/nav-link-to}}
+    {{/each}}
+    </ul>
+ </div>
+ {{/if}}
+ 
+ </div>
+ 
+ 
+ 

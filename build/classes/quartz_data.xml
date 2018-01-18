@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job-scheduling-data
+    xmlns="http://www.quartz-scheduler.org/xml/JobSchedulingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.quartz-scheduler.org/xml/JobSchedulingData http://www.quartz-scheduler.org/xml/job_scheduling_data_2_0.xsd"
+    version="1.8">
+
+    <schedule>
+        <job>
+            <name>UpdateThumbnailInPostServerFiles</name>
+            <job-class>com.notes.nicefact.jobs.UpdateThumbnailInPostServerFiles</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>UpdateThumbnailInPostServerFiles</name>
+                <job-name>UpdateThumbnailInPostServerFiles</job-name>
+                <!-- run job every 30 minutes -->
+                <cron-expression>0 0/30 * * * ?</cron-expression>
+            </cron>
+        </trigger>
+    </schedule>
+    
+        <schedule>
+        <job>
+            <name>UpdateThumbnailInPostDriveFiles</name>
+            <job-class>com.notes.nicefact.jobs.UpdateThumbnailInPostDriveFiles</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>UpdateThumbnailInPostDriveFiles</name>
+                <job-name>UpdateThumbnailInPostDriveFiles</job-name>
+                <!-- run job every 30 minutes -->
+                <cron-expression>0 0/30 * * * ?</cron-expression>
+            </cron>
+        </trigger>
+    </schedule>
+    
+        <schedule>
+        <job>
+            <name>UpdateThumbnailTutorialDriveFiles</name>
+            <job-class>com.notes.nicefact.jobs.UpdateThumbnailTutorialDriveFiles</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>UpdateThumbnailTutorialDriveFiles</name>
+                <job-name>UpdateThumbnailTutorialDriveFiles</job-name>
+                <!-- run job every 30 minutes -->
+                <cron-expression>0 0/30 * * * ?</cron-expression>
+            </cron>
+        </trigger>
+    </schedule>
+    
+        <schedule>
+        <job>
+            <name>UpdateThumbnailTutorialServerFiles</name>
+            <job-class>com.notes.nicefact.jobs.UpdateThumbnailTutorialServerFiles</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>UpdateThumbnailTutorialServerFiles</name>
+                <job-name>UpdateThumbnailTutorialServerFiles</job-name>
+                <!-- run job every 30 minutes -->
+                <cron-expression>0 0/30 * * * ?</cron-expression>
+            </cron>
+        </trigger>
+    </schedule>
+
+</job-scheduling-data>
