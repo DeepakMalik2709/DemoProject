@@ -43,6 +43,8 @@ public class AppProperties {
 	
 	private static final String googleClientId = "google.client.id";
 	private static final String googleClientSecret = "google.client.secret";
+	private static final String googleClientIdDev = "google.client.id.dev";
+	private static final String googleClientSecretDev = "google.client.secret.dev";
 	private static final String facebookClientId = "facebook.client.id";
 	private static final String facebookClientSecret = "facebook.client.secret";
 	private static final String twitterClientId = "twitter.client.id";
@@ -95,11 +97,23 @@ public class AppProperties {
 	}
 	
 	public String getGoogleClientId() {
-		return props.getProperty(googleClientId);
+		if (isProduction()) {
+			return props.getProperty(googleClientId);
+
+		} else {
+			return props.getProperty(googleClientIdDev);
+		}
+
 	}
 
 	public String getGoogleClientSecret() {
-		return props.getProperty(googleClientSecret);
+		if (isProduction()) {
+			return props.getProperty(googleClientSecret);
+
+		} else {
+			return props.getProperty(googleClientSecretDev);
+		}
+
 	}
 
 	public String getAdminEmail() {

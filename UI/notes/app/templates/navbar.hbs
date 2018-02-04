@@ -45,11 +45,13 @@
                                         <li class="notification-li">
                                              <a href="javascript:void(0);" {{action "notificationClick" notification}}>
                                                    <div>
+                                                   <div class='notification-msg'>
                                     <i class="fa fa-comment fa-fw"></i><span class="text-primary">{{notification.senderName}}</span> {{notification.actionKey}} 
                                     {{#if notification.showGroupName}}
                                     <span class="text-primary">{{notification.groupName}} </span> 
                                     {{/if}}
-                                    <span class="pull-right text-muted small">{{notification.createdDisplayTime}}</span>
+                                    </div>
+                                    <span class="pull-right text-muted small mtop3">{{notification.createdDisplayTime}}</span>
                                 </div>
                                 {{#if notification.showTitle}}
                                 <div>{{notification.title}}</div>

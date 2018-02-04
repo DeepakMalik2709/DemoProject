@@ -1,8 +1,8 @@
 @import "bootstrap";
 @import "ember-power-select";
-@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic);
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300italic,400italic,600italic);
 
-@import url(http://fonts.googleapis.com/css?family=Kaushan+Script);
+@import url(https://fonts.googleapis.com/css?family=Kaushan+Script);
 
 .width40 {
 	    width: 40%;
@@ -26,13 +26,18 @@
      overflow: hidden;
      }
  .mtop{
- margin-top : 15px;}
+ margin-top : 15px;
+ }
   .mtop10{
  margin-top : 10px;}
   .mbot10{
  margin-top : 10px;}
- 
- 
+ .mtop3{
+ margin-top : 3px;
+ }
+  .mtop5{
+ margin-top : 5px;
+ }
 .tooltip.top-tooltip {
     top: auto;
     left: 50%;
@@ -886,7 +891,7 @@ table.text-center th {
 .navbar-nav > .notifications-menu > .dropdown-menu,
 .navbar-nav > .messages-menu > .dropdown-menu,
 .navbar-nav > .tasks-menu > .dropdown-menu {
-  width: 280px;
+  width: 300px;
   padding: 0 0 0 0!important;
   margin: 0!important;
   top: 100%;
@@ -3184,7 +3189,7 @@ width:100%;
 
 
 .notification-li{
-	margin : 10px;
+	margin : 3px 10px;
 }
 
 .profile-img.avatar{
@@ -3322,4 +3327,10 @@ display: inline-block;
 .calendar-loader{
 	left : 50%;
 	margin-top: 250px;
+}
+.notification-msg{
+	max-width:175px;
+	display:inline-block;
+	word-wrap:break-word;
+	white-space:normal;
 }
