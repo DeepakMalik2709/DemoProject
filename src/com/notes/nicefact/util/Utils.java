@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +55,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,6 +69,8 @@ import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.TutorialTO;
+
+import flexjson.JSONSerializer;
 
 public class Utils {
 	public static final Logger logger = Logger.getLogger(Utils.class.getSimpleName());
@@ -241,10 +245,10 @@ public class Utils {
 	}
 
 	public static FileTO writeTutorialFileThumbnail(byte[] fileBytes, String email, String fileName) {
-		String fileBasePath = AppProperties.getInstance().getTutorialUploadsFolder()+ email + File.separator + Constants.THUMBNAIL_FOLDER;
+		String fileBasePath = AppProperties.getInstance().getTutorialUploadsFolder() + email + File.separator + Constants.THUMBNAIL_FOLDER;
 		return writeFileToPath(fileBytes, fileBasePath, fileName);
 	}
-	
+
 	public static FileTO writeGroupPostFileThumbnail(byte[] fileBytes, Long groupId, String fileName) {
 		String fileBasePath = AppProperties.getInstance().getGroupUploadsFolder() + groupId + File.separator + Constants.THUMBNAIL_FOLDER;
 		return writeFileToPath(fileBytes, fileBasePath, fileName);
@@ -290,7 +294,6 @@ public class Utils {
 		return null;
 	}
 
-
 	public static String n2b(String str) {
 		if (str == null || "null".equals(str)) {
 			return "";
@@ -306,34 +309,34 @@ public class Utils {
 		return token;
 	}
 
-	public static void revokeToken(String refreshToken){
+	public static void revokeToken(String refreshToken) {
 		try {
 			HttpClient client = HttpClients.createDefault();
 			List<Header> headers = new ArrayList<>();
 			headers.add(new BasicHeader("Content-Type", "application/x-www-form-urlencoded"));
 			String url = "https://accounts.google.com/o/oauth2/revoke?token=" + refreshToken;
-				int i = 0;
-				HttpGet request1 = new HttpGet(url);
-				logger.info("attempt : " + i);
-				if (headers != null) {
-					for (Header header : headers) {
-						request1.addHeader(header);
-					}
+			int i = 0;
+			HttpGet request1 = new HttpGet(url);
+			logger.info("attempt : " + i);
+			if (headers != null) {
+				for (Header header : headers) {
+					request1.addHeader(header);
 				}
-				HttpResponse response = client.execute(request1);
-				logger.warn("resp : " + response.getStatusLine().getStatusCode());
-				if (response.getEntity() != null) {
-					String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
-					logger.info(respStr);
-				}
-				
-				request1.releaseConnection();
+			}
+			HttpResponse response = client.execute(request1);
+			logger.warn("resp : " + response.getStatusLine().getStatusCode());
+			if (response.getEntity() != null) {
+				String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
+				logger.info(respStr);
+			}
+
+			request1.releaseConnection();
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	public static String refreshAccessToken() {
 		String token = null;
 		try {
@@ -466,7 +469,7 @@ public class Utils {
 		logger.info("enter refreshToken");
 		if (StringUtils.isBlank(user.getRefreshToken())) {
 			logger.warn(" refresh token is null for : " + user.getEmail());
-		}else{
+		} else {
 			HttpClient client = HttpClients.createDefault();
 			String url = Constants.GOOGLE_OAUTH_TOKEN_URL;
 			HttpPost request1 = new HttpPost(url);
@@ -656,25 +659,25 @@ public class Utils {
 
 	}
 
-	public static String getRandomColor() {			
+	public static String getRandomColor() {
 		String letters = "0123456789ABCDEF";
 		String color = "#";
 		Random rand = new Random();
-			  for (int i = 0; i < 6; i++) {
-				  
-			    color += letters.charAt(rand.nextInt(16));
-			  }
-			
+		for (int i = 0; i < 6; i++) {
+
+			color += letters.charAt(rand.nextInt(16));
+		}
+
 		return color;
 	}
-	
-	public static String getTaskFolderPath(Post task) {	
-		return AppProperties.getInstance().getGroupUploadsFolder() + task.getGroupId() +  File.separator + task.getId();
+
+	public static String getTaskFolderPath(Post task) {
+		return AppProperties.getInstance().getGroupUploadsFolder() + task.getGroupId() + File.separator + task.getId();
 	}
-	
-	public static String getInstituteFolderPath(Institute institute) {	
-		String path = AppProperties.getInstance().getInstituteUploadsFolder()  + institute.getId();
-		
+
+	public static String getInstituteFolderPath(Institute institute) {
+		String path = AppProperties.getInstance().getInstituteUploadsFolder() + institute.getId();
+
 		return path;
 	}
 
@@ -694,26 +697,63 @@ public class Utils {
 			}
 		}
 	}
-	
+
 	public static String[] createGoogleRecurrenceStr(List<String> list) {
-		String recurStr="RRULE:FREQ=WEEKLY;BYDAY=";
+		String recurStr = "RRULE:FREQ=WEEKLY;BYDAY=";
 		for (String day : list) {
-			recurStr+=day.substring(0, 2)+",";
+			recurStr += day.substring(0, 2) + ",";
 		}
-		String[] recurrence = new String[] { recurStr.substring(0,recurStr.length()-1) };
+		String[] recurrence = new String[] { recurStr.substring(0, recurStr.length() - 1) };
 		return recurrence;
 	}
 
-	public static Date removeTimeFromDate(Date date){
+	public static Date removeTimeFromDate(Date date) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		/* first convert from UTC to IST */
 		cal.add(Calendar.HOUR_OF_DAY, 5);
 		cal.add(Calendar.MINUTE, 30);
 		cal.getTime();
-		for(int i = Calendar.HOUR_OF_DAY; i<= Calendar.MILLISECOND; i++){
+		for (int i = Calendar.HOUR_OF_DAY; i <= Calendar.MILLISECOND; i++) {
 			cal.set(i, 0);
 		}
 		return cal.getTime();
-	} 
+	}
+
+	public static JSONObject getJsonFromResponse(HttpResponse response) {
+		JSONObject json = null;
+		if (null != response && response.getEntity() != null) {
+			try {
+				String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
+				json = new JSONObject(respStr);
+			} catch (JSONException | UnsupportedOperationException | IOException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		return json;
+	}
+
+	public static String jsonify(Object obj) {
+		String str = null;
+		if (obj != null) {
+			try {
+				if (obj instanceof String) {
+					str = obj.toString();
+				} else if (obj instanceof JSONObject || obj instanceof JSONArray) {
+					str = obj.toString();
+				} else {
+					str = new JSONSerializer().transform(new ExcludeTransformer(), void.class).exclude("class", "*.class", "authorities").deepSerialize(obj);
+				}
+			} catch (Exception e) {
+				str = "{code : -1, message: \"serialization failed\"}";
+				logger.error(e.getMessage(), e);
+			}
+		}
+		return str;
+	}
+
+	public static String generateRamdomId() {
+		String strKey = UUID.randomUUID().toString().replaceAll("-", "");
+		return strKey;
+	}
 }

@@ -90,7 +90,6 @@ export default Ember.Route.extend({
         				  if( !controller.get("notifications" )){
         					  controller.set("newNotifications", response.newNotifications);
         				  }
-        				
    	        			  controller.set("notifications" ,response.items );
         				}
 	        			 
@@ -106,8 +105,24 @@ export default Ember.Route.extend({
 	    	}else{
 	    		 controller.set("todayScheduleCount" ,model.get('loginUser.todayScheduleCount') );
 	    	}
+	    	
+	    	var apiKey = model.get('pushToken.token');
+	        var realtime = new Ably.Realtime(apiKey);
+	        var channel = realtime.channels.get(model.get('loginUser.email'));
+
+	        channel.on(function(channelStateChange) {
+	          console.log(channelStateChange);
+	          if (channelStateChange.event == 'attached') {
+	          }
+	        });
+	        
+	        channel.subscribe(function(msg) {
+	          console.log("Received: " ,msg);
+	        });
         }
         $.event.trigger( "sidebarUpdated");
+        
+    
     },
 
 

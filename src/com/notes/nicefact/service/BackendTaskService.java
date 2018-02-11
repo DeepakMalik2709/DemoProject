@@ -150,6 +150,15 @@ public class BackendTaskService extends CommonService<BackendTask> {
 			saveAndTrigger(task);
 		}
 	}
+	
+	public void createSendPushNotificationTask(Notification notification) {
+		if (null != notification && null != notification.getId()) {
+			BackendTask task = new BackendTask();
+			task.setPath("post/sendPushNotifications");
+			task.addToParamsMap("notificationId", notification.getId());
+			saveAndTrigger(task);
+		}
+	}
 
 	public void createMarkNotificationReadTask(String email) {
 		BackendTask task = new BackendTask();

@@ -32,9 +32,7 @@ import org.glassfish.jersey.server.mvc.Viewable;
 import org.json.JSONException;
 
 import com.notes.nicefact.comparator.CreatedDateComparator;
-import com.notes.nicefact.dao.GroupDAO;
 import com.notes.nicefact.dao.GroupMemberDAO;
-import com.notes.nicefact.dao.InstituteMemberDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
@@ -59,6 +57,7 @@ import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
+import com.notes.nicefact.service.PushService;
 import com.notes.nicefact.service.TagService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
@@ -137,6 +136,8 @@ public class SecureController extends CommonController {
 				}
 				json.put(Constants.SESSION_INSTITUTES, institutes);
 				json.put(Constants.SESSION_INSTITUTE_MEMBERS, instituteMembers);
+				Map<String, Object> pushToken = PushService.getInstance().getToken();
+				json.put("pushToken" , pushToken);
 				Map<String, Object> userMap = user.toMap();
 				json.put(Constants.LOGIN_USER, userMap);
 				json.put(Constants.APPLICATION_URL, AppProperties.getInstance().getApplicationUrl());

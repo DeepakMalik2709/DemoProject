@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -61,12 +63,14 @@ import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.InstituteService;
 import com.notes.nicefact.service.NotificationService;
 import com.notes.nicefact.service.PostService;
+import com.notes.nicefact.service.PushService;
 import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GoogleDriveFile;
 import com.notes.nicefact.to.MoveFileTO;
+import com.notes.nicefact.to.NotificationTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
@@ -427,6 +431,7 @@ public class BackendTaskController extends CommonController {
 				notificationService.upsert(notification);
 				BackendTaskService backendTaskService = new BackendTaskService(em);
 				backendTaskService.createSendNotificationMailsTask(notification);
+				backendTaskService.createSendPushNotificationTask(notification);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -514,6 +519,7 @@ public class BackendTaskController extends CommonController {
 				notificationService.upsert(notification);
 				BackendTaskService backendTaskService = new BackendTaskService(em);
 				backendTaskService.createSendNotificationMailsTask(notification);
+				backendTaskService.createSendPushNotificationTask(notification);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -675,6 +681,7 @@ public class BackendTaskController extends CommonController {
 				notificationService.upsert(notification);
 				BackendTaskService backendTaskService = new BackendTaskService(em);
 				backendTaskService.createSendNotificationMailsTask(notification);
+				backendTaskService.createSendPushNotificationTask(notification);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -938,6 +945,7 @@ public class BackendTaskController extends CommonController {
 
 					BackendTaskService backendTaskService = new BackendTaskService(em);
 					backendTaskService.createSendNotificationMailsTask(notification);
+					backendTaskService.createSendPushNotificationTask(notification);
 				}
 
 			}
@@ -1113,6 +1121,7 @@ public class BackendTaskController extends CommonController {
 				notificationService.upsert(notification);
 				BackendTaskService backendTaskService = new BackendTaskService(em);
 				backendTaskService.createSendNotificationMailsTask(notification);
+				backendTaskService.createSendPushNotificationTask(notification);
 			}
 			
 			if(post.getDeadline() !=null){
@@ -1351,6 +1360,7 @@ public class BackendTaskController extends CommonController {
 
 					BackendTaskService backendTaskService = new BackendTaskService(em);
 					backendTaskService.createSendNotificationMailsTask(notification);
+					backendTaskService.createSendPushNotificationTask(notification);
 				}
 			}
 		} catch (Exception e) {
@@ -1413,6 +1423,7 @@ public class BackendTaskController extends CommonController {
 				notificationService.upsert(notification);
 				BackendTaskService backendTaskService = new BackendTaskService(em);
 				backendTaskService.createSendNotificationMailsTask(notification);
+				backendTaskService.createSendPushNotificationTask(notification);
 			}
 			ScheduleService scheduleService = new ScheduleService(em);
 			if(StringUtils.isBlank(group.getCalendarId())){
@@ -1500,5 +1511,45 @@ public class BackendTaskController extends CommonController {
 			}
 		}
 		driveService.moveFile(moveFileTO);
+	}
+	
+	@POST
+	@Path("post/sendPushNotifications")
+	public void sendPushNotifications(@QueryParam("notificationId") Long notificationId, @Context HttpServletResponse response) throws IOException, InterruptedException {
+		logger.info("sendPushNotifications, notificationId : " + notificationId);
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			PostService postService = new PostService(em);
+
+			NotificationService notificationService = new NotificationService(em);
+			PushService pushService = PushService.getInstance();
+			Notification notification = notificationService.get(notificationId);
+			if (null != notification) {
+				NotificationTO notificationTO;
+				/* notification for posts */
+				Post post = postService.get(notification.getEntityId());
+				if (null != post) {
+					Map<String, Object> json = new HashMap<>();
+					json.put("name", "notification");
+					for (NotificationRecipient recipient : notification.getRecipients()) {
+						if (recipient.getSendEmail() && Utils.isValidEmailAddress(recipient.getEmail())) {
+							notificationTO = new NotificationTO(recipient);
+							json.put("data", notificationTO);
+							pushService.sendChannelMessage(recipient.getEmail(), json);
+						}
+					}
+				}
+
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+
+		logger.info("exit sendPushNotifications");
+		renderResponseRaw(true, response);
 	}
 }

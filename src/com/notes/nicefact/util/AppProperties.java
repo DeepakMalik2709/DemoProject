@@ -82,7 +82,10 @@ public class AppProperties {
 	private static final String DRIVE_USER_UPLOAD_FOLDER_NAME_DEV = "drive.user.upload.folder.name.dev";
 	private static final String DRIVE_USER_UPLOAD_FOLDER_NAME_SANDBOX = "drive.user.upload.folder.name.sandbox";
 	private static final String DRIVE_USER_UPLOAD_LIBRARY_FOLDER_NAME = "drive.user.upload.library.folder.name";
-
+	
+	private static final String ABLY_APP_ID = "ably.app.id";
+	private static final String ABLY_KEY = "ably.key";
+	
 	public String getDriveUserUploadFolderName() {
 		if (isSandbox()) {
 			return props.getProperty(DRIVE_USER_UPLOAD_FOLDER_NAME_SANDBOX);
@@ -261,5 +264,14 @@ public class AppProperties {
 		} else {
 			return props.getProperty(instituteUploadsDev);
 		}
+	}
+	
+	
+	public String getAblyAppId() {
+		return props.getProperty(ABLY_APP_ID);
+	}
+	
+	public String getAblyKey() {
+		return props.getProperty(ABLY_KEY);
 	}
 }
