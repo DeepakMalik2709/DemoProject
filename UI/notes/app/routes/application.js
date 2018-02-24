@@ -38,6 +38,35 @@ export default Ember.Route.extend({
 			 }), 2000);
 
     }),
+    openChannel :_.once(function(apiKey, email){
+    	var realtime = new Ably.Realtime(apiKey);
+    	var channel = realtime.channels.get(email);
+
+        channel.on(function(channelStateChange) {
+         // console.log(channelStateChange);
+          if (channelStateChange.event == 'attached') {
+          }
+        });
+        var controller = this.controller;
+        channel.subscribe(function(msg) {
+        	//console.log(msg)
+          var data = msg.data;
+          if(msg.name == "notification"){
+        	 var existing = controller.get("notifications").filterBy("id", data.id) ;
+        	 if(!existing.length){
+        		  controller.set("showNotifications", true);
+             	 controller.set("newNotifications", true);
+             	controller.get("notifications").unshiftObject(data);
+        	 }
+        	 if(data.item){
+	        	 if("COMMENT" == data.type || "COMMENT_REPLY" == data.type){
+	        		 $.event.trigger( "newComment" , data );
+	        	 }
+     		}
+        	
+          }
+        });
+    }),
     setupController: function(controller, model) {
         this._super(controller, model);
         controller.set("isLoggedIn", Ember.computed.notEmpty("model"));
@@ -107,18 +136,7 @@ export default Ember.Route.extend({
 	    	}
 	    	
 	    	var apiKey = model.get('pushToken.token');
-	        var realtime = new Ably.Realtime(apiKey);
-	        var channel = realtime.channels.get(model.get('loginUser.email'));
-
-	        channel.on(function(channelStateChange) {
-	          console.log(channelStateChange);
-	          if (channelStateChange.event == 'attached') {
-	          }
-	        });
-	        
-	        channel.subscribe(function(msg) {
-	          console.log("Received: " ,msg);
-	        });
+	        this.openChannel(apiKey, model.get('loginUser.email'));
         }
         $.event.trigger( "sidebarUpdated");
         
@@ -166,6 +184,8 @@ export default Ember.Route.extend({
         	this.controller.set("newNotifications",false);
         	if(notification.entityId){
         		if(notification.isPost || notification.isTask || notification.isSchedule){
+        			this.transitionTo('group.post', notification.entityId);
+        		}else if("COMMENT" == notification.type || "COMMENT_REPLY" == notification.type){
         			this.transitionTo('group.post', notification.entityId);
         		}
         	}else if(notification.groupId){

@@ -67,6 +67,7 @@ import com.notes.nicefact.service.PushService;
 import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
+import com.notes.nicefact.to.CommentTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GoogleDriveFile;
 import com.notes.nicefact.to.MoveFileTO;
@@ -1531,9 +1532,17 @@ public class BackendTaskController extends CommonController {
 				if (null != post) {
 					Map<String, Object> json = new HashMap<>();
 					json.put("name", "notification");
+					CommentTO commentTO = null;
+					if(NotificationType.COMMENT.equals(notification.getType()) || NotificationType.COMMENT_REPLY.equals(notification.getType())){
+						PostComment comment = postService.getPostCommentById(notification.getSubEntityId());
+						if (null != comment) {
+							commentTO = new CommentTO(comment);
+						}
+					}
 					for (NotificationRecipient recipient : notification.getRecipients()) {
-						if (recipient.getSendEmail() && Utils.isValidEmailAddress(recipient.getEmail())) {
+						if (Utils.isValidEmailAddress(recipient.getEmail())) {
 							notificationTO = new NotificationTO(recipient);
+							notificationTO.setItem(commentTO);
 							json.put("data", notificationTO);
 							pushService.sendChannelMessage(recipient.getEmail(), json);
 						}

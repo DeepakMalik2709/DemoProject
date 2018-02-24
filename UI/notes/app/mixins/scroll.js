@@ -4,7 +4,6 @@ export default Ember.Mixin.create({
 	
 	 bindScrolling: function(opts) {
 		    var onScroll, _this = this;
-
 		    onScroll = function(){ 
 		    	 var raw =  $("body")[0];
 		    	var diff = 800;

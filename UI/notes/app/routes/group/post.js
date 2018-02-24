@@ -1,6 +1,7 @@
 import Ember from 'ember';
+import notificationMixin from '../../mixins/notification';
 
-export default Ember.Route.extend( {
+export default Ember.Route.extend(notificationMixin, {
 	posts : null,
     hasMoreRecords : true,
     isFetching :false,
@@ -21,8 +22,10 @@ export default Ember.Route.extend( {
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
         this.controller.set('controllerRef', this)
          this.controller.set("noRecords", false);
+        this.listenComments();
     },
     willDestroy : function(){
+    	this.unlistenComments();
     },
     actions: {
     	savePost(post){
@@ -34,6 +37,7 @@ export default Ember.Route.extend( {
     			Ember.set(this, "isSaving", false);
     			Ember.set(post, "isSaving", false);
     			Ember.set(post, "showLoading", false);
+    			debugger;
     			var posts = this.controller.get("posts");
     			var index = posts.indexOf(post);
     			if(index > -1){

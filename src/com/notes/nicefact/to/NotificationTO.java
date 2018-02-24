@@ -9,7 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.Notification;
 import com.notes.nicefact.entity.NotificationRecipient;
-import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.enums.NotificationType;
 
@@ -103,6 +102,20 @@ public class NotificationTO implements Serializable {
 	
 	Long instituteId;
 	
+	
+	/* item notifcation is related to, eg PostComment */
+	Object item;
+	
+	
+	
+	public Object getItem() {
+		return item;
+	}
+
+	public void setItem(Object item) {
+		this.item = item;
+	}
+
 	public Long getInstituteId() {
 		if(null == instituteId){
 			return 0l;

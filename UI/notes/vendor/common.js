@@ -81,7 +81,6 @@ $(function(){
 			  setTimeout(function(){
 				  $(".sidebar .treeview").tree();
 			  },500)
-			 
 		  });
 		
 		 var interval1 = setInterval(function(){

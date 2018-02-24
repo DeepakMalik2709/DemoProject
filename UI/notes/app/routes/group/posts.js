@@ -1,8 +1,9 @@
 import Ember from 'ember';
 import scrollMixin from '../../mixins/scroll';
+import notificationMixin from '../../mixins/notification';
 import authenticationMixin from '../../mixins/authentication';
 
-export default Ember.Route.extend(scrollMixin,authenticationMixin,{
+export default Ember.Route.extend(scrollMixin,authenticationMixin,notificationMixin,{
 	posts : null,
     model(params) {
         return this.store.findRecord('group', params.groupId);
@@ -28,16 +29,19 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
         this.nextPageLink = null;
         this.isFetching =false;
         this.controller.set("isLoggedIn", this.controllerFor("application").get("isLoggedIn"));
-        this.controller.set("feeds", []);
+        this.controller.set("posts", []);
         this.controller.set('controllerRef', this)
         this.controller.set("noRecords", false);
         this.initCreatePost();
         this.fetchGroupPosts();
         this.bindScrolling();
         hideSidebarMobile();
+        this.listenComments();
     },
     willDestroy : function(){
     	this.unbindScrolling();
+    	this.unlistenComments();
+    	
     },
     initCreateTab : function(){
     	this.controller.set("showCreatePost", false);
@@ -65,12 +69,12 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 		    		}
 		    		if(newFeeds.length == 0){
 	    				this.hasMoreRecords = false;
-	    				if( this.controller.get("feeds").length == 0){
+	    				if( this.controller.get("posts").length == 0){
 	    					this.controller.set("noRecords", true);
 	    				}
 		    		}else{
-		    			 this.controller.get("feeds").pushObjects(newFeeds.sortBy("updatedTime").reverse());
-		    			// this.controller.get("feeds");
+		    			 this.controller.get("posts").pushObjects(newFeeds.sortBy("updatedTime").reverse());
+		    			// this.controller.get("posts");
 		    		}
 	   			 	this.nextPageLink = result.nextLink;
 		    	}
@@ -91,7 +95,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
 	    			Ember.set(this, "isSaving", false);
 	    			Ember.set(post, "isSaving", false);
 	    			Ember.set(post, "showLoading", false);
-	    			var posts = this.controller.get("feeds");
+	    			var posts = this.controller.get("posts");
 	    			var index = posts.indexOf(post);
 	    			if(index > -1){
 	    				resp1.set('isEditing' , false)
@@ -108,7 +112,7 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin,{
             let confirmation = confirm("Are you sure you want to delete post ?");
 
             if (confirmation) {
-            	var posts = this.controller.get("feeds");
+            	var posts = this.controller.get("posts");
     			var index = posts.indexOf(post);
     			posts.removeAt(index);
     			this.get("postService").deletePost(post.get("groupId"), post.get("id")).then((result)=>{

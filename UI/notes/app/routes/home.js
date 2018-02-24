@@ -1,8 +1,9 @@
 import Ember from 'ember';
 import scrollMixin from '../mixins/scroll';
+import notificationMixin from '../mixins/notification';
 import authenticationMixin from '../mixins/authentication';
 
-export default Ember.Route.extend(scrollMixin,authenticationMixin , {
+export default Ember.Route.extend(scrollMixin,authenticationMixin ,notificationMixin , {
 	posts : null,
     hasMoreRecords : true,
     isFetching :false,
@@ -25,9 +26,11 @@ export default Ember.Route.extend(scrollMixin,authenticationMixin , {
          this.controller.set("noRecords", false);
         this.fetchMyHomePosts();
         this.bindScrolling();
+        this.listenComments();
     },
     willDestroy : function(){
     	this.unbindScrolling();
+    	this.unlistenComments();
     },
     initCreatePost : function(){
     	var group = this.controller.get("model");
