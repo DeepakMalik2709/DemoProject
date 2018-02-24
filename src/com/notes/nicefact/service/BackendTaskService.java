@@ -20,7 +20,7 @@ import com.notes.nicefact.entity.Notification;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.Tutorial;
-import com.notes.nicefact.util.AppProperties;
+import com.notes.nicefact.util.Constants;
 
 public class BackendTaskService extends CommonService<BackendTask> {
 	static Logger logger = Logger.getLogger(BackendTaskService.class.getSimpleName());
@@ -46,7 +46,7 @@ public class BackendTaskService extends CommonService<BackendTask> {
 
 	public void triggerBackendTask(BackendTask task) {
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(AppProperties.getInstance().getApplicationUrl() + "/a/backend/").path("run").queryParam("taskId", task.getId());
+		WebTarget target = client.target(Constants.LOCALHOST_ADDRESS + "/a/backend/").path("run").queryParam("taskId", task.getId());
 		// target.request().get();
 		AsyncInvoker asyncInvoker = target.request().async();
 		final Future<Response> responseFuture = asyncInvoker.post(null);
@@ -54,7 +54,7 @@ public class BackendTaskService extends CommonService<BackendTask> {
 
 	public void runBackendTask(BackendTask task) {
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(AppProperties.getInstance().getApplicationUrl() + "/a/backend/").path(task.getPath());
+		WebTarget target = client.target(Constants.LOCALHOST_ADDRESS + "/a/backend/").path(task.getPath());
 		if (!task.getParamsMap().isEmpty()) {
 			for (String key : task.getParamsMap().keySet()) {
 				target.queryParam(key, task.getParamsMap().get(key));

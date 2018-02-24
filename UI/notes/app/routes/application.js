@@ -52,8 +52,14 @@ export default Ember.Route.extend({
         	//console.log(msg)
           var data = msg.data;
           if(msg.name == "notification"){
-        	 var existing = controller.get("notifications").filterBy("id", data.id) ;
-        	 if(!existing.length){
+        	  var notifications = controller.get("notifications");
+        	  var addNotification = true;
+        	  if(notifications){
+        		  var existing = notifications.filterBy("id", data.id) ;
+        		  addNotification = (existing.length <= 0 );
+        	  }
+        	
+        	 if(addNotification){
         		  controller.set("showNotifications", true);
              	 controller.set("newNotifications", true);
              	controller.get("notifications").unshiftObject(data);

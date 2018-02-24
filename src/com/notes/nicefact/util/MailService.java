@@ -53,6 +53,9 @@ public class MailService {
 		Properties props = new Properties();
 		props.put("resource.loader", "class");
 		props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		props.put("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.SimpleLog4JLogSystem");
+		props.put("runtime.log.logsystem.log4j.category", "velocity");
+		props.put("runtime.log.logsystem.log4j.logger", "velocity");
 		velocityEngine = new VelocityEngine(props);
 		velocityEngine.init();
 		appProperties = AppProperties.getInstance();

@@ -75,6 +75,7 @@ import com.notes.nicefact.to.NotificationTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
+import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.MailService;
 import com.notes.nicefact.util.Utils;
@@ -1029,7 +1030,7 @@ public class BackendTaskController extends CommonController {
 						task = backendTaskService.upsert(task);
 						path = task.getPath();
 						Client client = ClientBuilder.newClient();
-						WebTarget target = client.target(AppProperties.getInstance().getApplicationUrl() + "/a/backend/").path(path);
+						WebTarget target = client.target(Constants.LOCALHOST_ADDRESS + "/a/backend/").path(path);
 						if (!task.getParamsMap().isEmpty()) {
 							for (String key : task.getParamsMap().keySet()) {
 								target = target.queryParam(key, task.getParamsMap().get(key));

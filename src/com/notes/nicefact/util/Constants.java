@@ -106,5 +106,4 @@ public class Constants {
 	public static final Long FIRST_LOGIN_TEST_GROUP = -905L;
 	public static final String APPLICATION_URL = "url";
 	public static final String INDIA_TIMEZONE = "Asia/Kolkata";
-	
 }
