@@ -132,7 +132,7 @@ public class GoogleDriveService {
 	}
 
 	public HttpResponse doGet(String url, List<Header> headers, AppUser user) {
-		logger.info("doGet start , url : " + url);
+		logger.info("doGet start , url : " + url+ " , token : " + user.getAccessToken());
 		HttpClient client = HttpClients.createDefault();
 		if (StringUtils.isBlank(user.getAccessToken())) {
 			Utils.refreshToken(user);
@@ -157,6 +157,9 @@ public class GoogleDriveService {
 				} else if (response.getEntity() != null) {
 					String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
 					logger.info(respStr);
+					if(respStr.contains("invalid_token")){
+						Utils.refreshToken(user);
+					}
 				}
 				request1.releaseConnection();
 				Thread.sleep((i * 1000) + new Random().nextInt(1000));
@@ -171,7 +174,7 @@ public class GoogleDriveService {
 	}
 
 	public HttpResponse doDelete(String url, List<Header> headers, AppUser user) {
-		logger.info("doDelete start , url : " + url);
+		logger.info("doDelete start , url : " + url+ " , token : " + user.getAccessToken());
 		HttpClient client = HttpClients.createDefault();
 		if (StringUtils.isBlank(user.getAccessToken())) {
 			Utils.refreshToken(user);
@@ -194,6 +197,9 @@ public class GoogleDriveService {
 				} else if (response.getEntity() != null) {
 					String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
 					logger.info(respStr);
+					if(respStr.contains("invalid_token")){
+						Utils.refreshToken(user);
+					}
 				}
 				request1.releaseConnection();
 				Thread.sleep((i * 1000) + new Random().nextInt(1000));
@@ -228,7 +234,7 @@ public class GoogleDriveService {
 	}
 
 	public HttpResponse doPost(String url, List<Header> headers, byte[] payload, AppUser user) {
-		logger.info("doPost start , url : " + url);
+		logger.info("doPost start , url : " + url + " , token : " + user.getAccessToken());
 		HttpClient client = HttpClients.createDefault();
 		if (StringUtils.isBlank(user.getAccessToken())) {
 			Utils.refreshToken(user);
@@ -257,6 +263,8 @@ public class GoogleDriveService {
 					logger.info(respStr);
 					if(respStr.contains("invalidSharingRequest")){
 						return null;
+					}else if(respStr.contains("insufficientPermissions") || respStr.contains("invalid_token")){
+						Utils.refreshToken(user);
 					}
 				}
 				request1.releaseConnection();
@@ -282,7 +290,7 @@ public class GoogleDriveService {
 	}
 
 	public HttpResponse doPut(String url, List<Header> headers, byte[] payload, AppUser user) {
-		logger.info("doPut start , url : " + url );
+		logger.info("doPut start , url : " + url+ " , token : " + user.getAccessToken());
 		HttpClient client = HttpClients.createDefault();
 		logger.info("url : " + url);
 		for (int i = 0; i < 3; i++) {
@@ -307,6 +315,9 @@ public class GoogleDriveService {
 				} else if (response.getEntity() != null) {
 					String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
 					logger.info(respStr);
+					if(respStr.contains("invalid_token")){
+						Utils.refreshToken(user);
+					}
 				}
 				request1.releaseConnection();
 			} catch (Exception e) {
@@ -330,7 +341,7 @@ public class GoogleDriveService {
 	}
 
 	public HttpResponse doPatch(String url, List<Header> headers, byte[] payload, AppUser user) {
-		logger.info("doPatch start , url : " + url);
+		logger.info("doPatch start , url : " + url+ " , token : " + user.getAccessToken());
 		HttpClient client = HttpClients.createDefault();
 		logger.info("url : " + url);
 		for (int i = 0; i < 3; i++) {
@@ -355,6 +366,9 @@ public class GoogleDriveService {
 				} else if (response.getEntity() != null) {
 					String respStr = new String(IOUtils.toByteArray(response.getEntity().getContent()), Constants.UTF_8);
 					logger.info(respStr);
+					if(respStr.contains("invalid_token")){
+						Utils.refreshToken(user);
+					}
 				}
 				request1.releaseConnection();
 			} catch (Exception e) {
