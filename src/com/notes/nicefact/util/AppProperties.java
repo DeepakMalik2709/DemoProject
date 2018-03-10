@@ -185,8 +185,8 @@ public class AppProperties {
 	}
 
 	public boolean isSandbox() {
-		logger.info("props.getProperty(IS_SANDBOX) : " + props.getProperty(IS_SANDBOX));
-		logger.info(" Boolean.parseBoolean( props.getProperty(IS_SANDBOX) : " +  Boolean.parseBoolean( props.getProperty(IS_SANDBOX)));
+		/*logger.info("props.getProperty(IS_SANDBOX) : " + props.getProperty(IS_SANDBOX));
+		logger.info(" Boolean.parseBoolean( props.getProperty(IS_SANDBOX) : " +  Boolean.parseBoolean( props.getProperty(IS_SANDBOX)));*/
 		if(isProduction()){
 			return Boolean.parseBoolean( props.getProperty(IS_SANDBOX));
 		}

@@ -27,8 +27,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -66,8 +68,10 @@ import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.google.GoogleAppUtils;
+import com.notes.nicefact.service.PushService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.FileTO;
+import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.TutorialTO;
 
 import flexjson.JSONSerializer;
@@ -755,5 +759,20 @@ public class Utils {
 	public static String generateRamdomId() {
 		String strKey = UUID.randomUUID().toString().replaceAll("-", "");
 		return strKey;
+	}
+
+	public static void sendPostToUI(Post post) {
+		try {
+			PostTO postTO = new PostTO(post);
+			Map<String, Object> json = new HashMap<>();
+			json.put("name", "post");
+			json.put("data", postTO);
+			PushService pushService = PushService.getInstance();
+			for (String email : post.getAccessList()) {
+				pushService.sendChannelMessage(email, json);
+			} 
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 }

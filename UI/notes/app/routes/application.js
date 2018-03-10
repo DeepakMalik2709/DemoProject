@@ -70,6 +70,8 @@ export default Ember.Route.extend({
 	        	 }
      		}
         	
+          }else  if(msg.name == "post"){
+        	  $.event.trigger( "postUpdate" , data );
           }
         });
     }),

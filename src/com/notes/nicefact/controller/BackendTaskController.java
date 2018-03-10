@@ -99,7 +99,7 @@ public class BackendTaskController extends CommonController {
 			} else {
 				generateGroupPostFileThumbnail(em, post);
 			}
-
+			Utils.sendPostToUI(post);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
@@ -1130,6 +1130,7 @@ public class BackendTaskController extends CommonController {
 				ScheduleService scheduleService = new ScheduleService(em);
 				scheduleService.createTaskEvent(post);
 			}
+
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
@@ -1196,7 +1197,7 @@ public class BackendTaskController extends CommonController {
 			if (user.getUseGoogleDrive() ) {
 				moveTaskFilesToUserGoogleDrive(post, user, em);
 			}
-
+			Utils.sendPostToUI(post);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
@@ -1461,7 +1462,7 @@ public class BackendTaskController extends CommonController {
 			if (user.getUseGoogleDrive() ) {
 				moveSchduleFilesToUserGoogleDrive(post, user, em);
 			}
-
+			Utils.sendPostToUI(post);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {

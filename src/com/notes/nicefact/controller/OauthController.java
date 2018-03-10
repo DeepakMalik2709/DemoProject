@@ -34,6 +34,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.omg.CORBA.Current;
 
 import com.google.api.services.calendar.CalendarScopes;
 import com.notes.nicefact.entity.AppUser;
@@ -123,8 +124,13 @@ public class OauthController {
 	@GET
 	@Path("/driveAuthorization")
 	public Response driveAuthorization(@Context HttpServletResponse response) throws IOException, URISyntaxException {
-		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(Constants.GOOGLE_DRIVE_SCOPES + Constants.PROFILE_SCOPES, Constants.UTF_8) + "&include_granted_scopes=true&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
-				+ AppProperties.getInstance().getGoogleClientId() + "&redirect_uri="
+		String scopes = Constants.GOOGLE_DRIVE_SCOPES + Constants.PROFILE_SCOPES;
+		if(CurrentContext.getAppUser().getUseGoogleCalendar()){
+			scopes = scopes + " " + CalendarScopes.CALENDAR;
+		}
+		
+		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(scopes, Constants.UTF_8) + "&include_granted_scopes=true&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
+				+ AppProperties.getInstance().getGoogleClientId() + "&login_hint=" + CurrentContext.getEmail() + "&redirect_uri="
 				+ URLEncoder.encode(AppProperties.getInstance().getApplicationUrl() + "/a/oauth/" + GOOGLE_DRIVE_CALLBACK, Constants.UTF_8);
 		return Response.seeOther(new URI(url)).build();
 	}
@@ -132,8 +138,12 @@ public class OauthController {
 	@GET
 	@Path("/calendarAuthorization")
 	public Response calendarAuthorization(@Context HttpServletResponse response) throws IOException, URISyntaxException {
-		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(CalendarScopes.CALENDAR  + Constants.PROFILE_SCOPES , Constants.UTF_8) + "&include_granted_scopes=true&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
-				+ AppProperties.getInstance().getGoogleClientId() + "&redirect_uri="
+		String scopes = CalendarScopes.CALENDAR  + Constants.PROFILE_SCOPES;
+		if(CurrentContext.getAppUser().getUseGoogleDrive()){
+			scopes = scopes + " " + Constants.GOOGLE_DRIVE_SCOPES;
+		}
+		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode( scopes , Constants.UTF_8) + "&include_granted_scopes=true&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
+				+ AppProperties.getInstance().getGoogleClientId() + "&login_hint=" + CurrentContext.getEmail() + "&redirect_uri="
 				+ URLEncoder.encode(AppProperties.getInstance().getApplicationUrl() + "/a/oauth/" + GOOGLE_DRIVE_CALLBACK, Constants.UTF_8);
 		return Response.seeOther(new URI(url)).build();
 	}
@@ -143,7 +153,7 @@ public class OauthController {
 	public Response googleAuthorization(@Context HttpServletResponse response) throws IOException, URISyntaxException {
 		String allScopes = Constants.GOOGLE_DRIVE_SCOPES +" " + CalendarScopes.CALENDAR   + Constants.PROFILE_SCOPES ;
 		String url = GOOGLE_AUTH_URL + "?scope=" + URLEncoder.encode(allScopes, Constants.UTF_8) + "&include_granted_scopes=true&response_type=code&access_type=offline&approval_prompt=force" + "&client_id="
-				+ AppProperties.getInstance().getGoogleClientId() + "&redirect_uri="
+				+ AppProperties.getInstance().getGoogleClientId() + "&login_hint=" + CurrentContext.getEmail() + "&redirect_uri="
 				+ URLEncoder.encode(AppProperties.getInstance().getApplicationUrl() + "/a/oauth/" + GOOGLE_DRIVE_CALLBACK, Constants.UTF_8);
 		return Response.seeOther(new URI(url)).build();
 	}
