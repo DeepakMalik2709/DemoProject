@@ -291,6 +291,7 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 		return obj;
 	}
 
+
 	public List<E> getActiveListByField(String fieldName, Object fieldValue, int start, int max, String sort) {
 		EntityManager pm = getEntityManager();
 		Query query = pm.createQuery("select h from " + this.clazz.getSimpleName() + " h where h." + fieldName + " = :param and isActive = true and isDeleted = false order by " + sort);
@@ -424,6 +425,24 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 		}
 		return list;
 	}
+	
+
+	public List<E> getAllActive() {
+		 List<E> list;
+		EntityManager pm = getEntityManager();
+		Query query = pm.createQuery("select h from " + this.clazz.getSimpleName() + " h where isActive = true and isDeleted = false");		
+		try {
+			list = query.getResultList();
+		
+		} catch (NoResultException nre) {
+			list = new ArrayList<>();
+			logger.warn(nre.getMessage());
+		} finally {
+			
+		}
+		return list;
+	}
+
 	
 	public List<E> getByKeys(Collection<Long> keys) {
 		EntityManager pm = getEntityManager();

@@ -8,9 +8,12 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.notes.nicefact.entity.CommonEntity;
+
 @Entity
 @Table(name="Question")
-public class Question{
+public class Question extends CommonEntity{
+	private static final long serialVersionUID = 1L;
 	@Basic
 	private String descriton;
 	@Basic
@@ -27,6 +30,13 @@ public class Question{
 	@Basic
 	private Integer marks;
 	
+	public Question() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public Question(Question question) {
+		// TODO Auto-generated constructor stub
+	}
 	public String getDescriton() {
 		return descriton;
 	}

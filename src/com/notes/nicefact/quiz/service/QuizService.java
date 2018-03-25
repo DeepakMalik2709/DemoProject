@@ -1,5 +1,8 @@
 package com.notes.nicefact.quiz.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
@@ -15,6 +18,7 @@ import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonService;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.PostService;
+import com.notes.nicefact.to.SearchTO;
 
 public class QuizService extends CommonService<Quiz> {
 	private final static Logger logger = Logger.getLogger(QuizService.class.getName());
@@ -70,6 +74,17 @@ public class QuizService extends CommonService<Quiz> {
 		quizDao.upsert(quizDB);
 		logger.info("upsertQuiz : ");
 		return quizDB;
+	}
+
+
+	public List<QuizTO> fetchMyQuiz(SearchTO searchTO, AppUser user) {
+		List<Quiz> quizs = quizDao.getActiveListByList("group", user.getGroupIds(), searchTO.getFirst(), searchTO.getLimit() ,null );
+		List<QuizTO> quizTOs = new ArrayList<QuizTO>();
+		
+		for (Quiz quiz : quizs) {
+			quizTOs.add(new QuizTO(quiz));
+		}
+		return quizTOs;
 	}
 
 

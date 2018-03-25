@@ -4,14 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OptionTO{
-	private int number;
+	private Long id;
+	private Integer number;
 	private String title;
 	private String description;
 	private String weightage;
-	public int getNumber() {
+	
+	public Integer getNumber() {
 		return number;
 	}
-	public void setNumber(int number) {
+	public void setNumber(Integer number) {
 		this.number = number;
 	}
 	public String getTitle() {
@@ -31,6 +33,12 @@ public class OptionTO{
 	}
 	public void setWeightage(String weightage) {
 		this.weightage = weightage;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	

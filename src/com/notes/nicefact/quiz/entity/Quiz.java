@@ -1,6 +1,5 @@
 package com.notes.nicefact.quiz.entity;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +11,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.notes.nicefact.entity.CommonEntity;
-import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.quiz.to.QuizTO;
 
 @Entity
