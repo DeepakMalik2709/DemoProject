@@ -27,7 +27,7 @@ import com.notes.nicefact.util.Pagination;
  * CommonDaoImpl is an abstract class and it perform common CRUD operation and
  * all DAO need to extend this class
  * 
- * @author Dheeraj Kumar
+ * @author 
  * 
  * @param <E>
  */
