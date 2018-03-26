@@ -8,6 +8,7 @@ import javax.persistence.ManyToOne;
 
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.CommonEntity;
+import com.notes.nicefact.quiz.enums.AnsweredQuesStatus;
 
 @Entity
 public class AnsweredQuestion extends CommonEntity{
@@ -24,7 +25,7 @@ public class AnsweredQuestion extends CommonEntity{
 	private Option optinonId;
 	
 	@Enumerated(EnumType.STRING)
-	private String status;
+	private AnsweredQuesStatus status = AnsweredQuesStatus.NOTCHECKED;
 
 	public AppUser getStudent() {
 		return student;
@@ -50,11 +51,11 @@ public class AnsweredQuestion extends CommonEntity{
 		this.optinonId = optinonId;
 	}
 
-	public String getStatus() {
+	public AnsweredQuesStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(AnsweredQuesStatus status) {
 		this.status = status;
 	}
 	

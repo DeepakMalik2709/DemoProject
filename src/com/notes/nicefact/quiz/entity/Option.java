@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import com.notes.nicefact.entity.CommonEntity;
 
 @Entity
-@Table(name="Option")
+@Table(name="Options")
 public class Option extends CommonEntity{
 	
 	private static final long serialVersionUID = 1L;

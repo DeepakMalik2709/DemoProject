@@ -1,10 +1,13 @@
 package com.notes.nicefact.quiz.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -15,7 +18,7 @@ import com.notes.nicefact.entity.CommonEntity;
 public class Question extends CommonEntity{
 	private static final long serialVersionUID = 1L;
 	@Basic
-	private String descriton;
+	private String description;
 	@Basic
 	private String title;
 	@Basic
@@ -30,6 +33,9 @@ public class Question extends CommonEntity{
 	@Basic
 	private Integer marks;
 	
+	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "questions")
+	private Set<Quiz> quizes=  new HashSet<>();
+	
 	public Question() {
 		// TODO Auto-generated constructor stub
 	}
@@ -37,11 +43,11 @@ public class Question extends CommonEntity{
 	public Question(Question question) {
 		// TODO Auto-generated constructor stub
 	}
-	public String getDescriton() {
-		return descriton;
+	public String getDescription() {
+		return description;
 	}
-	public void setDescriton(String descriton) {
-		this.descriton = descriton;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	public String getTitle() {
 		return title;
@@ -81,9 +87,17 @@ public class Question extends CommonEntity{
 	}
 	@Override
 	public String toString() {
-		return "Question [descriton=" + descriton + ", title=" + title
+		return "Question [descriton=" + description + ", title=" + title
 				+ ", number=" + number + ", tag=" + tag + ", type=" + type
 				+ ", options=" + options + ", marks=" + marks + "]";
+	}
+
+	public Set<Quiz> getQuizes() {
+		return quizes;
+	}
+
+	public void setQuizes(Set<Quiz> quizes) {
+		this.quizes = quizes;
 	}
 	 
 	 

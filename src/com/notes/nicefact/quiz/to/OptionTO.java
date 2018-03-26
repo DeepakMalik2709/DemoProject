@@ -1,6 +1,7 @@
 package com.notes.nicefact.quiz.to;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.notes.nicefact.quiz.entity.Option;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OptionTO{
@@ -10,6 +11,19 @@ public class OptionTO{
 	private String description;
 	private String weightage;
 	
+	public OptionTO() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public OptionTO(Option option) {
+		super();
+		this.id = option.getId();
+		this.number=option.getNumber();
+		this.title=option.getTitle();
+		this.description=option.getDescription();
+		this.weightage=option.getWeightage();
+		
+	}
 	public Integer getNumber() {
 		return number;
 	}

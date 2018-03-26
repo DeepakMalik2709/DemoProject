@@ -1,5 +1,6 @@
 package com.notes.nicefact.quiz.to;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -11,16 +12,29 @@ public class QuestionTO {
 	private Long id;
 	private String descriton;
 	private String title;
-	private int number;
+	private Integer number;
 	private String tag;
 	private String type;
-	private List<Option> options;
-	private int marks;
+	private List<OptionTO> options;
+	private Integer marks;
 
 	public QuestionTO() {
 	}
 
 	public QuestionTO(Question question) {
+		super();
+		this.id=question.getId();
+		this.descriton = question.getDescription();
+		this.title = question.getTitle();
+		this.number = question.getNumber();
+		this.tag = question.getTag();
+		this.type = question.getType();
+		this.marks = question.getMarks();
+		options = new ArrayList<>();
+		for(Option opts : question.getOptions()) {
+			OptionTO optionTO = new OptionTO(opts);
+			options.add(optionTO);
+		}
 		// TODO Auto-generated constructor stub
 	}
 
@@ -48,11 +62,11 @@ public class QuestionTO {
 		this.title = title;
 	}
 
-	public int getNumber() {
+	public Integer getNumber() {
 		return number;
 	}
 
-	public void setNumber(int number) {
+	public void setNumber(Integer number) {
 		this.number = number;
 	}
 
@@ -72,19 +86,19 @@ public class QuestionTO {
 		this.type = type;
 	}
 
-	public List<Option> getOptions() {
+	public List<OptionTO> getOptions() {
 		return options;
 	}
 
-	public void setOptions(List<Option> options) {
+	public void setOptions(List<OptionTO> options) {
 		this.options = options;
 	}
 
-	public int getMarks() {
+	public Integer getMarks() {
 		return marks;
 	}
 
-	public void setMarks(int marks) {
+	public void setMarks(Integer marks) {
 		this.marks = marks;
 	}
 
