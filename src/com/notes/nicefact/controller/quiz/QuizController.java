@@ -1,4 +1,4 @@
-package com.notes.nicefact.quiz.controller;
+package com.notes.nicefact.controller.quiz;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,9 +7,12 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
@@ -30,6 +33,7 @@ public class QuizController extends CommonController {
 
 	@POST
 	@Path("/upsert")	
+	@Consumes(MediaType.APPLICATION_JSON)
 	public void upsertQuiz(QuizTO quizTO, @Context HttpServletResponse response,@Context HttpServletRequest request) {
 		logger.info("upsert quiz start , postId : ");
 		System.out.println("quiz :" + quizTO);
@@ -57,7 +61,7 @@ public class QuizController extends CommonController {
 		logger.info("createEvent exit");
 	}
 	
-	@POST
+	@GET
 	@Path("/myQuiz")	
 	public void myQuiz(@Context HttpServletResponse response,@Context HttpServletRequest request) {
 		logger.info("my quiz start , postId : ");
@@ -65,7 +69,7 @@ public class QuizController extends CommonController {
 		Map<String, Object> json = new HashMap<>();
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
-			AppUser user = CurrentContext.getAppUser();
+			AppUser user = CurrentContext.getAppUser();	
 			QuizService quizService = new QuizService(em);
 			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);			
 			List<QuizTO> quizTos = quizService.fetchMyQuiz(searchTO, user);

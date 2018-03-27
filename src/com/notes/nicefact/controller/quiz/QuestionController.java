@@ -1,4 +1,4 @@
-package com.notes.nicefact.quiz.controller;
+package com.notes.nicefact.controller.quiz;
 
 import java.util.HashMap;
 import java.util.List;

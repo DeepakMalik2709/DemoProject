@@ -1,8 +1,11 @@
 package com.notes.nicefact.quiz.to;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.notes.nicefact.entity.Group;
+import com.notes.nicefact.quiz.entity.Question;
 import com.notes.nicefact.quiz.entity.Quiz;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -13,6 +16,7 @@ public class QuizTO {
 	private String description;
 	private Integer marks;
 	private List<Long> groups;
+	private List<Question> questionDetail;
 	private List<Long> questions;
 	private Long fromDateTime;
 	private Long toDateTime;
@@ -24,7 +28,23 @@ public class QuizTO {
 	}
 	
 	public QuizTO(Quiz quiz) {
-		// TODO Auto-generated constructor stub
+		this.id=quiz.getId();
+		this.name = quiz.getName();
+		this.subject = quiz.getSubject();
+		this.description = quiz.getDescription();
+		this.marks = quiz.getMarks();
+		this.questions = new ArrayList<>();
+		this.groups = new ArrayList<>();
+		this.fromDateTime = quiz.getFromDateTime();
+		this.toDateTime = quiz.getToDateTime();
+		this.passingRules = quiz.getPassingRules();
+		this.totalAppeared = quiz.getTotalAppeared();
+		for (Question ques : quiz.getQuestions()) {			
+			this.questions.add(ques.getId());
+		}
+		for(Group quizGrp : quiz.getGroups()) {
+			this.groups.add(quizGrp.getId());
+		}
 	}
 
 	public Long getId() {
@@ -113,6 +133,14 @@ public class QuizTO {
 
 	public void setTotalAppeared(Integer totalAppeared) {
 		this.totalAppeared = totalAppeared;
+	}
+
+	public List<Question> getQuestionDetail() {
+		return questionDetail;
+	}
+
+	public void setQuestionDetail(List<Question> questionDetail) {
+		this.questionDetail = questionDetail;
 	}
 	
 	

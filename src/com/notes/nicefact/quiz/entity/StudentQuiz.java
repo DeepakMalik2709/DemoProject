@@ -2,8 +2,6 @@ package com.notes.nicefact.quiz.entity;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
@@ -29,7 +27,7 @@ public class StudentQuiz  extends CommonEntity{
 	@Basic
 	private Integer score;
 	
-	@Enumerated(EnumType.STRING)
+	@Basic
 	private String status;
 	
 	public Quiz getQuiz() {

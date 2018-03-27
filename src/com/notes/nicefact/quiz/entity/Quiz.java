@@ -7,10 +7,15 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import com.notes.nicefact.entity.CommonEntity;
+import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.quiz.to.QuizTO;
 
 @Entity
@@ -27,11 +32,17 @@ public class Quiz  extends CommonEntity{
 	@Basic
 	private Integer marks;
 	
-	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Set<QuizGroupQuestion> groups=  new HashSet<>();
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "quiz_group", 
+	joinColumns = { @JoinColumn(name = "quiz_id", nullable = false, updatable = false) }, 
+	inverseJoinColumns = { @JoinColumn(name = "group_id",nullable = false, updatable = false) })
+	private Set<Group> groups=  new HashSet<>();
 	
-	@OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Set<QuizGroupQuestion> questions=  new HashSet<>();
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "quiz_question", 
+	joinColumns = {@JoinColumn(name = "quiz_id", nullable = false, updatable = false) }, 
+	inverseJoinColumns = { @JoinColumn(name = "question_id",nullable = false, updatable = false) })
+	private Set<Question> questions=  new HashSet<>();
 	
 	@Basic
 	private Long fromDateTime;
@@ -46,7 +57,10 @@ public class Quiz  extends CommonEntity{
 		// TODO Auto-generated constructor stub
 	}
 	public Quiz(QuizTO quizTO) {
-		// TODO Auto-generated constructor stub
+		super();
+		updateProps( quizTO);
+		
+		
 	}
 	public String getName() {
 		return name;
@@ -73,18 +87,13 @@ public class Quiz  extends CommonEntity{
 		this.marks = marks;
 	}
 	
-	public Set<QuizGroupQuestion> getGroups() {
+	public Set<Group> getGroups() {
 		return groups;
 	}
-	public void setGroups(Set<QuizGroupQuestion> groups) {
+	public void setGroups(Set<Group> groups) {
 		this.groups = groups;
 	}
-	public Set<QuizGroupQuestion> getQuestions() {
-		return questions;
-	}
-	public void setQuestions(Set<QuizGroupQuestion> questions) {
-		this.questions = questions;
-	}
+	
 	public Long getFromDateTime() {
 		return fromDateTime;
 	}
@@ -113,12 +122,34 @@ public class Quiz  extends CommonEntity{
 	public String toString() {
 		return "Quiz [name=" + name + ", subject=" + subject + ", description="
 				+ description + ", marks=" + marks + ", groups=" + groups
-				+ ", questions=" + questions + ", fromDateTime=" + fromDateTime
+				+ ", questions="  + ", fromDateTime=" + fromDateTime
 				+ ", toDateTime=" + toDateTime + ", passingRules="
 				+ passingRules + ", totalAppeared=" + totalAppeared + "]";
 	}
 	
-	public void updateProps(Quiz quiz) {
+	public void updateProps(QuizTO quizTO) {
+		this.name=quizTO.getName();
+		this.subject=quizTO.getSubject();
+		this.description=quizTO.getDescription();
+		this.marks=quizTO.getMarks();
+		this.fromDateTime=quizTO.getFromDateTime();
+		this.toDateTime=quizTO.getToDateTime();
+		this.passingRules=quizTO.getPassingRules();
+		this.totalAppeared=quizTO.getTotalAppeared();
 		
+	}
+	
+	@PrePersist
+	@PreUpdate
+	void prePersist() {
+		super.preStore();
+	
+		
+	}
+	public Set<Question> getQuestions() {
+		return questions;
+	}
+	public void setQuestions(Set<Question> questions) {
+		this.questions = questions;
 	}
 }
