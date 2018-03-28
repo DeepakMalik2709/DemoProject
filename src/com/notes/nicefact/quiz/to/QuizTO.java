@@ -16,8 +16,7 @@ public class QuizTO {
 	private String description;
 	private Integer marks;
 	private List<Long> groups;
-	private List<Question> questionDetail;
-	private List<Long> questions;
+	private List<QuestionTO> questions;
 	private Long fromDateTime;
 	private Long toDateTime;
 	
@@ -40,7 +39,7 @@ public class QuizTO {
 		this.passingRules = quiz.getPassingRules();
 		this.totalAppeared = quiz.getTotalAppeared();
 		for (Question ques : quiz.getQuestions()) {			
-			this.questions.add(ques.getId());
+			this.questions.add(new QuestionTO(ques));
 		}
 		for(Group quizGrp : quiz.getGroups()) {
 			this.groups.add(quizGrp.getId());
@@ -94,15 +93,6 @@ public class QuizTO {
 	public void setGroups(List<Long> groups) {
 		this.groups = groups;
 	}
-
-	public List<Long> getQuestions() {
-		return questions;
-	}
-
-	public void setQuestions(List<Long> questions) {
-		this.questions = questions;
-	}
-
 	public Long getFromDateTime() {
 		return fromDateTime;
 	}
@@ -135,14 +125,12 @@ public class QuizTO {
 		this.totalAppeared = totalAppeared;
 	}
 
-	public List<Question> getQuestionDetail() {
-		return questionDetail;
+	public List<QuestionTO> getQuestions() {
+		return questions;
 	}
 
-	public void setQuestionDetail(List<Question> questionDetail) {
-		this.questionDetail = questionDetail;
+	public void setQuestions(List<QuestionTO> questions) {
+		this.questions = questions;
 	}
-	
-	
-	
+
 }

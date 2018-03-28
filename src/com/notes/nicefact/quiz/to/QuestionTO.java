@@ -10,7 +10,7 @@ import com.notes.nicefact.quiz.entity.Question;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QuestionTO {
 	private Long id;
-	private String descriton;
+	private String description;
 	private String title;
 	private Integer number;
 	private String tag;
@@ -24,7 +24,7 @@ public class QuestionTO {
 	public QuestionTO(Question question) {
 		super();
 		this.id=question.getId();
-		this.descriton = question.getDescription();
+		this.setDescription(question.getDescription());
 		this.title = question.getTitle();
 		this.number = question.getNumber();
 		this.tag = question.getTag();
@@ -35,7 +35,6 @@ public class QuestionTO {
 			OptionTO optionTO = new OptionTO(opts);
 			options.add(optionTO);
 		}
-		// TODO Auto-generated constructor stub
 	}
 
 	public Long getId() {
@@ -44,14 +43,6 @@ public class QuestionTO {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getDescriton() {
-		return descriton;
-	}
-
-	public void setDescriton(String descriton) {
-		this.descriton = descriton;
 	}
 
 	public String getTitle() {
@@ -100,6 +91,14 @@ public class QuestionTO {
 
 	public void setMarks(Integer marks) {
 		this.marks = marks;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

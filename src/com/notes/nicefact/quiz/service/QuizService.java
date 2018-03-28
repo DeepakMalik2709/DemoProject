@@ -15,6 +15,7 @@ import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.quiz.dao.QuizDao;
 import com.notes.nicefact.quiz.entity.Question;
 import com.notes.nicefact.quiz.entity.Quiz;
+import com.notes.nicefact.quiz.to.QuestionTO;
 import com.notes.nicefact.quiz.to.QuizTO;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonService;
@@ -79,11 +80,11 @@ public class QuizService extends CommonService<Quiz> {
 			Group grp = groupService.get(groupId);
 			quizDB.getGroups().add(grp);
 		}
-		for(Long quesId : quizTO.getQuestions()) {
-			Question ques = questionService.get(quesId);
+		for(QuestionTO quesTO : quizTO.getQuestions()) {
+			Question ques = questionService.get(quesTO.getId());
 			quizDB.getQuestions().add(ques);
 		}
-		quizDao.upsert(quizDB);
+		quizDB = quizDao.upsert(quizDB);
 		logger.info("upsertQuiz : ");
 		return quizDB;
 	}

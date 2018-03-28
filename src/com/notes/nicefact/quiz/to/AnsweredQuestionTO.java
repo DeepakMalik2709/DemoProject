@@ -1,43 +1,78 @@
 package com.notes.nicefact.quiz.to;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.quiz.entity.AnsweredQuestion;
+import com.notes.nicefact.quiz.enums.AnsweredQuesStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AnsweredQuestionTO{
-	private int quizId;
-	private int studentId;
-	private int questionId;
-	private int optinonId;
-	private String status;
-	public int getQuizId() {
-		return quizId;
+
+	private Long id;
+	private QuizTO quizTO;
+	private AppUser studentTO;
+	private QuestionTO questionTO;
+	private OptionTO optionTO;
+	private AnsweredQuesStatus status;
+	
+	public AnsweredQuestionTO(AnsweredQuestion answeredQuestion) {
+		this.id = answeredQuestion.getId();
+		this.quizTO =new QuizTO(answeredQuestion.getQuiz());		
+		this.optionTO=new OptionTO(answeredQuestion.getOption());
+		this.questionTO=new QuestionTO(answeredQuestion.getQuestion());
+		this.status = answeredQuestion.getStatus();
+		this.studentTO = answeredQuestion.getStudent();
 	}
-	public void setQuizId(int quizId) {
-		this.quizId = quizId;
+
+	public AnsweredQuestionTO() {
 	}
-	public int getStudentId() {
-		return studentId;
+	
+	public QuizTO getQuizTO() {
+		return quizTO;
 	}
-	public void setStudentId(int studentId) {
-		this.studentId = studentId;
+
+	public void setQuizTO(QuizTO quizTO) {
+		this.quizTO = quizTO;
 	}
-	public int getQuestionId() {
-		return questionId;
+
+	public AppUser getStudentTO() {
+		return studentTO;
 	}
-	public void setQuestionId(int questionId) {
-		this.questionId = questionId;
+
+	public void setStudentTO(AppUser studentTO) {
+		this.studentTO = studentTO;
 	}
-	public int getOptinonId() {
-		return optinonId;
+
+	public QuestionTO getQuestionTO() {
+		return questionTO;
 	}
-	public void setOptinonId(int optinonId) {
-		this.optinonId = optinonId;
+
+	public void setQuestionTO(QuestionTO questionTO) {
+		this.questionTO = questionTO;
 	}
-	public String getStatus() {
+
+	public OptionTO getOptionTO() {
+		return optionTO;
+	}
+
+	public void setOptionTO(OptionTO optionTO) {
+		this.optionTO = optionTO;
+	}
+
+	public AnsweredQuesStatus getStatus() {
 		return status;
 	}
-	public void setStatus(String status) {
+
+	public void setStatus(AnsweredQuesStatus status) {
 		this.status = status;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	
