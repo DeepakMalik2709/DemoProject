@@ -24,7 +24,19 @@ export default Ember.Mixin.create({
 				})
 			)
 	},
-	   doDelete(targetUrl){
+
+	doPut(targetUrl , json){
+		return Ember.$.when(
+				Ember.$.ajax({
+				"url" : targetUrl,
+				method : "PUT",
+				contentType : "application/json;charset=UTF-8",
+				data : JSON.stringify(json)
+				})
+			)
+	},
+	   
+	doDelete(targetUrl){
 		return Ember.$.when(
 				Ember.$.ajax({
 				"url" : targetUrl,

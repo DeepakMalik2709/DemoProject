@@ -18,9 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import com.notes.nicefact.dao.AppUserDAO;
 import com.notes.nicefact.dao.CommonDAO;
 import com.notes.nicefact.entity.AppUser;
-import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.exception.AppException;
 import com.notes.nicefact.exception.EmailAlreadyExistsException;
+import com.notes.nicefact.request.profile.PersonalInfoRequest;
+import com.notes.nicefact.request.profile.ProfileInfoRequest;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.CommonTO;
 import com.notes.nicefact.util.AppProperties;
@@ -292,6 +293,37 @@ public class AppUserService extends CommonService<AppUser> {
 		Utils.updateAppUserFromTo(appUser, appUserTO);
 		appUser = upsert(appUser);
 		if(CurrentContext.getSession() !=null){
+			CurrentContext.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, appUser);
+		}
+		CacheUtils.addUserToCache(appUser);
+		return  appUser;
+	}
+	
+	public AppUser updateProfileInfo(String email, ProfileInfoRequest profileInfoRequest) {
+		AppUser appUser = getAppUserByEmail(email);
+		
+		appUser.setAbout(profileInfoRequest.getAbout());
+		appUser.setFirstName(profileInfoRequest.getFirstName());
+		appUser.setLastName(profileInfoRequest.getLastName());
+		appUser.setCurrentCity(profileInfoRequest.getCurrentCity());
+		appUser.setPhoneNumber(profileInfoRequest.getPhoneNumber());
+		
+		appUser = upsert(appUser);
+		if(CurrentContext.getSession() != null){
+			CurrentContext.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, appUser);
+		}
+		CacheUtils.addUserToCache(appUser);
+		return  appUser;
+	}
+	
+	public AppUser updatePersonalInfo(String email, PersonalInfoRequest personalInfoRequest) {
+		AppUser appUser = getAppUserByEmail(email);
+		
+		appUser.setDob(personalInfoRequest.getDob());
+		appUser.setHomeTown(personalInfoRequest.getHomeTown());
+		
+		appUser = upsert(appUser);
+		if(CurrentContext.getSession() != null){
 			CurrentContext.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, appUser);
 		}
 		CacheUtils.addUserToCache(appUser);

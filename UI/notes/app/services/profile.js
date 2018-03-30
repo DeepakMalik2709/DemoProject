@@ -51,5 +51,41 @@ export default DS.Store.extend(ajaxMixin ,{
 					  resolve(data);
 			      });
 		 });
-	 }
+	 },
+
+	updateProfileInfo: function(model) {
+		return  new Ember.RSVP.Promise((resolve, reject) =>{
+			var url = "/rest/secure/profile-info";
+			this.doPost(url, model).then((data ) =>{
+				resolve(data);
+			});
+		});
+	},
+	
+	updatePersonalInfo: function(model) {
+		return  new Ember.RSVP.Promise((resolve, reject) =>{
+			var url = "/rest/secure/personal-info";
+			this.doPost(url, model).then((data ) =>{
+				resolve(data);
+			});
+		});
+	},
+
+	saveCertificate: function(model) {
+		return  new Ember.RSVP.Promise((resolve, reject) =>{
+			var url = "/rest/secure/certificate";
+			this.doPost(url, model).then((data ) =>{
+				resolve(data);
+			});
+		});
+	},
+
+	updateCertificate: function(model) {
+		return  new Ember.RSVP.Promise((resolve, reject) =>{
+			var url = "/rest/secure/certificate";
+			this.doPut(url, model).then((data ) =>{
+				resolve(data);
+			});
+		});
+	}
 });

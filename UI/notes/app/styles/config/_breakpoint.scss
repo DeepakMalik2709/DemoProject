@@ -1,0 +1,25 @@
+$desktop: 1024px;
+$tablet-landscape: 992px;
+$tablet-portrait-max: 991px;
+$tablet-portrait: 768px;
+$mobile-landscape-max: 767px;
+$mobile-landscape: 480px;
+$mobile-portrait: 320px;
+
+@mixin min-width($width) {
+    @media (min-width: $width) {
+        @content;
+    }
+}
+
+@mixin width($min, $max) {
+    @media (min-width: $min) and (max-width: $max) {
+        @content;
+    }
+}
+
+@mixin max-width($width) {
+    @media (max-width: $width) {
+        @content;
+    }
+}

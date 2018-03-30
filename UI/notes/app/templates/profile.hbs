@@ -1,29 +1,106 @@
-  <div class="row">
-                <div class="col-lg-12">
-                   
-                     <h1 class="page-header ">Profile</h1>
-                </div>
-                <!-- /.col-lg-12 -->
-            </div>
-            
-            
-            
-            
-<div class="form-horizontal">
+<div class="form-horizontal profile-info">
+    <h2 class="text-center profile-heading">Profile</h2>
 
- <div class="form-group">
-<div class="pull-left image">
-                    <img src="{{model.photoUrl}}" class="profile-img avatar" />
-                     <span class="{{if isSaving 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
-                      <button type="button"   onclick="$('#photo-upload').click();" class="btn btn-default" disabled={{if isSaving true}}>Change</button>
-                     {{#if model.hasUploadedPhoto}}
-                      <button type="button"   {{action 'removePhoto' model}} class="btn btn-default" disabled={{if isSaving true}}>Remove</button>
-                    {{/if}}
-                    <input accept="image/*"  id="photo-upload" onchange={{action "uploadPhoto"}} type="file" style="width: 0px; height: 0px; overflow: hidden;"  >
+    <div class="panel panel-primary panel-sections personal-top-section">
+        <div class="panel-body">
+            <div class="panel-section">
+                <div class="panel-section-left pull-left">
+                    <div class="profile-image-wrapper">
+                        <img src="{{model.photoUrl}}" class="avatar" width="90" />
+                        <span class="{{if isSaving 'inlinedisplay' 'nodisplay' }}"><img src="/img/loading.gif" /></span>
+                        <button type="button"   onclick="$('#photo-upload').click();" class="btn btn-default" disabled={{if isSaving true}}>Change</button>
+                        {{#if model.hasUploadedPhoto}}
+                            <button type="button"   {{action 'removePhoto' model}} class="btn btn-default" disabled={{if isSaving true}}>Remove</button>
+                        {{/if}}
+                        <input accept="image/*"  id="photo-upload" onchange={{action "uploadPhoto"}} type="file" style="width: 0px; height: 0px; overflow: hidden;">
                     </div>
-                    
-  </div>       
-         <div class="form-group">
+                    <div class="profile-info-wrapper">
+                        <label class="profile-name">{{model.firstName}} {{model.lastName}}</label>
+                        <label class="profile-email">{{model.email}}</label>
+                        <label class="profile-phoneNumber">{{model.phoneNumber}}</label>
+                        <label class="profile-currentCity">{{model.currentCity}}</label>
+                    </div>
+                </div>
+                <div class="panel-section-right pull-right" data-target="#profile-info" data-toggle="modal">
+                    <i class="fa fa-pencil panel-section-edit"></i>
+                </div>
+            </div>
+            <div class="panel-section">
+                <div class="profile-about">
+                    {{model.about}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{modal/profile/profile-info-modal item=model update="updateProfileInfo"}}
+
+    <div class="panel panel-primary panel-sections certifications">
+        <div class="panel-heading">
+        <h2>Certifications</h2>
+        <button type="button" class="btn btn-default" data-target="#certificate-0" data-toggle="modal">Add</button>
+        </div>
+        <div class="panel-body">
+        {{#each model.certificates as |certificate|}}
+            <div class="certificate panel-section">
+            <div class="panel-section-left pull-left">
+                <div class="form-group has-feedback">
+                <label class="control-label col-sm-2 col-xs-6">Name</label>
+                <label class="col-sm-10 col-xs-6 lbl_data">{{certificate.name}}</label>
+                </div>
+                <div class="form-group has-feedback">
+                <label class="control-label col-sm-2 col-xs-6">Certification Date</label>
+                <label class="col-sm-10 col-xs-6 lbl_data">{{certificate.date}}</label>
+                </div>
+                <div class="form-group has-feedback">
+                <label class="control-label col-sm-2">Organisation</label>
+                <label class="col-sm-10 col-xs-6 lbl_data">{{certificate.organisation}}</label>
+                </div>
+                <div class="form-group has-feedback">
+                <label class="control-label col-sm-2">Grade</label>
+                <label class="col-sm-10 col-xs-6 lbl_data">{{certificate.grade}}</label>
+                </div>
+            </div>
+            <div class="panel-section-right pull-right" data-target="#certificate-{{certificate.certificateId}}" data-toggle="modal">
+                <i class="fa fa-pencil panel-section-edit"></i>
+            </div>
+            </div>
+        {{/each}}
+        </div>
+    </div>
+
+    {{modal/profile/certificate-modal appUserId=model.id update="saveCertificate"}}
+
+    {{#each model.certificates as |certificate|}}
+        {{modal/profile/certificate-modal appUserId=model.id item=certificate update="updateCertificate"}}
+    {{/each}}
+
+    <div class="panel panel-primary panel-sections personal-info">
+        <div class="panel-heading">
+            <h2>Personal Information</h2>
+            <div class="panel-section-right pull-right" data-target="#personal-info" data-toggle="modal">
+                <i class="fa fa-pencil panel-section-edit"></i>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="panel-section">
+            <div class="panel-section-left pull-left">
+                <div class="form-group has-feedback">
+                <label class="control-label col-sm-2">DOB</label>
+                <label class="col-sm-10 col-xs-6 lbl_data">{{model.dob}}</label>
+                </div>
+                <div class="form-group has-feedback">
+                <label class="control-label col-sm-2">Hometown</label>
+                <label class="col-sm-10 col-xs-6 lbl_data">{{model.homeTown}}</label>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    {{modal/profile/personal-info-modal item=model update="updatePersonalInfo"}}
+       
+    <div class="form-group">
        <label class="col-sm-2 control-label">Google Drive  </label>
        <div class="col-sm-10">
               
@@ -49,7 +126,7 @@
        </div>
     </div>
                
-    <div class="form-group has-feedback {{if model.isValidFirstName 'has-success' 'has-error'}}">
+    <!--<div class="form-group has-feedback {{if model.isValidFirstName 'has-success' 'has-error'}}">
         <label class="col-sm-2 control-label">Frist name*</label>
         <div class="col-sm-10">
           {{input type="text" value=model.firstName class="form-control" placeholder="First name"}}
@@ -75,7 +152,7 @@
         <div class="col-sm-10">
           {{input type="text" value=model.password2 class="form-control" placeholder="Confirm password"}}
         </div>
-    </div>
+    </div>-->
     
     
     <div class="form-group">
