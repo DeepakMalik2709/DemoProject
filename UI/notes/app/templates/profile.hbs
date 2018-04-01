@@ -41,7 +41,7 @@
         <button type="button" class="btn btn-default" data-target="#certificate-0" data-toggle="modal">Add</button>
         </div>
         <div class="panel-body">
-        {{#each model.certificates as |certificate|}}
+        {{#each model.certificates as |certificate index|}}
             <div class="certificate panel-section">
             <div class="panel-section-left pull-left">
                 <div class="form-group has-feedback">
@@ -61,8 +61,9 @@
                 <label class="col-sm-10 col-xs-6 lbl_data">{{certificate.grade}}</label>
                 </div>
             </div>
-            <div class="panel-section-right pull-right" data-target="#certificate-{{certificate.certificateId}}" data-toggle="modal">
-                <i class="fa fa-pencil panel-section-edit"></i>
+            <div class="panel-section-right pull-right">
+                <i class="fa fa-pencil panel-section-edit" data-target="#certificate-{{certificate.certificateId}}" data-toggle="modal"></i>
+                <i class="fa fa-trash panel-section-delete" data-target="#delete-certificate-{{certificate.certificateId}}" data-toggle="modal"></i>
             </div>
             </div>
         {{/each}}
@@ -71,8 +72,9 @@
 
     {{modal/profile/certificate-modal appUserId=model.id update="saveCertificate"}}
 
-    {{#each model.certificates as |certificate|}}
+    {{#each model.certificates as |certificate index|}}
         {{modal/profile/certificate-modal appUserId=model.id item=certificate update="updateCertificate"}}
+        {{modal/core/delete-modal item=index modalId=(concat "delete-certificate-" certificate.certificateId) delete="deleteCertificate"}}
     {{/each}}
 
     <div class="panel panel-primary panel-sections personal-info">

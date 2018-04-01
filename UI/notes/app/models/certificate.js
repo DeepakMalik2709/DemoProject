@@ -11,5 +11,7 @@ export default DS.Model.extend({
 
   user: DS.belongsTo('user'),
 
-  isEmptyName: Ember.computed.empty('name')
+  isEmptyName: Ember.computed.empty('name'),
+
+  isDisabled: Ember.computed.empty('name')
 });

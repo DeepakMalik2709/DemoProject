@@ -71,6 +71,10 @@ public class CertificateService extends CommonService<Certificate> {
 		return certificate;
 	}
 	
+	public boolean remove(Long id) {
+		return getDAO().remove(id);
+	}
+	
 	public List<Certificate> getByAppUserId(Long id) {
 		List<Certificate> certificates = certificateDao.getByAppUserId(id);
 		return certificates;

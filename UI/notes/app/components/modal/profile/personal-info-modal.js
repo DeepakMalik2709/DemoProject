@@ -9,6 +9,14 @@ export default Ember.Component.extend({
     resetOnInit: Ember.on('init', function() {
         this.resetFromProfile();
     }),
+
+    didInsertElement() {
+        var _this = this;
+
+        $("#personal-info").on("hidden.bs.modal", function() {
+            _this.resetFromProfile();
+        });
+    },
     
     resetFromProfile() {
         var store = this.get('store');

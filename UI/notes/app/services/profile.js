@@ -87,5 +87,14 @@ export default DS.Store.extend(ajaxMixin ,{
 				resolve(data);
 			});
 		});
+	},
+
+	deleteCertificate: function(id) {
+		return  new Ember.RSVP.Promise((resolve, reject) =>{
+			var url = "/rest/secure/certificate/"+id;
+			this.doDelete(url).then((data ) =>{
+				resolve(data);
+			});
+		});
 	}
 });

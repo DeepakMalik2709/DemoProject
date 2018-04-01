@@ -15,15 +15,6 @@
         .btn-default {
             float: right;
         }
-
-        .panel-section-edit {
-            float: right;
-            font-size: 18px;
-
-            &:hover {
-                cursor: pointer;
-            }
-        }
     }
 
     .panel-body {
@@ -43,13 +34,11 @@
             }
 
             &-edit {
-                float: right;
-                font-size: 18px;
                 color: #337ab7;
-    
-                &:hover {
-                    cursor: pointer;
-                }
+            }
+
+            &-delete {
+                margin-left: 15px;
             }
                 
             label {

@@ -47,6 +47,10 @@ export default DS.Model.extend({
 	  isValidPassword : Ember.computed.not('isInValidPassword'),
 	  isValid : Ember.computed.and("isValidFirstName","isValidLastName","isValidPassword"),
 	  
+	  isEmptyFirstName: Ember.computed.empty('firstName'),
+	  isEmptyLastName: Ember.computed.empty('lastName'),
+
+	  isDisabled: Ember.computed.or('isEmptyFirstName', 'isEmptyLastName'),
 	  
 	  save: function(){
 	      var data = JSON.stringify(this.getProperties.apply(this, this.dbFields));
