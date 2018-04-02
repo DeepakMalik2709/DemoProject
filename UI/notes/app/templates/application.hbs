@@ -30,24 +30,24 @@
                     <!-- /.search form -->
                     <!-- sidebar menu: : style can be found in sidebar.less -->
                     <ul class="sidebar-menu">
-   		        <!--        {{#nav-link-to 'dashboard'  tagName="li"}}                           
-                             <i class="fa fa-dashboard"></i><span>Dashboard</span>                           
+   		        <!--        {{#nav-link-to 'dashboard'  tagName="li"}}
+                             <i class="fa fa-dashboard"></i><span>Dashboard</span>
                         {{/nav-link-to}} -->
                         <li class="treeview">
-                       
+
                              <a href="javascript:void(0);">
                                 <i class="fa fa-group fa-fw"></i> <span>Groups</span> <i class="fa fa-angle-left pull-right"></i>
                              </a>
                              <ul class="treeview-menu" style='max-height : 125px;overflow-y : auto'>
-                      
+
                      					 {{#each myGroups as |group|}}
                                {{#nav-link-to 'group.posts' group.id   tagName="li"}}<i class="fa fa-th"></i>{{group.name}}{{/nav-link-to}}
                              {{/each}}
                                </ul>
-                           
+
                         </li>
                         <li class="treeview">
-                       
+
                              <a href="#">
                                 <i class="fa fa-edit"></i> <span>Create</span> <i class="fa fa-angle-left pull-right"></i>
                              </a>
@@ -56,49 +56,44 @@
                                     {{#nav-link-to 'group.task.create'  tagName="li"}} <i class="fa fa-angle-double-right"></i>Task  {{/nav-link-to}}
                                      {{#nav-link-to 'group.create'  tagName="li"}} <i class="fa fa-angle-double-right"></i>Group  {{/nav-link-to}}
                       		</ul>
-                           
+
                         </li>
                          <li class="treeview">
                                 <div style="cursor:pointer; color: white;padding: 12px 15px 12px 15px;"  {{action "checkCalendarAauthentication" model on="click" on="touchEnd"}} >
 	                                <i class="fa fa-calendar"></i> <span>Calendar</span>
-	                     <!--            <small class="badge pull-right bg-red">{{todayScheduleCount}}</small> -->
+	                     <!--            <small class="badge pull-right bg-red">todayScheduleCount}}</small> -->
                                 </div>
-                                
+
                     	 </li>
-						 <li class="treeview">
-                       
-                             <a href="#">
-                                <i class="fa fa-edit"></i> <span>Quiz</span> <i class="fa fa-angle-left pull-right"></i>
-                             </a>
-                             <ul class="treeview-menu">
-									{{#nav-link-to 'quizupsert'  tagName="li"}} <i class="fa fa-angle-double-right"></i>Create Quiz  {{/nav-link-to}}
-                      		</ul>
-                           
+          						 <li class="treeview">
+                         <div style="cursor:pointer; color: white;padding: 12px 15px 12px 15px;" >
+                            {{#nav-link-to 'quizes.grid'  tagName="li"}}
+                              <i class="fa fa-edit"></i> <span>Quiz</span>
+                              {{/nav-link-to}}
+                          </div>
                         </li>
-                    	 
-                        
                     </ul>
                 </section>
                 <!-- /.sidebar -->
             </aside>
           {{/if }}
  			<aside class="right-side">
- 				
+
  						{{outlet}}
-    				
-             
+
+
               </aside>
         </div><!-- ./wrapper -->
- 
-    
+
+
 
 <footer class='page-footer'>
   <div class="container">
-  
+
     <div class="row">
     <div class="col col-sm-6 pull-right">
-      
-     
+
+
       <div class="btn-group">
        <a class="btn btn-md" href="javascript:void(0);">Follow us</a>
       <!--  <a class="btn btn-twitter btn-md" href="javascript:void(0);"><i class="icon-twitter icon-large"></i> Twitter</a> -->
@@ -107,12 +102,12 @@
       {{/link-to}}
 	 <!--   <a class="btn btn-google-plus btn-md" href="javascript:void(0);"><i class="icon-google-plus icon-large"></i> Google+</a> -->
       </div>
-<!--        <p class="pull-right">&copy; <i class="icon-heart-empty"></i> <a href="/">AllSchool 2017</a></p> -->      
-       <p class="pull-right">Contact @ Allschoolhelp@gmail.com</p>      
+<!--        <p class="pull-right">&copy; <i class="icon-heart-empty"></i> <a href="/">AllSchool 2017</a></p> -->
+       <p class="pull-right">Contact @ Allschoolhelp@gmail.com</p>
     </div>
-    
+
   </div>
-  
+
   </div>
 <!--   <div class='footer-ad'>
       	<a class="close" href="javascript:void(0);" {{action "hideAd"}} aria-label="Close"><span aria-hidden="true">&times;</span></a>
@@ -126,6 +121,6 @@
 		</script>
       </div>
   </div> -->
-  
-  <!-- ad block end --> 
+
+  <!-- ad block end -->
 </footer>

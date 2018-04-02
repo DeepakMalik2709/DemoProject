@@ -28,7 +28,7 @@ Router.map(function() {
         this.route('attendance',{path : '/:groupId/attendance'});
       });
   this.route('attendance', function() {
-      this.route('view',{path : '/:groupId'});      
+      this.route('view',{path : '/:groupId'});
   });
   this.route('tag', function() {
       this.route('view',{path : '/:groupId'});
@@ -42,11 +42,19 @@ Router.map(function() {
         this.route('create',{path : '/create'});
       });
   this.route('calendar');
-
+  this.route('quizes', function() {
+    this.route('upsert');
+    this.route('play');
+    this.route('grid');
+  });
   this.route('new', function() {
     this.route('schedule');
   });
-  this.route('quizupsert');
+  this.route('quiz', function() {
+    this.route('upsert');
+    this.route('play');
+    this.route('grid');
+  });
 });
 
 export default Router;
