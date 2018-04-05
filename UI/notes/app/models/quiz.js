@@ -11,8 +11,11 @@ export default DS.Model.extend({
   fromDateTime: DS.attr('number'),
   toDateTime: DS.attr('number'),
   totalAppeared: DS.attr('number'),
-	questions: DS.attr( ),
-  groups: DS.attr( )
-
+	questions:  DS.attr( {
+			defaultValue() { return []; }
+		}),
+  groups:  DS.attr( {
+			defaultValue() { return []; }
+		})
 
 });
