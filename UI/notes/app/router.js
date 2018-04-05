@@ -42,11 +42,7 @@ Router.map(function() {
         this.route('create',{path : '/create'});
       });
   this.route('calendar');
-  this.route('quizes', function() {
-    this.route('upsert');
-    this.route('play');
-    this.route('grid');
-  });
+
   this.route('new', function() {
     this.route('schedule');
   });

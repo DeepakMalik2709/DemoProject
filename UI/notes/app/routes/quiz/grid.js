@@ -5,7 +5,7 @@ export default Ember.Route.extend(authenticationMixin,{
 
     contextService: Ember.inject.service('context'),
 
-    tableSchema:[{ label: 'Name',		  sortable: true,	      valuePath: 'description',	     width: '150px'	    },
+    tableSchema:[{ label: 'Name',		  sortable: true,	      valuePath: 'name',	     width: '150px'	    },
                 { label: 'Subject',		  sortable: true,	      valuePath: 'subject',     width: '150px'	    },
                 { label: 'From',		  sortable: true,	      valuePath: 'fromDateTime' , width: '150px'	,format:function(value){  return new Date(value);}   },
                  { label: 'To',		    sortable: true,	      valuePath: 'toDateTime',	width: '150px'	,format:function(value){  return new Date(value);}   }],
@@ -26,7 +26,7 @@ export default Ember.Route.extend(authenticationMixin,{
           controller.set('tableSchema', this.tableSchema);
            controller.set('rows',model);
       },
-      action:{
+       actions:{
         createQuiz(){
             this.transitionTo('quiz.upsert');
         },
