@@ -22,7 +22,7 @@ public class QuizTO {
 	
 	private String passingRules;
 	private Integer totalAppeared;
-	
+	private String createdByEmail;
 	public QuizTO() {
 	}
 	
@@ -33,6 +33,7 @@ public class QuizTO {
 		this.description = quiz.getDescription();
 		this.marks = quiz.getMarks();
 		this.questions = new ArrayList<>();
+		this.createdByEmail = quiz.getCreatedBy();
 		this.groups = new ArrayList<>();
 		this.fromDateTime = quiz.getFromDateTime();
 		this.toDateTime = quiz.getToDateTime();
@@ -44,6 +45,7 @@ public class QuizTO {
 		for(Group quizGrp : quiz.getGroups()) {
 			this.groups.add(quizGrp.getId());
 		}
+	
 	}
 
 	public Long getId() {
@@ -131,6 +133,14 @@ public class QuizTO {
 
 	public void setQuestions(List<QuestionTO> questions) {
 		this.questions = questions;
+	}
+
+	public String getCreatedByEmail() {
+		return createdByEmail;
+	}
+
+	public void setCreatedByEmail(String createdByEmail) {
+		this.createdByEmail = createdByEmail;
 	}
 
 }

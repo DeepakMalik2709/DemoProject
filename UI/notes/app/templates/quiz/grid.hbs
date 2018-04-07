@@ -1,0 +1,8 @@
+<div class="row">
+      <button type="submit" class="btn  btn-info" {{action 'createQuiz' }}> Create Quiz</button>
+</div>
+ <div class="row">
+   <div class="col-sm-12">
+{{common-grid tableSchema=tableSchema rows=model  rowClickAction="quizClick"}}
+    </div>      <!-- /.col-lg-12 -->
+ </div>

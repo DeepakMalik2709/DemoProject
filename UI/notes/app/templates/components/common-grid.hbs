@@ -126,13 +126,7 @@
   cursor: pointer;
 }
 </style>
-  <div class="row">
-    <div class="col-sm-12">
-		<div class="box-body no-padding">
-         <div class="table-responsive">
-        </div>
-    </div>
- {{#light-table table  as |t|}}
+ {{#light-table table tableClassNames="table table-bordered table-hover dataTable"  as |t|}}
 
   {{t.head     iconSortable='fa fa-sort'    iconAscending='fa fa-sort-asc'    iconDescending='fa fa-sort-desc'   }}
 
@@ -151,8 +145,3 @@
     {{/if}}
   {{/t.body}}
 	{{/light-table}}
-
-
-
-     </div>      <!-- /.col-lg-12 -->
-  </div>

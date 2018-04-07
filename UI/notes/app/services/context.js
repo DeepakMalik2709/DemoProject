@@ -13,6 +13,13 @@ export default Ember.Service.extend(ajaxMixin ,utilsMixin ,{
 			this.context.set( "loginUser", user)
 		}
 	},
+	getLoginUser(){
+		var user=null;
+		if(this.context!=null){
+			user = this.context.get( "loginUser");
+		}
+		return user;
+	},
 	fetchContext(callback) {
 		if(this.context){
 			if(typeof callback == "function"){
@@ -34,13 +41,13 @@ export default Ember.Service.extend(ajaxMixin ,utilsMixin ,{
 				return this.context;
 			});
 		}
-		
+
 	},
 	fetchNotifications() {
 		 return  new Ember.RSVP.Promise((resolve, reject) =>{
 				var url = "/rest/secure/notifications";
 				this.doGet(url).then((data ) =>{
-					
+
 					var notifications = [];
 			    	  if(data.code ==0 && data.items){
 			    		  var items = data.items;
@@ -55,9 +62,9 @@ export default Ember.Service.extend(ajaxMixin ,utilsMixin ,{
 			    	  resolve(data);
 			      });
 		 });
-	 
+
 	},
-	
+
 	markNotificationAsRead() {
 		var url = "/rest/secure/markNotificationAsRead";
 		this.doGet(url);
@@ -92,5 +99,5 @@ export default Ember.Service.extend(ajaxMixin ,utilsMixin ,{
 	dashboardData:function(){
 		return this.get("/rest/dashboard/dataList" );
 	}
-	
+
 });

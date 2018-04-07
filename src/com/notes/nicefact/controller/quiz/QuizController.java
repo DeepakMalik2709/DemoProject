@@ -11,6 +11,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
@@ -60,6 +61,35 @@ public class QuizController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("createEvent exit");
 	}
+	
+	@GET
+	@Path("/play/{id}")	
+	public void quizById(@PathParam("id") long id, @Context HttpServletResponse response,@Context HttpServletRequest request) {
+		logger.info("play quiz start , postId : ");
+		System.out.println("id :" + id);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			QuizService quizService = new QuizService(em);
+			Quiz quiz = quizService.get(id);
+			QuizTO savedTO = new QuizTO(quiz);
+			
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEMS, savedTO);
+		}  catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("createEvent exit");
+	}
+
 	
 	@GET
 	@Path("/myQuiz")	

@@ -6,6 +6,7 @@ export default Ember.Component.extend({
 	columns:Ember.computed(function() {
     return this.tableSchema;
   }),
+	dateFormat:function(value){ var date =new Date(value); return date.getDay()+"/"+date.getMonth();}   ,
   init() {
 	    this._super(...arguments);
 	    this.refreshTable( this.rows);
@@ -28,7 +29,7 @@ export default Ember.Component.extend({
     actions: {
 
 				rowAction(row){
-					  this.transitionTo('quiz.play');
+					this.sendAction('rowClickAction',row, event);
 						console.log(row);
 				},
     	 onColumnClick(column) {
