@@ -6,6 +6,7 @@ export default DS.Model.extend({
 	description: DS.attr('string'),
 	name: DS.attr('string'),
 	subject: DS.attr('string'),
+	createdByEmail: DS.attr('string'),
   marks: DS.attr('string'),
   passingRules: DS.attr('string'),
   fromDateTime: DS.attr('number'),

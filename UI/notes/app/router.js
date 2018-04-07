@@ -47,8 +47,9 @@ Router.map(function() {
     this.route('schedule');
   });
   this.route('quiz', function() {
-    this.route('upsert');
-    this.route('play');
+    this.route('create');
+    this.route('upsert',{path:'/upsert/:quizId'});
+    this.route('play',{path:'/play/:quizId'});
     this.route('grid');
   });
 });

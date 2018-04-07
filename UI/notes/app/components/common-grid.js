@@ -29,7 +29,7 @@ export default Ember.Component.extend({
     actions: {
 
 				rowAction(row){
-					  this.transitionTo('quiz.play');
+					this.sendAction('rowClickAction',row, event);
 						console.log(row);
 				},
     	 onColumnClick(column) {
