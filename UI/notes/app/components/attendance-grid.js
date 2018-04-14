@@ -20,12 +20,12 @@ export default Ember.Component.extend(scrollMixin,authenticationMixin,ajaxMixin,
   }),
 
   init() {
-	    this._super(...arguments);	    
+	    this._super(...arguments);
 	    this.set("model" , this.item,true);
 	    this.groupId=this.get("model.groupId");
 	    this.refreshTable( this.get('rows'));
-	   
-  },  
+
+  },
   refreshTable(data){
 	  let table = new Table(this.get('columns'),data, { enableSync: true });
       let sortColumn = table.get('allColumns').findBy('valuePath', this.get('sort'));
@@ -37,11 +37,11 @@ export default Ember.Component.extend(scrollMixin,authenticationMixin,ajaxMixin,
 
       this.set('table', table);
   },
-  fetchAttByDate(start,end){ 
+  fetchAttByDate(start,end){
   	var url = "/rest/secure/group/" +this.groupId + "/attendance?fromDate="+new Date(start).getTime()+"&toDate="+new Date(end).getTime();
-  	this.doGet(url).then((result)=>{    		
+  	this.doGet(url).then((result)=>{
 			if(result.code ==0){
-				if(result.item){    				
+				if(result.item){
 					 this.set("rows" , result.item.members,true);
 					 this.refreshTable( this.get('rows'));
 				}
@@ -51,7 +51,7 @@ export default Ember.Component.extend(scrollMixin,authenticationMixin,ajaxMixin,
     actions: {
     	fetchStudentAttendance(item){
 			if(item.get('start') > item.get('end')){
-				alert("from date must to less then to date");	    				
+				alert("from date must to less then to date");
 			}else{
 				this.fetchAttByDate(item.get('start'),item.get('end'));
 			}
@@ -79,5 +79,5 @@ export default Ember.Component.extend(scrollMixin,authenticationMixin,ajaxMixin,
              */
         }
     }
-  
+
 });

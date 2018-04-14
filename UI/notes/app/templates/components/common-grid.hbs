@@ -1,0 +1,147 @@
+ <style>
+.ember-light-table {
+  height: inherit;
+  overflow: auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.ember-light-table table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ember-light-table .lt-scaffolding {
+  border: none;
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  visibility: hidden;
+}
+
+.ember-light-table .lt-head-wrap,
+.ember-light-table .lt-foot-wrap {
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+}
+
+.ember-light-table .lt-body-wrap {
+  overflow-y: hidden;
+
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+}
+
+.ember-light-table .lt-column {
+  position: relative;
+}
+
+.ember-light-table .lt-scrollable {
+  width: 100%;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+}
+
+.ember-light-table .lt-scrollable.vertical-collection {
+  overflow-y: auto;
+}
+
+.ember-light-table vertical-collection {
+  width: 100%;
+  display: table;
+  table-layout: fixed;
+}
+
+.ember-light-table vertical-collection occluded-content:first-of-type {
+  display: table-caption;
+}
+
+.ember-light-table .align-left {
+  text-align: left;
+}
+
+.ember-light-table .align-right {
+  text-align: right;
+}
+
+.ember-light-table .align-center {
+  text-align: center;
+}
+
+.ember-light-table .lt-column .lt-sort-icon {
+  float: right;
+}
+
+.ember-light-table .lt-column.is-draggable,
+.ember-light-table .lt-column.is-sortable {
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.ember-light-table .lt-column.is-resizing {
+  pointer-events: none;
+}
+
+.ember-light-table.is-resizing {
+  cursor: col-resize;
+}
+
+.ember-light-table .lt-column .lt-column-resizer {
+  width: 5px;
+  cursor: col-resize;
+  height: 100%;
+  background: transparent;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.ember-light-table .lt-row.is-expandable,
+.ember-light-table .lt-row.is-selectable {
+  cursor: pointer;
+}
+</style>
+ {{#light-table table tableClassNames="table table-bordered table-hover dataTable"  as |t|}}
+
+  {{t.head     iconSortable='fa fa-sort'    iconAscending='fa fa-sort-asc'    iconDescending='fa fa-sort-desc'   }}
+
+  {{#t.body  onRowClick=(action "rowAction")}}
+
+    {{#if isLoading}}
+      {{#body.loader}}
+        Loading...
+      {{/body.loader}}
+    {{/if}}
+
+    {{#if table.isEmpty}}
+      {{#body.no-data}}
+        No quiz found.
+      {{/body.no-data}}
+    {{/if}}
+  {{/t.body}}
+	{{/light-table}}
