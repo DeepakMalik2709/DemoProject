@@ -5,7 +5,7 @@ import authenticationMixin from '../mixins/authentication';
 
 const {    inject, computed } = Ember;
 export default Ember.Route.extend(authenticationMixin, tutorialMixin, utilsMixin,{
-	dashboardService: Ember.inject.service('dashboard'),   
+	dashboardService: Ember.inject.service('dashboard'),
 	model() {
     	 var dashboard = Ember.Object.create({
              loginUser: null,
@@ -22,14 +22,14 @@ export default Ember.Route.extend(authenticationMixin, tutorialMixin, utilsMixin
 
     },
 
-       
+
     setupController: function(controller, model) {
         this._super(controller, model);
         controller.set("isLoggedIn", Ember.computed.notEmpty("model"));
 //        this.tutorialService.fetchMyTutorialList().then((result)=>{
-//        	if(result.code == 0){        	
+//        	if(result.code == 0){
 //        		 let myTutorials = result.items;
-//        		
+//
 //        		 model.set("myTutorials", myTutorials);
 //        		 model.set("myTutorialsNextLink", result.nextLink);
 //        		 this.cleanupAllTutorials(myTutorials);
@@ -40,8 +40,8 @@ export default Ember.Route.extend(authenticationMixin, tutorialMixin, utilsMixin
         		 model.set("loginUser", result.loginUser);
         	}
         });
-      
-        this.get('dashboardService').dashboardData().then((result) => {
+
+      /*  this.get('dashboardService').dashboardData().then((result) => {
         	var modifiedSchedulesList = [];
         	if(result.code==0){
         		for(var i =0; i<result.todaySchedules.length;i++){
@@ -49,21 +49,21 @@ export default Ember.Route.extend(authenticationMixin, tutorialMixin, utilsMixin
             		var modifiedSchedule = {};
             		modifiedSchedule.title = actualSchedule.title;
             		modifiedSchedule.eventType = actualSchedule.eventType;
-            		
+
             		var timing = this.dateTimeFormatAMPM(new Date(actualSchedule.start));
             		if(actualSchedule.end != null){
             			timing = timing+" - "+this.dateTimeFormatAMPM(new Date(actualSchedule.end));
             		}
             		modifiedSchedule.timing = timing;
-            		
+
             		modifiedSchedulesList[i] =modifiedSchedule;
             	}
         		model.set("todaySchedules", modifiedSchedulesList);
         	}
-        });
+        });  */
     },
 
-  
+
     actions: {
 
        /* doNavbarSearch() {

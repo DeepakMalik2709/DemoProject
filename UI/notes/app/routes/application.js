@@ -5,19 +5,19 @@ const {
 } = Ember;
 export default Ember.Route.extend({
 
-	
+
     model() {
         return this.contextService.fetchContext();
     },
     context: null,
     init: function() {
-    	
+
     },
     router: Ember.inject.service('-routing'),
     groupService: Ember.inject.service('group'),
 	scheduleService: Ember.inject.service('new.schedule'),
-	
-    onRouteChange: Ember.observer('router.currentPath', function(a){ 
+
+    onRouteChange: Ember.observer('router.currentPath', function(a){
     	hideSidebarMobile();
     }),
 
@@ -39,6 +39,7 @@ export default Ember.Route.extend({
 
     }),
     openChannel :_.once(function(apiKey, email){
+      if(apiKey==undefined ){ return false;}
     	var realtime = new Ably.Realtime(apiKey);
     	var channel = realtime.channels.get(email);
 
@@ -58,7 +59,7 @@ export default Ember.Route.extend({
         		  var existing = notifications.filterBy("id", data.id) ;
         		  addNotification = (existing.length <= 0 );
         	  }
-        	
+
         	 if(addNotification){
         		  controller.set("showNotifications", true);
              	 controller.set("newNotifications", true);
@@ -69,7 +70,7 @@ export default Ember.Route.extend({
 	        		 $.event.trigger( "newComment" , data );
 	        	 }
      		}
-        	
+
           }else  if(msg.name == "post"){
         	  $.event.trigger( "postUpdate" , data );
           }
@@ -93,7 +94,7 @@ export default Ember.Route.extend({
         		}else{
         			showAddInstituteMessage = true;
         		}
-	        	
+
 	    		if(showAddInstituteMessage){
 	    			this.showAddInstituteMessage();
 	    		}
@@ -114,7 +115,7 @@ export default Ember.Route.extend({
         			this.showGooglePermissionMessage();
         		}
         	}
-        	
+
 	        let request = this.get('groupService').fetchMyGroups();
 	        request.then((response) => {
 	        	   controller.set("myGroups" ,response );
@@ -129,11 +130,11 @@ export default Ember.Route.extend({
         				  }
    	        			  controller.set("notifications" ,response.items );
         				}
-	        			 
+
 	        		}
-	        	   
-	        });	       
-	    	if(!model.get('loginUser.todayScheduleCount')){
+
+	        });
+	  /*  	if(!model.get('loginUser.todayScheduleCount')){
 	        this.get('scheduleService').fetchtodayScheduleCount().then((response) => {
 	        	   controller.set("todayScheduleCount" ,response.total );
 	        	   model.set('loginUser.todayScheduleCount', response.total);
@@ -141,14 +142,14 @@ export default Ember.Route.extend({
 	        });
 	    	}else{
 	    		 controller.set("todayScheduleCount" ,model.get('loginUser.todayScheduleCount') );
-	    	}
-	    	
+	    	} */
+
 	    	var apiKey = model.get('pushToken.token');
 	        this.openChannel(apiKey, model.get('loginUser.email'));
         }
         $.event.trigger( "sidebarUpdated");
-        
-    
+
+
     },
 
 
@@ -164,7 +165,7 @@ export default Ember.Route.extend({
     		}else{
     			this.transitionTo('calendar');
     		}
-    		
+
     	},
         doNavbarSearch() {
             var searchTerm = this.get('controller.searchTerm')
@@ -175,7 +176,7 @@ export default Ember.Route.extend({
                 }
             });
         },
-        
+
         markNotificationAsRead(){
         	var notifications = this.get('controller.notifications');
         	for(var i =0; i<notifications.length;i++){
@@ -187,7 +188,7 @@ export default Ember.Route.extend({
         		}
         	}
         },
-        
+
         notificationClick(notification){
         	this.controller.set("newNotifications",false);
         	if(notification.entityId){

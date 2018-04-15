@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -18,6 +19,7 @@ import javax.persistence.Transient;
 
 import com.notes.nicefact.enums.LANGUAGE;
 import com.notes.nicefact.enums.SHARING;
+import com.notes.nicefact.quiz.entity.Quiz;
 import com.notes.nicefact.to.GroupTO;
 import com.notes.nicefact.to.TagTO;
 
@@ -102,10 +104,12 @@ public class Group extends CommonEntity {
 	@Column(columnDefinition = "TEXT")
 	String description;
 
+	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "groups")
+	private Set<Quiz> quizes=  new HashSet<>();
+	
 	String taskFolderId;
 	String postFolderId;
-	String scheduleFolderId;
-	
+	String scheduleFolderId;	
 	String assignmentFolderId;
 	
 	
@@ -364,5 +368,13 @@ public class Group extends CommonEntity {
 		this.description = group.getDescription();
 		this.tagIds = new HashSet<>(group.getTagIds());
 		this.isGroupAttendaceAllowed = group.getIsGroupAttendaceAllowed();
+	}
+
+	public Set<Quiz> getQuizes() {
+		return quizes;
+	}
+
+	public void setQuizes(Set<Quiz> quizes) {
+		this.quizes = quizes;
 	}
 }
