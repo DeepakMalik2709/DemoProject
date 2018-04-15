@@ -17,6 +17,7 @@
 /WebContent/.classpath
 /war
 .classpath
+.settings/
 /.settings
 /.settings/com.google.appengine.eclipse.core.prefs
 /.settings/com.google.gdt.eclipse.core.prefs
@@ -30,5 +31,8 @@
 /keys/
 /uploads/
 /WebContent/
-/WebContent/
 /bin/
+/WebContent/fonts/bootstrap/glyphicons-halflings-regular.svg
+/.settings/org.eclipse.wst.common.component
+/.settings/.jsdtscope
+/src/prod.properties
