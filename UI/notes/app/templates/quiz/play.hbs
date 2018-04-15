@@ -1,0 +1,42 @@
+   <div class="row">
+        <!-- left column -->
+         <div class="col-md-3">
+         </div>
+        <div class="col-md-6" style="width:100%;">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header" style="background-color: #f5f5f5;">
+                    <div style="display: inline-block;width: 15%;text-align: center;"> Quiz Id : {{model.id}} </div> <div style="display: inline-block;width: 15%;text-align: center;">Title : {{model.name}} </div>  <div style="display: inline-block;width: 25%;text-align: center;">Subject : {{model.subject}}  </div><div style="display: inline-block;width: 15%;text-align: center;float:right;">Max. Marks : {{model.marks}} </div>
+                </div><!-- /.box-header -->
+                <!-- form start -->
+                <form role="form">
+                    <div class="box-body">
+					<div class="form-group overflow-hide">
+                        <div style="float:left; width:20%;padding-right:2%;">
+						{{#each model.questions as |question|}}
+						   <button style="width:15%;"{{action "clickQuesionNo" question}}>{{question.number}}</button>
+						{{/each}}
+				        </div>
+					   <div style="float:right; width:80%;padding-left:10%;">
+							<p class="question">{{selectedQuestion.number}} {{selectedQuestion.title}}</p>
+							<ul class="answers">
+							{{#each selectedQuestion.options as |option|}}
+									<input type="radio" name="option.title" value="option" id="option.id"><label for="option.title">{{option.number}} {{option.title}}</label><br/>
+						    {{/each}}
+							</ul>
+                       </div>
+					</div>
+	                <div class="box-footer overflow-hide">
+                            <div style="float:left; width:20%;padding-right:2%;">
+                     		    <b><button type="submit" style="width:50%;dissplay: inline-block;" class="btn btn-primary" {{action 'saveTask' model}} > <b>Finish Quiz</b></button></b>
+							</div>
+						    <div style="float:right; width:80%;padding-left:10%;">
+								<button type="submit" disabled={{isPrevDisabled}} style="width:10%;display: inline-block;" class="btn btn-primary" {{action 'previousQuestion'}} >Previous</button>
+								<button type="submit" disabled={{isNextDisabled}} style="float:right;width:10%;display: inline-block;" class="btn btn-primary" {{action 'nextQuestion'}} >Next</button>
+							</div>
+					</div>
+                   </div><!-- /.box-body -->
+                </form>
+            </div><!-- /.box -->
+         </div>
+   </div>
