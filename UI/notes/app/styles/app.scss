@@ -257,7 +257,7 @@ a:focus {
 .right-side {
   background-color: #f9f9f9;
   margin-left: 250px;
-   margin-right: 10px;
+  margin-right: 10px;
 }
 .right-side.strech {
  margin-left: 10px;
@@ -3334,3 +3334,10 @@ display: inline-block;
 	word-wrap:break-word;
 	white-space:normal;
 }
+
+@import "config/breakpoint";
+
+@import "core/font-awesome";
+@import "core/panel";
+
+@import "pages/profile/profile";

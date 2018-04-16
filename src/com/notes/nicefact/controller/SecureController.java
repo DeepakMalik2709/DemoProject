@@ -35,6 +35,7 @@ import org.json.JSONException;
 import com.notes.nicefact.comparator.CreatedDateComparator;
 import com.notes.nicefact.dao.GroupMemberDAO;
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.entity.Certificate;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupAttendance;
 import com.notes.nicefact.entity.GroupMember;
@@ -62,6 +63,7 @@ import com.notes.nicefact.service.PushService;
 import com.notes.nicefact.service.TagService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
+import com.notes.nicefact.service.profile.CertificateService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.CommentTO;
 import com.notes.nicefact.to.FileTO;
@@ -77,6 +79,7 @@ import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TagTO;
 import com.notes.nicefact.to.TaskSubmissionTO;
 import com.notes.nicefact.to.TutorialTO;
+import com.notes.nicefact.to.profile.CertificateTo;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
@@ -135,6 +138,17 @@ public class SecureController extends CommonController {
 						instituteMembers.add(instituteMemberTO);
 					}
 				}
+				
+				List<CertificateTo> certificates = new ArrayList<>();
+				
+				CertificateService certificateService = new CertificateService(em);
+				List<Certificate> certificates2 = certificateService.getByAppUserId(user.getId());
+				
+				for(Certificate certificate: certificates2) {
+					certificates.add(CertificateTo.convert(certificate));
+				}
+				
+				json.put(Constants.CERTIFICATES, certificates);
 				json.put(Constants.SESSION_INSTITUTES, institutes);
 				json.put(Constants.SESSION_INSTITUTE_MEMBERS, instituteMembers);
 				Map<String, Object> pushToken = PushService.getInstance().getToken();

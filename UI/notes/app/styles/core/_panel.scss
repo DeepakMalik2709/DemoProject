@@ -1,0 +1,52 @@
+.panel-sections {
+    @include min-width($tablet-landscape) {
+        margin-left: 100px;
+    }
+    
+    .panel-heading {
+        overflow: auto;
+
+        h2 {
+            margin: 0;
+            font-size: 24px;
+            display: inline-block;
+        }
+
+        .btn-default {
+            float: right;
+        }
+    }
+
+    .panel-body {
+        .panel-section {
+            overflow: auto;
+            
+            &:not(:last-child) {
+                border-bottom: 1px solid #ccc;
+            }
+
+            &:not(:first-child) {
+                margin-top: 15px;
+            }
+
+            &-left {
+                width: 80%;
+            }
+
+            &-edit {
+                color: #337ab7;
+            }
+
+            &-delete {
+                margin-left: 15px;
+            }
+                
+            label {
+                &.lbl_data {
+                    padding-top: 7px;
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+}

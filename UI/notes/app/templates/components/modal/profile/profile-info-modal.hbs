@@ -1,0 +1,40 @@
+{{#modal/custom-modal title="Personal Information" modal-id="profile-info" item=data save="update"}}
+    <div class="form-group has-feedback {{if data.isEmptyFirstName 'has-error' 'has-success'}}">
+        <label class="control-label col-sm-3" for="inputFirstName">First Name *</label>
+        <div class="col-sm-8">
+            {{input type="text" value=data.firstName class="form-control" id="inputFirstName" aria-describedby="inputFirstNameStatus"}}
+            <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+            <span id="inputFirstNameStatus" class="sr-only">(success)</span>
+        </div>
+    </div>
+    <div class="form-group has-feedback {{if data.isEmptyLastName 'has-error' 'has-success'}}">
+        <label class="control-label col-sm-3" for="inputLastName">Last Name *</label>
+        <div class="col-sm-8">
+            {{input type="text" value=data.lastName class="form-control" id="inputLastName" aria-describedby="inputLastNameStatus"}}
+            <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+            <span id="inputLastNameStatus" class="sr-only">(success)</span>
+        </div>
+    </div>
+    <div class="form-group has-feedback has-success">
+        <label class="control-label col-sm-3" for="inputEmailId">Email id *</label>
+        <label class="lbl_data col-sm-8" id="inputLastName">{{data.email}}</label>
+    </div>
+    <div class="form-group has-feedback has-success">
+        <label class="control-label col-sm-3" for="inputCurrentCity">Current City</label>
+        <div class="col-sm-8">
+            {{input type="text" value=data.currentCity class="form-control" id="inputCurrentCity"}}
+        </div>
+    </div>
+    <div class="form-group has-feedback has-success">
+        <label class="control-label col-sm-3" for="inputPhoneNumber">Phone Number</label>
+        <div class="col-sm-8">
+            {{input type="text" value=data.phoneNumber class="form-control" id="inputPhoneNumber"}}
+        </div>
+    </div>
+    <div class="form-group has-feedback has-success">
+        <label class="control-label col-sm-3" for="inputAbout">About</label>
+        <div class="col-sm-8">
+            {{textarea type="text" class="form-control" id="inputAbout" placeholder="About" value=data.about rows=4 autoresize=false}}
+        </div>
+    </div>
+{{/modal/custom-modal}}

@@ -1,0 +1,13 @@
+.fa {
+    &.fa-pencil, &.fa-trash {
+        font-size: 18px;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    &.fa-trash {
+        color: #941d1d;
+    }
+}

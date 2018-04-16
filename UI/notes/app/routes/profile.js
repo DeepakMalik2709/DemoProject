@@ -6,7 +6,26 @@ export default Ember.Route.extend(authenticationMixin , {
 	profileService: Ember.inject.service('profile'),
     model(params) {
     	var context = this.contextService.fetchContext((result)=>{
-    		var user = this.store.createRecord('user', { 
+			let certificates = [];
+
+			var _this = this;
+
+			result.certificates.forEach(function(element) {
+				let certificate = _this.store.createRecord('certificate', {
+					certificateId: element.certificateId,
+					name: element.name,
+					date: element.date,
+					image: element.image,
+					organisation: element.organisation,
+					grade: element.grade,
+					appUserId: element.appUserId
+				});
+
+				certificates.push(certificate);
+			});
+
+    		var user = this.store.createRecord('user', {
+				id: result.loginUser.id, 
         		lastName: result.loginUser.lastName,
         		firstName: result.loginUser.firstName, 
         		email : result.loginUser.email,
@@ -23,7 +42,8 @@ export default Ember.Route.extend(authenticationMixin , {
         		sendCommentReplyEmail : result.loginUser.sendCommentReplyEmail  ,
         		sendCommentOnCommentEmail : result.loginUser.sendCommentOnCommentEmail  ,
         		institutes : result.institutes,
-        		instituteMembers : result.instituteMembers,
+				instituteMembers : result.instituteMembers,
+				certificates: certificates
         		});
     		return user;
     	});
@@ -139,6 +159,74 @@ export default Ember.Route.extend(authenticationMixin , {
         		const instituteAdapter = this.store.adapterFor('institute');
         		instituteAdapter.joinInstitute(institute.id);
         		alert("your request has been sent for approval.")
-        },
+		},
+		
+		updateProfileInfo(model) {
+			this.get("profileService").updateProfileInfo(model).then(result=>{
+				this.controller.get('model').set('firstName', result.item.firstName);
+				this.controller.get('model').set('lastName', result.item.lastName);
+				this.controller.get('model').set('currentCity', result.item.currentCity);
+				this.controller.get('model').set('phoneNumber', result.item.phoneNumber);
+				this.controller.get('model').set('about', result.item.about);
+
+				this.contextService.setLoginUser(result.item);
+				Ember.$('#profile-info').modal('hide');
+			});
+		},
+
+		updatePersonalInfo(model) {
+			this.get("profileService").updatePersonalInfo(model).then(result=>{
+				this.controller.get('model').set('dob', result.item.dob);
+				this.controller.get('model').set('homeTown', result.item.homeTown);
+				
+				this.contextService.setLoginUser(result.item);
+				Ember.$('#personal-info').modal('hide');
+			});
+		},
+		
+		updateCertificate(model) {
+			this.get("profileService").updateCertificate(model).then(result=>{
+				let certificates = this.controller.get('model').get('certificates');
+				let certificate = certificates.find(certificate => certificate.get('certificateId') == model.get('certificateId'));
+
+				certificate.set('name', result.item.name);
+				certificate.set('date', result.item.date);
+				certificate.set('image', result.item.image);
+				certificate.set('organisation', result.item.organisation);
+				certificate.set('grade', result.item.grade);
+
+				Ember.$('#certificate-'+model.get('certificateId')).modal('hide');
+			});
+		},
+		
+		saveCertificate(model) {
+			model.set("appUserId", this.controller.get('model').get("id"));
+
+			this.get("profileService").saveCertificate(model).then(result=>{
+				let newCertificate = this.store.createRecord('certificate', {
+					certificateId: result.item.id,
+					name: result.item.name,
+					date: result.item.date,
+					image: result.item.image,
+					organisation: result.item.organisation,
+					grade: result.item.grade
+				});
+
+				this.controller.get('model').get('certificates').pushObject(newCertificate);
+				Ember.$('#certificate-0').modal('hide');
+			});
+		},
+		
+		deleteCertificate(index) {
+			let certificates = this.controller.get('model').get('certificates');
+
+			let certificate = certificates.objectAt(index);
+
+			Ember.$('#delete-certificate-'+certificate.get('certificateId')).modal('hide');
+
+			this.get("profileService").deleteCertificate(certificate.get('certificateId')).then(result=>{
+				this.controller.get('model').get('certificates').removeAt(index);
+			});
+		}
     }
 });
