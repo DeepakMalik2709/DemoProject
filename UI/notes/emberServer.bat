@@ -1,1 +1,0 @@
-ember server --proxy http://localhost:8080
