@@ -36,3 +36,4 @@
 /.settings/org.eclipse.wst.common.component
 /.settings/.jsdtscope
 /src/prod.properties
+/target/
