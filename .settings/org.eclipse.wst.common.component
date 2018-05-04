@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="AllSchool-0.0.1-SNAPSHOT">
+    <wb-module deploy-name="allschool">
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <property name="java-output-path" value="/AllSchool/bin"/>
-        <property name="context-root" value="AllSchool"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/WebContent/META-INF"/>
+        <property name="context-root" value="allschool"/>
+        <property name="java-output-path" value="/allschool/target/classes"/>
     </wb-module>
 </project-modules>
