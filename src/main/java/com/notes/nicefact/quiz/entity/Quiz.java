@@ -6,6 +6,8 @@ import java.util.Set;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -31,6 +33,12 @@ public class Quiz  extends CommonEntity{
 	private String description;
 	@Basic
 	private Integer marks;
+	
+	@Enumerated(EnumType.STRING)
+	private TIME_STATUS timeStatus;
+	
+	@Enumerated(EnumType.STRING)
+	private SHARE_TYPE shareWith;
 	
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "quiz_group", 
@@ -61,6 +69,12 @@ public class Quiz  extends CommonEntity{
 		updateProps( quizTO);
 		
 		
+	}
+	public TIME_STATUS getTimeStatus() {
+		return timeStatus;
+	}
+	public void setTimeStatus(TIME_STATUS timeStatus) {
+		this.timeStatus = timeStatus;
 	}
 	public String getName() {
 		return name;
@@ -136,7 +150,8 @@ public class Quiz  extends CommonEntity{
 		this.toDateTime=quizTO.getToDateTime();
 		this.passingRules=quizTO.getPassingRules();
 		this.totalAppeared=quizTO.getTotalAppeared();
-		
+		this.timeStatus=quizTO.getWithTime()?TIME_STATUS.BOTH:TIME_STATUS.NA;
+		this.shareWith =SHARE_TYPE.valueOf(quizTO.getShareWith());
 	}
 	
 	@PrePersist
@@ -151,5 +166,11 @@ public class Quiz  extends CommonEntity{
 	}
 	public void setQuestions(Set<Question> questions) {
 		this.questions = questions;
+	}
+	public SHARE_TYPE getShareWith() {
+		return shareWith;
+	}
+	public void setShareWith(SHARE_TYPE shareWith) {
+		this.shareWith = shareWith;
 	}
 }
