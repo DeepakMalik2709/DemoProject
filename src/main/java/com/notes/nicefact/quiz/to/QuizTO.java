@@ -8,6 +8,7 @@ import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.quiz.entity.Question;
 import com.notes.nicefact.quiz.entity.Quiz;
 import com.notes.nicefact.quiz.entity.TIME_STATUS;
+import com.notes.nicefact.util.AppProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QuizTO {
@@ -25,6 +26,7 @@ public class QuizTO {
 	private Integer totalAppeared;
 	private String createdByEmail;
 	private String shareWith;
+	private String shareLink;
 	
 	public QuizTO() {
 	}
@@ -50,6 +52,7 @@ public class QuizTO {
 		for(Group quizGrp : quiz.getGroups()) {
 			this.groups.add(quizGrp.getId());
 		}
+		this.shareLink=AppProperties.getInstance().getApplicationUrl()+"/quiz/play/"+this.id;
 	
 	}
 
@@ -162,6 +165,14 @@ public class QuizTO {
 
 	public void setShareWith(String shareWith) {
 		this.shareWith = shareWith;
+	}
+
+	public String getShareLink() {
+		return shareLink;
+	}
+
+	public void setShareLink(String shareLink) {
+		this.shareLink = shareLink;
 	}
 
 }
