@@ -35,7 +35,7 @@ public class QuestionTO {
 			OptionTO optionTO = new OptionTO(opts);
 			options.add(optionTO);
 		}
-		this.imageURL=question.getImageURL();
+		//this.imageURL=question.getImageURL();
 		
 	}
 
