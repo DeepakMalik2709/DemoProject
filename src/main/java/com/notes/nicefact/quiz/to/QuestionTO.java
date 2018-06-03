@@ -17,7 +17,7 @@ public class QuestionTO {
 	private String type;
 	private List<OptionTO> options;
 	private Integer marks;
-
+	private List<String> imageURL;
 	public QuestionTO() {
 	}
 
@@ -35,6 +35,16 @@ public class QuestionTO {
 			OptionTO optionTO = new OptionTO(opts);
 			options.add(optionTO);
 		}
+		//this.imageURL=question.getImageURL();
+		
+	}
+
+	public List<String> getImageURL() {
+		return imageURL;
+	}
+
+	public void setImageURL(List<String> imageURL) {
+		this.imageURL = imageURL;
 	}
 
 	public Long getId() {

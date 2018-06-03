@@ -65,9 +65,6 @@ public class QuizService extends CommonService<Quiz> {
 
 	public Quiz upsertQuiz(QuizTO quizTO, AppUser user) {
 
-		if (quizTO.getGroups().isEmpty()) {
-			throw new ServiceException(" Group id cannot be null");
-		}	
 		Quiz quizDB=null;		
 		if (null == quizTO.getId() || quizTO.getId() <= 0) {
 			quizDB = new Quiz(quizTO);			

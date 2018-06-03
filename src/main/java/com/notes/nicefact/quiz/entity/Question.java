@@ -1,6 +1,7 @@
 package com.notes.nicefact.quiz.entity;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Basic;
@@ -99,6 +100,18 @@ public class Question extends CommonEntity{
 	public void setQuizes(Set<Quiz> quizes) {
 		this.quizes = quizes;
 	}
+	
+	/*@Basic
+	private List<String> imageURL;
+	
+
+	public List<String> getImageURL() {
+		return imageURL;
+	}
+
+	public void setImageURL(List<String> imageURL) {
+		this.imageURL = imageURL;
+	}*/
 	 
 	 
 	 

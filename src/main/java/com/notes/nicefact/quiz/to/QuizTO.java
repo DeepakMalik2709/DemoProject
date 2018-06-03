@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.quiz.entity.Question;
 import com.notes.nicefact.quiz.entity.Quiz;
+import com.notes.nicefact.quiz.entity.TIME_STATUS;
+import com.notes.nicefact.util.AppProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QuizTO {
@@ -19,10 +21,13 @@ public class QuizTO {
 	private List<QuestionTO> questions;
 	private Long fromDateTime;
 	private Long toDateTime;
-	
+	private boolean withTime;
 	private String passingRules;
 	private Integer totalAppeared;
 	private String createdByEmail;
+	private String shareWith;
+	private String shareLink;
+	
 	public QuizTO() {
 	}
 	
@@ -38,13 +43,16 @@ public class QuizTO {
 		this.fromDateTime = quiz.getFromDateTime();
 		this.toDateTime = quiz.getToDateTime();
 		this.passingRules = quiz.getPassingRules();
-		this.totalAppeared = quiz.getTotalAppeared();
+		this.totalAppeared = quiz.getTotalAppeared();		
+		this.withTime = !quiz.getTimeStatus().equals(TIME_STATUS.NA);
+		this.shareWith = quiz.getShareWith().toString();
 		for (Question ques : quiz.getQuestions()) {			
 			this.questions.add(new QuestionTO(ques));
 		}
 		for(Group quizGrp : quiz.getGroups()) {
 			this.groups.add(quizGrp.getId());
 		}
+		this.shareLink=AppProperties.getInstance().getApplicationUrl()+"/quiz/play/"+this.id;
 	
 	}
 
@@ -141,6 +149,30 @@ public class QuizTO {
 
 	public void setCreatedByEmail(String createdByEmail) {
 		this.createdByEmail = createdByEmail;
+	}
+
+	public boolean getWithTime() {
+		return withTime;
+	}
+
+	public void setWithTime(boolean withTime) {
+		this.withTime = withTime;
+	}
+
+	public String getShareWith() {
+		return shareWith;
+	}
+
+	public void setShareWith(String shareWith) {
+		this.shareWith = shareWith;
+	}
+
+	public String getShareLink() {
+		return shareLink;
+	}
+
+	public void setShareLink(String shareLink) {
+		this.shareLink = shareLink;
 	}
 
 }
