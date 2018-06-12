@@ -12,6 +12,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.notes.nicefact.entity.CommonEntity;
+import com.notes.nicefact.quiz.to.QuestionTO;
 
 @Entity
 @Table(name="Question")
@@ -42,6 +43,10 @@ public class Question extends CommonEntity{
 	
 	public Question(Question question) {
 		// TODO Auto-generated constructor stub
+	}
+	public Question(QuestionTO question) {
+		super();
+		updateProps(question);
 	}
 	public String getDescription() {
 		return description;
@@ -98,6 +103,16 @@ public class Question extends CommonEntity{
 
 	public void setQuizes(Set<Quiz> quizes) {
 		this.quizes = quizes;
+	}
+
+	public void updateProps(QuestionTO questionTO) {
+		this.marks=questionTO.getMarks();
+		this.number=questionTO.getNumber();
+		this.tag=questionTO.getTag();
+		this.title=questionTO.getTitle();
+		this.type=questionTO.getType();
+		this.description=questionTO.getDescription();
+		this.number=questionTO.getNumber();
 	}
 	 
 	 
