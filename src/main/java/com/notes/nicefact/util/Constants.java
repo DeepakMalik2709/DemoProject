@@ -26,6 +26,8 @@ public class Constants {
 	public static final String SESSION_INSTITUTE_MEMBERS = "instituteMembers";
 	public static final String CONTEXT = "properties";
 
+	public static final String CERTIFICATES = "certificates";
+	
 	public static final String NEXT_LINK = "nextLink";
 
 	public static final String DATA_ITEM = "item";
@@ -91,7 +93,7 @@ public class Constants {
 	public static final String THUMBNAIL_FOLDER = "thumbnails/";
 	public static final String CONTENT_TYPE_JSON = "application/json; charset=UTF-8";
 	public static final String CONTENT_TYPE = "Content-Type";
-	public static final String  LOCALHOST_ADDRESS = "http://127.0.0.1:8080";
+	public static final String  LOCALHOST_ADDRESS = "http://localhost:8080";
 	
 	public static final String WRITER = "writer";
 	public static final String COMMENTER = "commenter";

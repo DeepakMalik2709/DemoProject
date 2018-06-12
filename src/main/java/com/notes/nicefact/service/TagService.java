@@ -39,6 +39,10 @@ public class TagService extends CommonService<Tag> {
 			}
 			return tagTos;
 		}
+		
+		public Tag getByName(String name) {
+			return tagDao.getByName(name);
+		}
 
 
 		public Tag upsert(TagTO tagTO) {

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttachment;
@@ -15,6 +17,7 @@ import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostRecipient;
+import com.notes.nicefact.entity.PostTag;
 import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.CurrentContext;
@@ -50,6 +53,9 @@ public class PostTO {
 	String postPriv;
 
 	// List<GoogleDriveFileTO> files = new ArrayList<>() ;
+	
+	private String newTag;
+	private String postCategory;
 	
 	List<PostRecipientTO> recipients = new ArrayList<>();
 	
@@ -178,7 +184,28 @@ public class PostTO {
 		}
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
-		}		
+		}
+		
+		if(post.getPostTags().size() > 0) {
+			TagTO tagTO = null;
+			List<String> tagNames = new ArrayList<>();
+			
+			for(PostTag postTag: post.getPostTags()) {
+				tagTO = new TagTO();
+				tagTO.setId(postTag.getTag().getId());
+				tagTO.setName(postTag.getTag().getName());
+				this.tags.add(tagTO);
+				tagNames.add(postTag.getTag().getName());
+			}
+			
+			this.newTag = StringUtils.join(tagNames, ',');
+		}
+		
+		if(post.getPostCategory() == null || post.getPostCategory().equals("")) {
+			this.postCategory = "PRIVATE";
+		} else {
+			this.postCategory = post.getPostCategory().name();
+		}
 	}
 
 	private void setScheduleAttribute(Post post) {
@@ -291,6 +318,21 @@ public class PostTO {
 		this.postPriv = postPriv;
 	}
 
+	public String getNewTag() {
+		return newTag;
+	}
+	public void setNewTag(String newTag) {
+		this.newTag = newTag;
+	}
+	
+	public String getPostCategory() {
+		return postCategory;
+	}
+	
+	public void setPostCategory(String postCategory) {
+		this.postCategory = postCategory;
+	}
+	
 	public int getTotalAttendee() {
 		return totalAttendee;
 	}
