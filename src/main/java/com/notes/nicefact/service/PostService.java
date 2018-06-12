@@ -5,9 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -23,6 +25,7 @@ import com.notes.nicefact.dao.PostCommentDAO;
 import com.notes.nicefact.dao.PostDAO;
 import com.notes.nicefact.dao.PostFileDAO;
 import com.notes.nicefact.dao.PostReactionDAO;
+import com.notes.nicefact.dao.TaskSubmissionDAO;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Post;
@@ -30,6 +33,7 @@ import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostReaction;
+import com.notes.nicefact.entity.TaskSubmission;
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.ServiceException;
@@ -38,6 +42,7 @@ import com.notes.nicefact.to.CommentTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
+import com.notes.nicefact.to.TaskSubmissionTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 
@@ -167,18 +172,39 @@ public class PostService extends CommonService<Post> {
 		List<PostTO> toList = new ArrayList<>();
 		PostTO postTO;
 		Date today = new Date();
+		
+		Map<Long,TaskSubmissionTO> taskSubmissionMapByPostId = getUserWiseTaskSubmissionforPosts(posts, searchTO);
+		
 		for (Post post : posts) {
 			/*if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
 				if ((null != post.getFromDate() && !post.getFromDate().before(today)) || (null != post.getToDate() && !post.getToDate().after(today))) {
 					continue;
 				}
 			}*/
-			postTO = new PostTO(post);
+			
+			List<TaskSubmissionTO> tsTOList = new ArrayList<>();
+			tsTOList.add(taskSubmissionMapByPostId.get(post.getId()));
+			postTO = new PostTO(post, tsTOList);
 			toList.add(postTO);
 		}
 		return toList;
 	}
 
+	public Map<Long,TaskSubmissionTO> getUserWiseTaskSubmissionforPosts(List<Post> posts, SearchTO searchTO) {
+		List<Long> postIdList = new ArrayList<>();
+		for (Post post : posts) {
+			postIdList.add(post.getId());
+		}
+		List<TaskSubmission> taskSubmissions = taskService.getTaskSubmissionsForUserByTaskIds(postIdList, searchTO.getEmail());
+		Map<Long,TaskSubmissionTO> taskSubmissionMapByPostId = new HashMap<>();
+		
+		for(TaskSubmission ts : taskSubmissions){
+			TaskSubmissionTO tsTO = new TaskSubmissionTO(ts);
+			taskSubmissionMapByPostId.put(ts.getPostId(), tsTO);
+		}
+		return taskSubmissionMapByPostId;
+	}
+	
 	public PostComment upsertComment(CommentTO commentTO, AppUser appUser) {
 		logger.info("start : addPostComment ," + commentTO);
 		if (commentTO.getPostId() <= 0) {
@@ -337,6 +363,7 @@ public class PostService extends CommonService<Post> {
 		List<PostTO> toList = new ArrayList<>();
 		PostTO postTO;
 		Date today = new Date();
+		Map<Long,TaskSubmissionTO> taskSubmissionMapByPostId = getUserWiseTaskSubmissionforPosts(posts, searchTO);
 		for (Post post : posts) {
 /*			if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
 				if (!post.getFromDate().before(today)
@@ -344,7 +371,10 @@ public class PostService extends CommonService<Post> {
 					continue;
 				}
 			}*/
-			postTO = new PostTO(post);
+			List<TaskSubmissionTO> tsTOList = new ArrayList<>();
+			tsTOList.add(taskSubmissionMapByPostId.get(post.getId()));
+			postTO = new PostTO(post, tsTOList);
+			
 			toList.add(postTO);
 		}
 		return toList;

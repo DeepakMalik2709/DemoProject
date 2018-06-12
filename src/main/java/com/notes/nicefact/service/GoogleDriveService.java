@@ -763,6 +763,14 @@ public class GoogleDriveService {
 
 	}
 
+	public void deleteFile(String fileId, AppUser appUser) {
+		logger.info("deleteFile start, postFile id  : " + fileId);
+		String url = DRIVE_FILES_URL + fileId;
+		doDelete(url, null, appUser);
+		logger.info("deleteFile exit");
+		
+	}
+
 	public HttpResponse makeServiceAccountDeleteRequest(String url) {
 		HttpResponse response = null;
 		logger.info("makeServiceAccountDeleteRequest start, url : " + url);

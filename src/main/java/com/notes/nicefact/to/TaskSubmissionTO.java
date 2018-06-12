@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.notes.nicefact.entity.TaskSubmission;
+import com.notes.nicefact.entity.TaskSubmissionFile;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TaskSubmissionTO {
@@ -34,23 +35,34 @@ public class TaskSubmissionTO {
 		this.comment = submission.getComment();
 		this.createdTime = submission.getCreatedTime().getTime();
 		this.updatedTime = submission.getUpdatedTime().getTime();
-		//TODO : populate files
-		/*
 		
-		this.name = submission.getCreatedByName();
-		this.fileName = submission.getName();
-		this.serverName = submission.getServerName();
-		this.mimeType = submission.getMimeType();
-		this.size = submission.getSize();
-		this.icon = submission.getIcon();
-		this.sizeBytes = submission.getSizeBytes();
-		this.downloadCount = submission.getDownloadCount();
-		this.hasThumbnail = StringUtils.isNotBlank(submission.getThumbnail());
-		this.thumbnailLink = submission.getThumbnail();
-		this.driveLink = submission.getDriveLink();
-		this.embedLink = submission.getEmbedLink();
-		isDriveFile = StringUtils.isNotBlank(this.driveLink);*/
+		this.files = getTaskSubmissionFilesTO(submission.getFiles());
 		
+		
+	}
+
+	private List<FileTO> getTaskSubmissionFilesTO(List<TaskSubmissionFile> files) {
+		List<FileTO> filesTOList = new ArrayList<>();
+		if(files!=null){
+			for(TaskSubmissionFile file : files){
+				FileTO fileTO = new FileTO();
+				fileTO.setName(file.getName());
+				fileTO.setId(file.getId());
+				fileTO.setServerName(file.getServerName());
+				fileTO.setMimeType(file.getMimeType());
+				fileTO.setSize(file.getSize());
+				fileTO.setIcon(file.getIcon());
+				fileTO.setSizeBytes(file.getSizeBytes());
+				fileTO.setDownloadCount(file.getDownloadCount());
+				fileTO.setThumbnailLink(file.getThumbnail());
+				fileTO.setDriveLink(file.getDriveLink());
+				fileTO.setEmbedLink(file.getEmbedLink());
+				
+				filesTOList.add(fileTO);
+			}
+		}
+		
+		return filesTOList;
 	}
 
 	public TaskSubmissionTO() {

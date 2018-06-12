@@ -40,7 +40,7 @@ public class ServiceFilter implements Filter {
 
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 
-		boolean bypassLogin = false;
+		boolean bypassLogin = true;
 		HttpServletRequest request = ((HttpServletRequest) req);
 		HttpServletResponse response = ((HttpServletResponse) resp);
 		String url = request.getRequestURI();
@@ -60,7 +60,7 @@ public class ServiceFilter implements Filter {
 			} else {
 
 				if (user == null && bypassLogin && !AppProperties.getInstance().isProduction()) {
-					user = CacheUtils.getAppUser("kkuldeepjoshi5@gmail.com");
+					user = CacheUtils.getAppUser("deepmalik786@gmail.com");
 			//		Utils.refreshToken(user);
 					request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
 				}
