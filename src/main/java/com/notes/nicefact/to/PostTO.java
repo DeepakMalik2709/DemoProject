@@ -175,7 +175,7 @@ public class PostTO {
 			this.files.add(fileTO);
 		}
 		this.title = post.getTitle();
-		this.noOfSubmissions = post.getNoOfSubmissions();
+		
 		if(null != post.getDeadline()){
 			this.deadlineTime = post.getDeadline().getTime();
 			this.canSubmit = this.deadlineTime > new Date().getTime();
@@ -205,9 +205,58 @@ public class PostTO {
 			this.postCategory = "PRIVATE";
 		} else {
 			this.postCategory = post.getPostCategory().name();
-		}
+		}	
+		
+		this.noOfSubmissions = post.getSubmitters().size();
 	}
 
+	public PostTO(Post post, List<TaskSubmissionTO> submissions) {
+		this.id = post.getId();
+		this.groupId = post.getGroupId();
+		this.postType = post.getPostType();
+		if(groupId !=null && groupId > 0){
+			Group group = CacheUtils.getGroup(this.groupId);
+			this.groupName =  group.getName();
+		}
+		this.comment = post.getComment();
+		this.createdByEmail = post.getCreatedBy();
+		this.createdByName = post.getCreatedByName();
+		this.updatedByEmail = post.getUpdatedBy();
+		this.updatedByName = post.getUpdatedByName();
+		this.createdTime = post.getCreatedTime().getTime();
+		this.updatedTime = post.getUpdatedTime().getTime();
+		this.numberOfComments = post.getNumberOfComments();
+		this.numberOfReactions = post.getNumberOfReactions();	
+		if(POST_TYPE.SCHEDULE.equals(post.getPostType()) ){	
+			this.setScheduleAttribute(post);
+		}
+		CommentTO commentTO;
+		for (PostComment comment : post.getComments()) {
+			commentTO = new CommentTO(comment);
+			this.comments.add(commentTO);
+		}
+		FileTO fileTO;
+		for(PostFile file : post.getFiles()){
+			fileTO= new FileTO(file);
+			this.files.add(fileTO);
+		}
+		this.title = post.getTitle();
+		
+		if(null != post.getDeadline()){
+			this.deadlineTime = post.getDeadline().getTime();
+			this.canSubmit = this.deadlineTime > new Date().getTime();
+		}else{
+			this.canSubmit = true;
+		}
+		if(CurrentContext.getAppUser() !=null){
+			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
+		}		
+		
+		this.noOfSubmissions = post.getSubmitters().size();
+		
+		this.submissions = submissions;
+	}
+	
 	private void setScheduleAttribute(Post post) {
 		
 		AppUser user =  CurrentContext.getAppUser();

@@ -44,6 +44,9 @@
 			<artifactId>google-api-services-calendar</artifactId>
 			<version>v3-rev305-1.22.0</version>
 		</dependency>
+		
+		
+
 		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
 		<dependency>
 			<groupId>log4j</groupId>
@@ -242,52 +245,9 @@
 				</configuration>
 			</plugin>
 			
-			<plugin>
-           <artifactId>maven-antrun-plugin</artifactId>
-           <executions>
-             <execution>
-               <phase>test</phase>
-               <goals>
-                 <goal>run</goal>
-               </goals>
-               <configuration>
-                 <tasks>
-                 	<delete>
-					    <fileset dir="${project.build.outputDirectory}" includes="app-*" />
-					</delete>
-                   <copy file="src/main/resources/app-${env}.properties"
-                         tofile="${project.build.outputDirectory}/app.properties"/>
-                 </tasks>
-               </configuration>
-             </execution>
-           </executions>
-         </plugin>
+			
 		</plugins>
 	</build>
 	
-	<profiles>
-		<profile>
-	    	<id>LOCAL</id>
-	    	<activation>
-		      <activeByDefault>true</activeByDefault>
-		    </activation>
-	      	<properties>
-            	<env>local</env>
-			</properties>
-	    </profile>
-	 
-	    <profile>
-	      <id>TEST</id>
-	      <properties>
-            	<env>test</env>
-			</properties>
-	    </profile>
-	    
-	    <profile>
-	      <id>PROD</id>
-	      <properties>
-            	<env>prod</env>
-			</properties>
-	    </profile>
-	  </profiles>
+	
 </project>

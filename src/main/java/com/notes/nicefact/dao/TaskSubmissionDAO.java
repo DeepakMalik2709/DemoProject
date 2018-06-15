@@ -10,6 +10,7 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
+import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.TaskSubmission;
 
 public class TaskSubmissionDAO extends CommonDAOImpl<TaskSubmission> {
@@ -25,6 +26,21 @@ public class TaskSubmissionDAO extends CommonDAOImpl<TaskSubmission> {
 		EntityManager pm = super.getEntityManager();
 		Query query = pm.createQuery("select t from TaskSubmission t where  t.postId = :taskId ");
 		query.setParameter("taskId", taskId);
+		try {
+			results = (List<TaskSubmission>) query.getResultList();
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		}
+		return results;
+	}
+
+	public List<TaskSubmission> getTaskSubmissionsForUserByTaskIds(List<Long> taskIds, String userEmail) {
+		
+		List<TaskSubmission> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from TaskSubmission t where  t.postId in (:taskIds) and t.createdBy = :email");
+		query.setParameter("taskIds", taskIds);
+		query.setParameter("email", userEmail);
 		try {
 			results = (List<TaskSubmission>) query.getResultList();
 		} catch (NoResultException nre) {

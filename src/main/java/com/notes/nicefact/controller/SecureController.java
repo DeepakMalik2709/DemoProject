@@ -1382,10 +1382,38 @@ public class SecureController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		try {
 			TaskService taskService = new TaskService(em);
-			TaskSubmission post = taskService.upsertTaskSubmission(sumbmissionTO, CurrentContext.getAppUser());
-			TaskSubmissionTO savedTO = new TaskSubmissionTO(post);
+			TaskSubmission taskSumission = taskService.upsertTaskSubmission(sumbmissionTO, CurrentContext.getAppUser());
+			TaskSubmissionTO savedTO = new TaskSubmissionTO(taskSumission);
 			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			/*json.put(Constants.DATA_ITEM, savedTO);*/
+			json.put(Constants.DATA_ITEM, savedTO);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e );
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("taskSubmission exit");
+	}
+	
+	@POST
+	@Path("task/resubmission")
+	public void taskResubmission(TaskSubmissionTO sumbmissionTO, @Context HttpServletRequest request, @Context HttpServletResponse response) {
+		logger.info("taskSubmission start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		AppUser appUser = CurrentContext.getAppUser();
+		try {
+			TaskService taskService = new TaskService(em);
+			taskService.deleteTaskSubmission(sumbmissionTO.getPostId(), sumbmissionTO.getId(), appUser);
+			TaskSubmission taskSumission = taskService.upsertTaskSubmission(sumbmissionTO, appUser);
+			TaskSubmissionTO savedTO = new TaskSubmissionTO(taskSumission);
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.DATA_ITEM, savedTO);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e );
 

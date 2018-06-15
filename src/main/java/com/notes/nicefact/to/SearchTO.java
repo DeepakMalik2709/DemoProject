@@ -123,6 +123,9 @@ public class SearchTO {
 
 	public SearchTO(HttpServletRequest request, int max) {
 		super();
+		if (CurrentContext.getAppUser() != null) {
+			this.email = CurrentContext.getEmail();
+		}
 		this.limit = max;
 		setRequest(request);
 	}
