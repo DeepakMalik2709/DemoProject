@@ -1,6 +1,12 @@
 package com.notes.nicefact.entity;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
@@ -20,6 +26,8 @@ public class Tag extends CommonEntity{
 	
 	String description;
 	
+	@OneToMany(mappedBy="tag", cascade = CascadeType.ALL)
+	private Set<PostTag> postTags = new LinkedHashSet<>();
 	
 	public Tag() {
 	}
@@ -43,6 +51,14 @@ public class Tag extends CommonEntity{
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public Set<PostTag> getPostTags() {
+		return postTags;
+	}
+
+	public void setPostTags(Set<PostTag> postTags) {
+		this.postTags = postTags;
 	}
 
 	public void updateProps(Tag tag) {
