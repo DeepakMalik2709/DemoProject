@@ -200,7 +200,8 @@ public class PostService extends CommonService<Post> {
 		List<String> tags = null;
 		if(postTagList != null && postTagList.size() > 0) {
 			if(null != postTo.getNewTag() && !postTo.getNewTag().equals("")) {
-				tags = new ArrayList<>(Arrays.asList(postTo.getNewTag().split("\\s*,\\s*")));
+				tags = new ArrayList<>(Arrays.asList(postTo.getNewTag().split("\\s+")));
+				tags = getHashTag(tags);
 				
 				for(PostTag postTag: postTagList) {
 					if(!tags.contains(postTag.getTag().getName().trim())) {
@@ -215,7 +216,8 @@ public class PostService extends CommonService<Post> {
 			
 		} else {
 			if(null != postTo.getNewTag() && !postTo.getNewTag().equals("")) {
-				tags = Arrays.asList(postTo.getNewTag().split("\\s*,\\s*"));
+				tags = Arrays.asList(postTo.getNewTag().split("\\s+"));
+				tags = getHashTag(tags);
 			}
 		}
 		
@@ -246,6 +248,16 @@ public class PostService extends CommonService<Post> {
 		return post;
 	}
 
+	private List<String> getHashTag(List<String> tags) {
+		for(int index = 0; index < tags.size(); index++) {
+			if(tags.get(index).charAt(0) != '#') {
+				tags.set(index, "#"+tags.get(index));
+			}
+		}
+				
+		return tags;
+	}
+	
 	void updateAttachedFiles(Post post, PostTO postTo) {
 		try {
 			String fileBasePath = AppProperties.getInstance()
