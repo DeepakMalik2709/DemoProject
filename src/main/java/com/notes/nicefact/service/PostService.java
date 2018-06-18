@@ -34,11 +34,19 @@ import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostReaction;
+<<<<<<< HEAD
 import com.notes.nicefact.entity.TaskSubmission;
+=======
+>>>>>>> 8d33ad6de334e179f9c7f9230aad6ba43202e283
 import com.notes.nicefact.entity.PostRecipient;
 import com.notes.nicefact.entity.PostTag;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
+<<<<<<< HEAD
+=======
+import com.notes.nicefact.entity.TaskSubmission;
+
+>>>>>>> 8d33ad6de334e179f9c7f9230aad6ba43202e283
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.exception.NotFoundException;
@@ -49,8 +57,13 @@ import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.PostRecipientTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
+<<<<<<< HEAD
 import com.notes.nicefact.to.TaskSubmissionTO;
 import com.notes.nicefact.to.TagTO;
+=======
+import com.notes.nicefact.to.TagTO;
+import com.notes.nicefact.to.TaskSubmissionTO;
+>>>>>>> 8d33ad6de334e179f9c7f9230aad6ba43202e283
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Utils;
@@ -205,7 +218,8 @@ public class PostService extends CommonService<Post> {
 		List<String> tags = null;
 		if(postTagList != null && postTagList.size() > 0) {
 			if(null != postTo.getNewTag() && !postTo.getNewTag().equals("")) {
-				tags = new ArrayList<>(Arrays.asList(postTo.getNewTag().split("\\s*,\\s*")));
+				tags = new ArrayList<>(Arrays.asList(postTo.getNewTag().split("\\s+")));
+				tags = getHashTag(tags);
 				
 				for(PostTag postTag: postTagList) {
 					if(!tags.contains(postTag.getTag().getName().trim())) {
@@ -220,7 +234,8 @@ public class PostService extends CommonService<Post> {
 			
 		} else {
 			if(null != postTo.getNewTag() && !postTo.getNewTag().equals("")) {
-				tags = Arrays.asList(postTo.getNewTag().split("\\s*,\\s*"));
+				tags = Arrays.asList(postTo.getNewTag().split("\\s+"));
+				tags = getHashTag(tags);
 			}
 		}
 		
@@ -251,6 +266,16 @@ public class PostService extends CommonService<Post> {
 		return post;
 	}
 
+	private List<String> getHashTag(List<String> tags) {
+		for(int index = 0; index < tags.size(); index++) {
+			if(tags.get(index).charAt(0) != '#') {
+				tags.set(index, "#"+tags.get(index));
+			}
+		}
+				
+		return tags;
+	}
+	
 	void updateAttachedFiles(Post post, PostTO postTo) {
 		try {
 			String fileBasePath = AppProperties.getInstance()
