@@ -44,6 +44,8 @@ public class PostTO {
 	
 	String createdByEmail;
 	
+	private long postCreatorId;
+	
 	String createdByName;
 	
 	String updatedByName;
@@ -259,7 +261,22 @@ public class PostTO {
 		}
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
-		}		
+		}
+		
+		if(post.getPostTags().size() > 0) {
+			TagTO tagTO = null;
+			List<String> tagNames = new ArrayList<>();
+			
+			for(PostTag postTag: post.getPostTags()) {
+				tagTO = new TagTO();
+				tagTO.setId(postTag.getTag().getId());
+				tagTO.setName(postTag.getTag().getName());
+				this.tags.add(tagTO);
+				tagNames.add(postTag.getTag().getName());
+			}
+			
+			this.newTag = StringUtils.join(tagNames, ',');
+		}
 		
 		this.noOfSubmissions = post.getSubmitters().size();
 		
@@ -459,6 +476,14 @@ public class PostTO {
 		this.createdByEmail = createdByEmail;
 	}
 
+	public long getPostCreatorId() {
+		return postCreatorId;
+	}
+	
+	public void setPostCreatorId(long postCreatorId) {
+		this.postCreatorId = postCreatorId;
+	}
+	
 	public String getCreatedByName() {
 		return createdByName;
 	}
