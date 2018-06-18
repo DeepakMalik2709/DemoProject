@@ -184,10 +184,7 @@ public class PostTO {
 		}
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
-<<<<<<< HEAD
 			this.noOfSubmissions = post.getSubmitters().size();
-=======
->>>>>>> 8d33ad6de334e179f9c7f9230aad6ba43202e283
 		}
 		
 		if(post.getPostTags().size() > 0) {
@@ -209,14 +206,8 @@ public class PostTO {
 			this.postCategory = "PRIVATE";
 		} else {
 			this.postCategory = post.getPostCategory().name();
-<<<<<<< HEAD
 		}
 
-=======
-		}	
-		
-		this.noOfSubmissions = post.getSubmitters().size();
->>>>>>> 8d33ad6de334e179f9c7f9230aad6ba43202e283
 	}
 
 	public PostTO(Post post, List<TaskSubmissionTO> submissions) {

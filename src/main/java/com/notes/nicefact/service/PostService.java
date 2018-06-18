@@ -26,7 +26,7 @@ import com.notes.nicefact.dao.PostCommentDAO;
 import com.notes.nicefact.dao.PostDAO;
 import com.notes.nicefact.dao.PostFileDAO;
 import com.notes.nicefact.dao.PostReactionDAO;
-import com.notes.nicefact.dao.TaskSubmissionDAO;
+import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Post;
@@ -34,19 +34,10 @@ import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostReaction;
-<<<<<<< HEAD
-import com.notes.nicefact.entity.TaskSubmission;
-=======
->>>>>>> 8d33ad6de334e179f9c7f9230aad6ba43202e283
 import com.notes.nicefact.entity.PostRecipient;
 import com.notes.nicefact.entity.PostTag;
 import com.notes.nicefact.entity.Tag;
-import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
-<<<<<<< HEAD
-=======
 import com.notes.nicefact.entity.TaskSubmission;
-
->>>>>>> 8d33ad6de334e179f9c7f9230aad6ba43202e283
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.exception.NotFoundException;
@@ -57,13 +48,8 @@ import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.PostRecipientTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
-<<<<<<< HEAD
-import com.notes.nicefact.to.TaskSubmissionTO;
-import com.notes.nicefact.to.TagTO;
-=======
 import com.notes.nicefact.to.TagTO;
 import com.notes.nicefact.to.TaskSubmissionTO;
->>>>>>> 8d33ad6de334e179f9c7f9230aad6ba43202e283
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Utils;
