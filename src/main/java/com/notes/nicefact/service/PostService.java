@@ -71,6 +71,7 @@ public class PostService extends CommonService<Post> {
 	BackendTaskService backendTaskService;
 	NotificationService notificationService;
 	private PostTagService postTagService;
+	private AppUserService appUserService;
 	
 	public PostService(EntityManager em) {
 		groupDao = new GroupDAO(em);
@@ -83,6 +84,7 @@ public class PostService extends CommonService<Post> {
 		notificationService = new NotificationService(em);
 		taskService = new TaskService(em);
 		postTagService = new PostTagService(em);
+		appUserService = new AppUserService(em);
 		
 		this.em = em;
 	}
@@ -509,6 +511,9 @@ public class PostService extends CommonService<Post> {
 		List<PostTO> toList = new ArrayList<>();
 		PostTO postTO;
 		Date today = new Date();
+		
+		Map<String, Long> appUserMap = new HashMap<>();
+		
 		Map<Long,TaskSubmissionTO> taskSubmissionMapByPostId = getUserWiseTaskSubmissionforPosts(posts, searchTO);
 		for (Post post : posts) {
 /*			if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
@@ -520,6 +525,13 @@ public class PostService extends CommonService<Post> {
 			List<TaskSubmissionTO> tsTOList = new ArrayList<>();
 			tsTOList.add(taskSubmissionMapByPostId.get(post.getId()));
 			postTO = new PostTO(post, tsTOList);
+			
+			if(!appUserMap.containsKey(post.getCreatedBy())) {
+				AppUser postCreatedBy = appUserService.getAppUserByEmail(post.getCreatedBy());
+				appUserMap.put(post.getCreatedBy(), postCreatedBy.getId());
+			}
+			
+			postTO.setPostCreatorId(appUserMap.get(post.getCreatedBy()));
 			
 			toList.add(postTO);
 		}

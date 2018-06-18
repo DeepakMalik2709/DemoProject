@@ -1,7 +1,6 @@
 
 package com.notes.nicefact.controller;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,7 +25,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.fileupload.MultipartStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -64,7 +62,6 @@ import com.notes.nicefact.service.TagService;
 import com.notes.nicefact.service.TaskService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.service.profile.CertificateService;
-import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.CommentTO;
 import com.notes.nicefact.to.FileTO;
 import com.notes.nicefact.to.GroupAttendanceTO;
@@ -155,6 +152,7 @@ public class SecureController extends CommonController {
 				Map<String, Object> pushToken = PushService.getInstance().getToken();
 				json.put("pushToken" , pushToken);
 				Map<String, Object> userMap = user.toMap();
+				userMap.put("haveEditAccess", true);
 				json.put(Constants.LOGIN_USER, userMap);
 				json.put(Constants.APPLICATION_URL, AppProperties.getInstance().getApplicationUrl());
 				json.put(Constants.CONTEXT, CurrentContext.getCommonContext().toMap());
@@ -300,34 +298,7 @@ public class SecureController extends CommonController {
 	public Viewable dashboard(@Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
 		return new Viewable("/jsp/index.jsp", null);
 	}
-
-	@POST
-	@Path("/profile")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void upsertProfile(AppUserTO appUserTO, @Context HttpServletResponse response) {
-		logger.info("upsertProfile start");
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		Map<String, Object> json = new HashMap<>();
-		try {
-			AppUserService appUserService = new AppUserService(em);
-			AppUser updated = appUserService.updateAppUser(CurrentContext.getEmail(), appUserTO);
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, updated.toMap());
-
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("upsertProfile exit");
-	}
-
+	
 	@GET
 	@Path("/groups/mine")
 	public void listMyGroups(@Context HttpServletRequest request, @Context HttpServletResponse response) {
@@ -852,69 +823,6 @@ public class SecureController extends CommonController {
 		logger.info("fetchGroupPosts exit");
 	}
 
-	@POST
-	@Path("/profile" + Constants.PHOTO_URL)
-	public void uploadUserImage(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JSONException {
-		logger.info("uploadUserImage start");
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			String contentType = request.getContentType();
-			String boundary = contentType.substring(contentType.indexOf("boundary=") + 9);
-			MultipartStream multipartStream = new MultipartStream(request.getInputStream(), boundary.getBytes(Constants.UTF_8));
-			boolean nextPart = multipartStream.skipPreamble();
-			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			while (nextPart) {
-				String header = multipartStream.readHeaders();
-				/* process headers , DO NOT REMOVE , UPLOAD STOPS WORKING */
-				System.out.println(header);
-				multipartStream.readBodyData(output);
-				nextPart = multipartStream.readBoundary();
-			}
-
-			byte[] fileBytes = output.toByteArray();
-			AppUserService appUserService = new AppUserService(em);
-			AppUser user = appUserService.uploadPhoto(CurrentContext.getEmail(), fileBytes);
-			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("uploadUserImage exit");
-	}
-
-	@DELETE
-	@Path("/profile" + Constants.PHOTO_URL)
-	public void removeUserImage(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JSONException {
-		logger.info("removeUserImage start");
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			AppUserService appUserService = new AppUserService(em);
-			AppUser user = appUserService.removePhoto(CurrentContext.getEmail());
-			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			AppUserTO userTO = new AppUserTO(user);
-			json.put(Constants.LOGIN_USER, userTO);
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("removeUserImage exit");
-
-	}
-
 	@DELETE
 	@Path("/group/post/{postId}")
 	public void deleteGroupPost(@PathParam("postId") long postId, @Context HttpServletResponse response) {
@@ -1208,51 +1116,6 @@ public class SecureController extends CommonController {
 			}
 		}
 		logger.info("generateFileThumbnail exit");
-	}
-	
-	@POST
-	@Path("/profile/deauthorizeGoogleDrive" )
-	public void deauthorizeGoogleDrive(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JSONException {
-		logger.info("deauthorizeGoogleDrive start");
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			AppUserService appUserService = new AppUserService(em);
-			AppUser user = appUserService.deauthorizeGoogleDrive(CurrentContext.getEmail());
-			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("deauthorizeGoogleDrive exit");
-
-	}
-	
-	
-	@POST
-	@Path("/profile/deauthorizeGoogleCalendar" )
-	public void deauthorizeGoogleCalendar(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JSONException {
-		logger.info("deauthorizeGoogleDrive start");
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			AppUserService appUserService = new AppUserService(em);
-			AppUser user = appUserService.deauthorizeGoogleDrive(CurrentContext.getEmail());
-			request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("deauthorizeGoogleDrive exit");
-
 	}
 	
 	@GET
