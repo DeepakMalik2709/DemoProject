@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
@@ -48,6 +49,14 @@ public class AppUser extends CommonEntity {
 	private String lastName;
 
 	private String phoneNumber;
+	
+	private String dob;
+	private String homeTown;
+	private String currentCity;
+	private String about;
+	
+	@OneToMany(targetEntity=Certificate.class, mappedBy="appUser", fetch=FetchType.EAGER)
+	private Set<Certificate> certificates;
 
 	String password;
 
@@ -184,6 +193,10 @@ public class AppUser extends CommonEntity {
 		map.put("firstName", firstName);
 		map.put("lastName", lastName);
 		map.put("phoneNumber", getPhoneNumber());
+		map.put("dob", getDob());
+		map.put("homeTown", getHomeTown());
+		map.put("currentCity", getCurrentCity());
+		map.put("about", getAbout());
 		map.put("updatedTime", getUpdatedTime().getTime());
 		map.put("createdTime", getCreatedTime().getTime());
 		map.put("active", getIsActive());
@@ -588,6 +601,46 @@ public class AppUser extends CommonEntity {
 
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+	}
+
+	public String getDob() {
+		return dob;
+	}
+
+	public void setDob(String dob) {
+		this.dob = dob;
+	}
+
+	public String getHomeTown() {
+		return homeTown;
+	}
+
+	public void setHomeTown(String homeTown) {
+		this.homeTown = homeTown;
+	}
+
+	public String getCurrentCity() {
+		return currentCity;
+	}
+
+	public void setCurrentCity(String currentCity) {
+		this.currentCity = currentCity;
+	}
+
+	public String getAbout() {
+		return about;
+	}
+
+	public void setAbout(String about) {
+		this.about = about;
+	}
+
+	public Set<Certificate> getCertificates() {
+		return certificates;
+	}
+
+	public void setCertificates(Set<Certificate> certificates) {
+		this.certificates = certificates;
 	}
 
 	public String getRefreshTokenAccountEmail() {

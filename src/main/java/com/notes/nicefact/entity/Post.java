@@ -17,7 +17,6 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import javax.persistence.Transient;
 
 import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
 import com.notes.nicefact.enums.SHARING;
@@ -39,6 +38,10 @@ public class Post extends AbstractComment {
 	public enum TASK_TYPE{
 		CLASS_ASSIGNMENT
 	}
+	
+	public enum POST_CATEGORY {
+		PRIVATE, PUBLIC
+	}
 
 	// company key of person creating post
 	@Basic
@@ -47,8 +50,8 @@ public class Post extends AbstractComment {
 	@Basic
 	private Long groupId;
 
-	@Transient
-	Set<Tag> tags;
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "post", cascade=CascadeType.ALL, orphanRemoval = true)
+	private Set<PostTag> postTags = new LinkedHashSet<>() ;
 
 	@ElementCollection(fetch = FetchType.LAZY)
 	Set<String> accessList;
@@ -62,11 +65,11 @@ public class Post extends AbstractComment {
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	protected List<PostRecipient> recipients = new ArrayList<>();
-
+	
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	protected Set<PostReaction> reactions = new LinkedHashSet<>();
 	
-	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	protected List<PostFile> files = new ArrayList<>();
 	
 	@Enumerated(EnumType.STRING)
@@ -75,10 +78,13 @@ public class Post extends AbstractComment {
 	@Enumerated(EnumType.STRING)
 	private POST_TYPE postType = POST_TYPE.SIMPLE;
 	
+	@Enumerated(EnumType.STRING)
+	private POST_CATEGORY postCategory = POST_CATEGORY.PUBLIC;
+	
 	@ElementCollection(fetch = FetchType.LAZY)
 	private List<String> weekdays ;
 	
-int noOfSubmissions;
+	int noOfSubmissions;
 	
 	@Basic
 	Date deadline;
@@ -152,17 +158,17 @@ int noOfSubmissions;
 		if(null != this.getGroupId()){
 			this.sharing = SHARING.GROUP;
 		}
-		if(post.getDeadlineTime()  >0){
+		if(post.getDeadlineTime() > 0){
 			this.deadline = new Date(post.getDeadlineTime());
 		}
 		this.allDayEvent = post.getAllDayEvent();
-		if(post.getFromDate()    >0){
+		if(post.getFromDate() > 0){
 			this.fromDate =new Date(post.getFromDate());
 			if(this.allDayEvent!=null && this.allDayEvent == true){
 				this.fromDate = Utils.removeTimeFromDate(this.fromDate);
 			}
 		}
-		if(post.getToDate()    >0){
+		if(post.getToDate() > 0){
 			this.toDate = new Date(post.getToDate());
 			if(this.allDayEvent!=null && this.allDayEvent == true){
 				this.toDate = Utils.removeTimeFromDate(this.toDate);
@@ -172,6 +178,11 @@ int noOfSubmissions;
 		if(post.getPostType()!=null){
 			this.postType=post.getPostType();
 		}
+		
+		if(post.getGroupId() != null && post.getGroupId() > 0) {
+			this.postCategory = POST_CATEGORY.PRIVATE;
+		}
+		
 		if(post.getLocation()!=null){
 			this.location = post.getLocation();
 		}
@@ -180,13 +191,13 @@ int noOfSubmissions;
 		this.googleEventId = post.getGoogleEventId();
 		
 	}
-
+	
 	public void updateProps(Post post) {
-		this.tags = post.getTags();
+		this.postTags = post.getPostTags();
 		this.comment = post.getComment();
 		this.isEdited=true;
 		setWeekdays(post.getWeekdays());
-		if(post.getDeadline()  ==null){
+		if(post.getDeadline() == null){
 			this.deadline = null;
 		}else{
 			this.deadline = new Date(post.getDeadline().getTime());
@@ -269,14 +280,11 @@ int noOfSubmissions;
 		this.numberOfReactions = numberOfReactions;
 	}
 
-	public Set<Tag> getTags() {
-		if(null == tags){
-			tags= new LinkedHashSet<>();
-		}
-		return tags;
+	public Set<PostTag> getPostTags() {
+		return postTags;
 	}
-	public void setTags(Set<Tag> tags) {
-		this.tags = tags;
+	public void setPostTags(Set<PostTag> postTags) {
+		this.postTags = postTags;
 	}
 
 	public List<PostRecipient> getRecipients() {
@@ -326,6 +334,14 @@ int noOfSubmissions;
 		this.postType = postType;
 	}
 
+	public POST_CATEGORY getPostCategory() {
+		return postCategory;
+	}
+	
+	public void setPostCategory(POST_CATEGORY postCategory) {
+		this.postCategory = postCategory;
+	}
+	
 	public int getNoOfSubmissions() {
 		return noOfSubmissions;
 	}

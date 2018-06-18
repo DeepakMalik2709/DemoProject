@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
@@ -16,6 +17,7 @@ import com.notes.nicefact.entity.AbstractFile.UPLOAD_TYPE;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostFile;
+import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.Constants;
 
@@ -43,14 +45,66 @@ public class PostDAO extends CommonDAOImpl<Post> {
 
 	public List<Post> fetchMyPosts(SearchTO searchTO , AppUser appuser) {
 		List<Post> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		
+		Query query = null;
+		
 		if (!appuser.getGroupIds().isEmpty()) {
-			EntityManager pm = super.getEntityManager();
-			Query query = pm.createQuery("select t from Post t where  t.groupId in (:groupIds) order by t.updatedTime desc");
+			query = pm.createQuery("select p from Post p where p.groupId in (:groupIds) or (p.postCategory in (:postCategory) and p.createdBy=:createdBy) order by p.updatedTime desc");
 			query.setParameter("groupIds", appuser.getGroupIds());
+		} else {
+			query = pm.createQuery("select p from Post p where (p.postCategory in (:postCategory) and p.createdBy=:createdBy) order by p.updatedTime desc");
+		}
+		
+		query.setParameter("postCategory", Post.POST_CATEGORY.PUBLIC);
+		query.setParameter("createdBy", appuser.getEmail());
+		query.setFirstResult(searchTO.getFirst());
+		query.setMaxResults(searchTO.getLimit());
+		try {
+			results = (List<Post>) query.getResultList();
+		} catch (NoResultException nre) {
+		}
+		
+		return results;
+	}
+	
+	public List<Post> fetchAllPublicPosts(SearchTO searchTO) {
+		List<Post> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from Post t where  t.postCategory in (:postCategory) order by t.updatedTime desc");
+		query.setParameter("postCategory", Post.POST_CATEGORY.PUBLIC);
+		query.setFirstResult(searchTO.getFirst());
+		query.setMaxResults(searchTO.getLimit());
+		
+		try {
+			results = (List<Post>) query.getResultList();
+		} catch (NoResultException nre) {
+		} 
+		return results;
+	}
+	
+	public List<Post> searchPublicPost(SearchTO searchTO) {
+		List<Post> items = null;
+		List<Post> results = new ArrayList<>();
+		if (StringUtils.isNotBlank(searchTO.getSearchTerm())) {
+			EntityManager pm = super.getEntityManager();
+			Query query = pm.createQuery(
+					"SELECT distinct p FROM Post p"
+					+ " JOIN p.postTags pt"
+					+ " WHERE p.comment LIKE CONCAT('%', :searchTerm, '%')" 
+					+ " OR pt.tag.id in (SELECT t.id FROM Tag t WHERE t.name LIKE CONCAT('%', :searchTerm, '%'))"
+					+ " order by p.updatedTime desc");
+			query.setParameter("searchTerm", searchTO.getSearchTerm());
 			query.setFirstResult(searchTO.getFirst());
 			query.setMaxResults(searchTO.getLimit());
 			try {
-				results = (List<Post>) query.getResultList();
+				items = (List<Post>) query.getResultList();
+				if (!items.isEmpty()) {
+					for (Post post : items) {
+						pm.detach(post);
+						results.add(post);
+					}
+				}
 			} catch (NoResultException nre) {
 			} 
 		}

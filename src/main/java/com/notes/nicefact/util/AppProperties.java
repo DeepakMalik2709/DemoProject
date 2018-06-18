@@ -209,7 +209,7 @@ public class AppProperties {
 		}else if (isProduction()) {
 			return props.getProperty(groupUploads);
 		} else {
-			return props.getProperty(groupUploadsDev);
+			return props.getProperty(groupUploads);
 		}
 	}
 

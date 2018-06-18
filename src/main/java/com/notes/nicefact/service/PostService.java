@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,21 +35,30 @@ import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.PostReaction;
 import com.notes.nicefact.entity.TaskSubmission;
+import com.notes.nicefact.entity.PostRecipient;
+import com.notes.nicefact.entity.PostTag;
+import com.notes.nicefact.entity.Tag;
+import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
 import com.notes.nicefact.enums.NotificationAction;
+import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.ServiceException;
 import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.to.CommentTO;
 import com.notes.nicefact.to.FileTO;
+import com.notes.nicefact.to.PostRecipientTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TaskSubmissionTO;
+import com.notes.nicefact.to.TagTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
+import com.notes.nicefact.util.Utils;
 
 public class PostService extends CommonService<Post> {
 	static Logger logger = Logger.getLogger(PostService.class.getSimpleName());
 
+	private EntityManager em;
 	private GroupDAO groupDao;
 	private GroupMemberDAO groupMemberDAO;
 	private PostDAO postDAO;
@@ -59,7 +69,8 @@ public class PostService extends CommonService<Post> {
 	private PostFileDAO postFileDAO;
 	BackendTaskService backendTaskService;
 	NotificationService notificationService;
-
+	private PostTagService postTagService;
+	
 	public PostService(EntityManager em) {
 		groupDao = new GroupDAO(em);
 		groupMemberDAO = new GroupMemberDAO(em);
@@ -70,6 +81,9 @@ public class PostService extends CommonService<Post> {
 		backendTaskService = new BackendTaskService(em);
 		notificationService = new NotificationService(em);
 		taskService = new TaskService(em);
+		postTagService = new PostTagService(em);
+		
+		this.em = em;
 	}
 
 	@Override
@@ -81,8 +95,78 @@ public class PostService extends CommonService<Post> {
 		if (StringUtils.isBlank(postTo.getComment())) {
 			throw new ServiceException(" Post cannot be empty");
 		}
-		Post post = new Post(postTo);
-		if (appUser.getGroupIds().contains(postTo.getGroupId())) {
+		
+		Post post;
+		
+		if(postTo.getId() != null && postTo.getId() > 0) { // existing post
+			post = postDAO.get(postTo.getId());
+			
+			post.setComment(postTo.getComment());
+			
+			post.getRecipients().clear();
+			
+			PostRecipient recipient;
+			List<PostRecipient> postRecipients = new ArrayList<>();
+			for (PostRecipientTO postRecipientTO : postTo.getRecipients()) {
+				recipient = new PostRecipient();
+				recipient.setEmail(postRecipientTO.getEmail());
+				recipient.setScheduleResponse(ScheduleAttendeeResponseType.valueOf(postRecipientTO.getScheduleResponse()) );
+				recipient.setName(postRecipientTO.getLabel());
+				recipient.setPost(post);
+				AppUser hr = CacheUtils.getAppUser(postRecipientTO.getEmail());
+				if (hr == null) {
+					recipient.setType(RecipientType.EMAIL);
+				} else {
+					recipient.setType(RecipientType.USER);
+					recipient.setName(hr.getDisplayName());
+					recipient.setPosition(hr.getPosition());
+					recipient.setDepartment(hr.getDepartment());
+					recipient.setOrganization(hr.getOrganization());
+				}
+				postRecipients.add(recipient);
+			}
+			
+			post.getRecipients().addAll(postRecipients);
+			
+			post.setTitle(postTo.getTitle());
+			
+			if(postTo.getDeadlineTime() > 0){
+				post.setDeadline(new Date(postTo.getDeadlineTime()));
+			}
+			
+			post.setAllDayEvent(postTo.getAllDayEvent());
+			
+			if(postTo.getFromDate() > 0){
+				post.setFromDate(new Date(postTo.getFromDate()));
+				
+				if(post.getAllDayEvent() != null && post.getAllDayEvent() == true){
+					post.setFromDate(Utils.removeTimeFromDate(post.getFromDate()));
+				}
+			}
+			if(postTo.getToDate() > 0){
+				post.setToDate(new Date(postTo.getToDate()));
+				if(post.getAllDayEvent() != null && post.getAllDayEvent() == true){
+					post.setToDate(Utils.removeTimeFromDate(post.getToDate()));
+				}
+			}
+			
+			post.setWeekdays(postTo.getWeekdays());
+			
+			if(post.getLocation() != null){
+				post.setLocation(postTo.getLocation());
+			}
+			
+			post.setGoogleEventId(postTo.getGoogleEventId());
+		} else { // new post
+			post = new Post(postTo);
+		}
+		
+		if(postTo.getGroupId() == null || postTo.getGroupId() == 0) {
+			// Saving public post
+			updateAttachedFiles(post, postTo);
+			post = upsert(post);
+			backendTaskService.savePostTask(post);
+		} else if (appUser.getGroupIds().contains(postTo.getGroupId())) {
 			Group group = CacheUtils.getGroup(postTo.getGroupId());
 			if (group.getBlocked().contains(appUser.getEmail())) {
 				throw new UnauthorizedException(
@@ -115,13 +199,62 @@ public class PostService extends CommonService<Post> {
 		} else {
 			throw new UnauthorizedException("You cannot post to this group.");
 		}
+		
+		// Adding or removing tag
+		List<PostTag> postTagList = postTagService.getByPostId(post.getId());
+		List<String> tags = null;
+		if(postTagList != null && postTagList.size() > 0) {
+			if(null != postTo.getNewTag() && !postTo.getNewTag().equals("")) {
+				tags = new ArrayList<>(Arrays.asList(postTo.getNewTag().split("\\s*,\\s*")));
+				
+				for(PostTag postTag: postTagList) {
+					if(!tags.contains(postTag.getTag().getName().trim())) {
+						postTagService.remove(postTag);
+					} else {
+						tags.remove(postTag.getTag().getName().trim());
+					}
+				}
+			} else {
+				postTagService.removeAll(postTagList);
+			}
+			
+		} else {
+			if(null != postTo.getNewTag() && !postTo.getNewTag().equals("")) {
+				tags = Arrays.asList(postTo.getNewTag().split("\\s*,\\s*"));
+			}
+		}
+		
+		if(null != postTo.getNewTag() && !postTo.getNewTag().equals("")) {
+			TagService tagService = new TagService(em);
+			TagTO tagTO = new TagTO();
+			Tag tag;
+			Set<PostTag> postTags = new HashSet<>();
+			
+			for(String tagName: tags) {
+				tagName = tagName.trim();
+				tag = tagService.getByName(tagName);
+				
+				if(tag == null) {
+					tagTO = new TagTO();
+					tagTO.setName(tagName);
+					tagTO.setDescription(tagName);
+					
+					tag = tagService.upsert(tagTO);
+				}
+				
+				postTags.add(postTagService.save(post, tag));
+			}
+			
+			post.getPostTags().addAll(postTags);
+		}
+		
 		return post;
 	}
 
 	void updateAttachedFiles(Post post, PostTO postTo) {
 		try {
 			String fileBasePath = AppProperties.getInstance()
-					.getGroupUploadsFolder() + post.getGroupId();
+					.getGroupUploadsFolder() + (post.getGroupId() != null && post.getGroupId() > 0 ? post.getGroupId() : "Public");
 			if (Files.notExists(Paths.get(fileBasePath))) {
 				Files.createDirectories(Paths.get(fileBasePath));
 			}
@@ -291,7 +424,7 @@ public class PostService extends CommonService<Post> {
 		return subComment;
 	}
 
-	public void deletePost(long groupId, long postId, AppUser appUser) {
+	public void deletePost(long postId, AppUser appUser) {
 		Post post = CacheUtils.getPost(postId);
 		if (post.getCreatedBy().equals(appUser.getEmail())) {
 			remove(postId);
@@ -378,6 +511,14 @@ public class PostService extends CommonService<Post> {
 			toList.add(postTO);
 		}
 		return toList;
+	}
+	
+	public List<Post> getAllPublicPost(SearchTO searchTO) {
+		return postDAO.fetchAllPublicPosts(searchTO);
+	}
+	
+	public List<Post> searchPublicPost(SearchTO searchTO) {
+		return postDAO.searchPublicPost(searchTO);
 	}
 
 	public List<PostFile> getPostFilesWithTempDriveId(int offset) {

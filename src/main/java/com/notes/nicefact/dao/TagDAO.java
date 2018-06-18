@@ -11,7 +11,6 @@ import javax.persistence.Query;
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.to.SearchTO;
-import com.notes.nicefact.util.Constants;
 
 public class TagDAO extends CommonDAOImpl<Tag>{
 	static Logger logger = Logger.getLogger(TagDAO.class.getSimpleName());
@@ -39,5 +38,19 @@ public class TagDAO extends CommonDAOImpl<Tag>{
 		} catch (NoResultException nre) {
 		}
 		return results;
+	}
+	
+	public Tag getByName(String name) {
+		Tag tag = null;
+		
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from Tag t where t.name=:name order by t.name asc");
+		query.setParameter("name", name);
+		try {
+			tag = (Tag) query.getSingleResult();
+		} catch (NoResultException nre) {
+		}
+		
+		return tag;
 	}
 }

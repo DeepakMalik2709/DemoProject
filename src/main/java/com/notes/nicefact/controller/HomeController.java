@@ -33,6 +33,7 @@ import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.GroupMember;
 import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.InstituteMember;
+import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.entity.TutorialFile;
 import com.notes.nicefact.exception.AppException;
@@ -41,10 +42,12 @@ import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.CommonEntityService;
 import com.notes.nicefact.service.GroupService;
 import com.notes.nicefact.service.InstituteService;
+import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.TutorialService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.GroupTO;
 import com.notes.nicefact.to.InstituteTO;
+import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.to.TutorialTO;
 import com.notes.nicefact.util.CacheUtils;
@@ -351,38 +354,6 @@ public class HomeController extends CommonController {
 			response.getOutputStream().close();
 		}
 		logger.info("getUserImage exit");
-	}
-	
-	@GET
-	@Path("/trending")
-	public void  fetchTrending(@Context HttpServletRequest request,   @Context HttpServletResponse response){
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		logger.info("searchTutorial start");
-		Map<String, Object> json = new HashMap<>();
-		try {
-			TutorialService notesService = new TutorialService(em);
-			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_5);
-			List<Tutorial> tutorials =  notesService.fetchTrendingTutorialList(searchTO);
-			List<TutorialTO> tutorialTos = Utils.adaptTutorialTO(tutorials);
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.TOTAL, tutorialTos.size());
-			json.put(Constants.DATA_ITEMS, tutorialTos);
-			if(!tutorialTos.isEmpty()){
-				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
-			}
-			
-		} catch (Exception e) {
-			logger.error( e.getMessage(), e);
-			
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		}finally{
-			if(em.isOpen()){
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("searchTutorial exit");
 	}
 	
 	@GET
