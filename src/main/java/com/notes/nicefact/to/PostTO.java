@@ -186,8 +186,8 @@ public class PostTO {
 		}
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
-			this.noOfSubmissions = post.getSubmitters().size();
 		}
+		this.noOfSubmissions = post.getSubmitters().size();
 		
 		if(post.getPostTags().size() > 0) {
 			TagTO tagTO = null;
