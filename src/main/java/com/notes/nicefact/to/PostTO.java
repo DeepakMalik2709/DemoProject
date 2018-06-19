@@ -187,6 +187,7 @@ public class PostTO {
 		if(CurrentContext.getAppUser() !=null){
 			this.isSubmitted = post.getSubmitters().contains(CurrentContext.getEmail());
 		}
+		this.noOfSubmissions = post.getSubmitters().size();
 		
 		if(post.getPostTags().size() > 0) {
 			TagTO tagTO = null;
@@ -207,9 +208,8 @@ public class PostTO {
 			this.postCategory = "PRIVATE";
 		} else {
 			this.postCategory = post.getPostCategory().name();
-		}	
-		
-		this.noOfSubmissions = post.getSubmitters().size();
+		}
+
 	}
 
 	public PostTO(Post post, List<TaskSubmissionTO> submissions) {
