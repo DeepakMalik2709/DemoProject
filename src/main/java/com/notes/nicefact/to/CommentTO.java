@@ -18,9 +18,6 @@ public class CommentTO {
 
 	String senderPosition;
 	String attendeeId;
-
-	
-
 	String senderDepartment;
 
 	String senderOrganization;
@@ -49,6 +46,8 @@ public class CommentTO {
 	String updatedByEmail;
 	
 	String resposeStatus;
+	
+	private long createdById;
 
 	public String getResposeStatus() {
 		return resposeStatus;
@@ -280,4 +279,11 @@ public class CommentTO {
 		this.updatedByEmail = updatedByEmail;
 	}
 
+	public long getCreatedById() {
+		return createdById;
+	}
+
+	public void setCreatedById(long createdById) {
+		this.createdById = createdById;
+	}
 }
