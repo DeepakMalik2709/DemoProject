@@ -26,10 +26,11 @@ import com.notes.nicefact.dao.PostCommentDAO;
 import com.notes.nicefact.dao.PostDAO;
 import com.notes.nicefact.dao.PostFileDAO;
 import com.notes.nicefact.dao.PostReactionDAO;
-import com.notes.nicefact.dao.TaskSubmissionDAO;
+import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Group;
 import com.notes.nicefact.entity.Post;
+import com.notes.nicefact.entity.Post.POST_CATEGORY;
 import com.notes.nicefact.entity.Post.POST_TYPE;
 import com.notes.nicefact.entity.PostComment;
 import com.notes.nicefact.entity.PostFile;
@@ -37,9 +38,7 @@ import com.notes.nicefact.entity.PostReaction;
 import com.notes.nicefact.entity.PostRecipient;
 import com.notes.nicefact.entity.PostTag;
 import com.notes.nicefact.entity.Tag;
-import com.notes.nicefact.entity.AbstractRecipient.RecipientType;
 import com.notes.nicefact.entity.TaskSubmission;
-
 import com.notes.nicefact.enums.NotificationAction;
 import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.exception.NotFoundException;
@@ -367,12 +366,16 @@ public class PostService extends CommonService<Post> {
 					+ commentTO.getPostId());
 		}
 		PostComment postComment = new PostComment(commentTO);
-		if (appUser.getGroupIds().contains(post.getGroupId())) {
-			Group group = CacheUtils.getGroup(post.getGroupId());
-			if (group.getBlocked().contains(appUser.getEmail())) {
-				throw new UnauthorizedException(
-						"User has been blocked by group admin.");
+		if (appUser.getGroupIds().contains(post.getGroupId()) || post.getPostCategory().equals(POST_CATEGORY.PUBLIC)) {
+			
+			if(post.getPostCategory().equals(POST_CATEGORY.PRIVATE)) {
+				Group group = CacheUtils.getGroup(post.getGroupId());
+				if (group.getBlocked().contains(appUser.getEmail())) {
+					throw new UnauthorizedException(
+							"User has been blocked by group admin.");
+				}
 			}
+			
 			if (commentTO.getCommentId() < 0) {
 				postComment.setPost(post);
 				post.getComments().add(postComment);
@@ -412,12 +415,15 @@ public class PostService extends CommonService<Post> {
 		}
 		Post post = dbComment.getPost();
 		PostComment subComment = new PostComment(commentTO);
-		if (appUser.getGroupIds().contains(post.getGroupId())) {
-			Group group = CacheUtils.getGroup(post.getGroupId());
-			if (group.getBlocked().contains(appUser.getEmail())) {
-				throw new UnauthorizedException(
-						"User has been blocked by group admin.");
+		if (appUser.getGroupIds().contains(post.getGroupId()) || post.getPostCategory().equals(POST_CATEGORY.PUBLIC)) {
+			if(post.getPostCategory().equals(POST_CATEGORY.PRIVATE)) {
+				Group group = CacheUtils.getGroup(post.getGroupId());
+				if (group.getBlocked().contains(appUser.getEmail())) {
+					throw new UnauthorizedException(
+							"User has been blocked by group admin.");
+				}
 			}
+			
 			if (commentTO.getSubCommentId() <= 0) {
 				subComment.setParent(dbComment);
 				dbComment.getComments().add(subComment);
@@ -526,9 +532,29 @@ public class PostService extends CommonService<Post> {
 			tsTOList.add(taskSubmissionMapByPostId.get(post.getId()));
 			postTO = new PostTO(post, tsTOList);
 			
+			AppUser postCreatedBy = null;
+			
 			if(!appUserMap.containsKey(post.getCreatedBy())) {
-				AppUser postCreatedBy = appUserService.getAppUserByEmail(post.getCreatedBy());
+				postCreatedBy = appUserService.getAppUserByEmail(post.getCreatedBy());
 				appUserMap.put(post.getCreatedBy(), postCreatedBy.getId());
+			}
+			
+			for(CommentTO commentTO: postTO.getComments()) {
+				if(!appUserMap.containsKey(commentTO.getCreatedByEmail())) {
+					postCreatedBy = appUserService.getAppUserByEmail(commentTO.getCreatedByEmail());
+					appUserMap.put(commentTO.getCreatedByEmail(), postCreatedBy.getId());
+				}
+				
+				commentTO.setCreatedById(appUserMap.get(commentTO.getCreatedByEmail()));
+				
+				for(CommentTO subCommentTO: commentTO.getComments()) {
+					if(!appUserMap.containsKey(subCommentTO.getCreatedByEmail())) {
+						postCreatedBy = appUserService.getAppUserByEmail(subCommentTO.getCreatedByEmail());
+						appUserMap.put(subCommentTO.getCreatedByEmail(), postCreatedBy.getId());
+					}
+					
+					subCommentTO.setCreatedById(appUserMap.get(subCommentTO.getCreatedByEmail()));
+				}
 			}
 			
 			postTO.setPostCreatorId(appUserMap.get(post.getCreatedBy()));

@@ -849,56 +849,6 @@ public class SecureController extends CommonController {
 		logger.info("deleteGroupPost exit");
 	}
 
-	@DELETE
-	@Path("/post/{postId}/comment/{commentId}")
-	public void deleteGroupPostComment(@PathParam("postId") long postId, @PathParam("commentId") long commentId, @Context HttpServletResponse response) {
-		logger.info("deleteGroupPostComment start , postId : " + postId + " , commentId : " + commentId);
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			PostService postService = new PostService(em);
-			postService.deletePostComment(postId, commentId, CurrentContext.getAppUser());
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("deleteGroupPostComment exit");
-	}
-
-	@POST
-	@Path("/post/{postId}/react")
-	public void reactToPost(@PathParam("postId") long postId, @Context HttpServletResponse response) {
-		logger.info("reactToPost start , postId : " + postId);
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			PostService postService = new PostService(em);
-			Post post = postService.reactToPost(postId, CurrentContext.getAppUser());
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, post.getNumberOfReactions());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("reactToPost exit");
-	}
-
 	@POST
 	@Path("/uploadFile")
 	public void uploadPostFile(@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, JSONException {
@@ -1034,43 +984,6 @@ public class SecureController extends CommonController {
 	}
 	
 	@GET
-	@Path("/my/posts")
-	public void fetchMyPosts(@PathParam("groupId") long groupId, @Context HttpServletRequest request, @Context HttpServletResponse response) {
-		logger.info("fetchMyPosts start");
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			AppUser user = CurrentContext.getAppUser();
-			PostService postService = new PostService(em);
-			SearchTO searchTO = new SearchTO(request, Constants.RECORDS_20);
-			searchTO.setGroupId(groupId);
-			List<PostTO> postTos = postService.fetchMyPosts(searchTO, user);
-			
-			Collections.sort(postTos, new CreatedDateComparator());
-			if (postTos.isEmpty()) {
-				json.put(Constants.CODE, Constants.NO_RESULT);
-			} else {
-
-				json.put(Constants.DATA_ITEMS, postTos);
-				json.put(Constants.NEXT_LINK, searchTO.getNextLink());
-				json.put(Constants.CODE, Constants.RESPONSE_OK);
-				json.put(Constants.TOTAL, postTos.size());
-			}
-
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("fetchMyPosts exit");
-	}
-
-	@GET
 	@Path("/group/file/thumbnail")
 	public void generateFileThumbnail(@QueryParam("name") String serverName, @Context HttpServletRequest req, @Context HttpServletResponse response) {
 		logger.info("generateFileThumbnail start");
@@ -1166,51 +1079,6 @@ public class SecureController extends CommonController {
 		logger.info("fetchMyNotifications exit");
 	}
 	
-	@GET
-	@Path("/post/{postId}")
-	public void fetchPost(@PathParam("postId") long postId, @Context HttpServletResponse response, @Context HttpServletRequest request) {
-		logger.info("fetchPost start, postId : " + postId);
-		Map<String, Object> json = new HashMap<>();
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		try {
-			GroupService groupService = new GroupService(em);
-			PostService postService = new PostService(em);
-			Post post = postService.get(postId);
-			AppUser user = CurrentContext.getAppUser();
-			if (null == post){
-				throw new NotFoundException("Post not found for id : " + postId);
-			}
-			Group group = CacheUtils.getGroup(post.getGroupId());
-			if(group == null){
-				throw new NotFoundException("Post has been deleted");
-			}
-			if(!SHARING.PUBLIC.equals(group.getSharing())){
-				if (!user.getGroupIds().contains(post.getGroupId())) {
-					AppUserService appUserService = new AppUserService(em);
-					user = appUserService.getAppUserByEmail(user.getEmail());
-					if (!user.getGroupIds().contains(post.getGroupId())) {
-						throw new UnauthorizedException("Post not found");
-					}
-					request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
-				}
-			}
-			
-			PostTO postTO = new PostTO(post);
-			json.put(Constants.CODE, Constants.RESPONSE_OK);
-			json.put(Constants.DATA_ITEM, postTO);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		} finally {
-			if (em.isOpen()) {
-				em.close();
-			}
-		}
-		renderResponseJson(json, response);
-		logger.info("fetchPost exit");
-	}
-
 	@GET
 	@Path("/markNotificationAsRead")
 	public void markNotificationAsRead(@Context HttpServletRequest request, @Context HttpServletResponse response) {
