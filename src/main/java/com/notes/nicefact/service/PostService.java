@@ -320,8 +320,10 @@ public class PostService extends CommonService<Post> {
 		PostTO postTO;
 		Date today = new Date();
 		
-		Map<Long,TaskSubmissionTO> taskSubmissionMapByPostId = getUserWiseTaskSubmissionforPosts(posts, searchTO);
-		
+		Map<Long,TaskSubmissionTO> taskSubmissionMapByPostId = new HashMap<>();
+		if(posts!= null && !posts.isEmpty()){
+			taskSubmissionMapByPostId = getUserWiseTaskSubmissionforPosts(posts, searchTO);
+		}
 		for (Post post : posts) {
 			/*if (post.getPostType().equals(POST_TYPE.SCHEDULE)) {
 				if ((null != post.getFromDate() && !post.getFromDate().before(today)) || (null != post.getToDate() && !post.getToDate().after(today))) {

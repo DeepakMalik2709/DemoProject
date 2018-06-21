@@ -548,12 +548,25 @@ public GroupMember fetchGroupMemberByEmail(long groupId, String email) {
 				} else {
 					member.getPositions().clear();
 					member.getPositions().addAll(memberTO.getPositions());
+					
+					// Adding user in group admin and teacher list according to member postions list
+					
+					if(member.getPositions().contains(UserPosition.ADMIN)){
+						group.getAdmins().add(memberTO.getEmail());
+					}
+
+					if(member.getPositions().contains(UserPosition.TEACHER)){
+						group.getTeachers().add(memberTO.getEmail());
+					}
+					
+					groupDao.upsert(group);
 				}
 				groupMemberDAO.upsert(member);
 				AppUser dbUser = appUserService.getAppUserByEmail(memberTO.getEmail());
 				dbUser.getJoinRequestGroups().remove(groupId);
 				dbUser.getGroupIds().add(groupId);
 				appUserService.upsert(dbUser);
+				
 				
 				NotificationService notificationService = new NotificationService(em);
 				Notification notification = new Notification(user);
