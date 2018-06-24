@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.services.calendar.model.EventAttachment;
 import com.notes.nicefact.entity.AbstractFile;
 import com.notes.nicefact.util.Constants;
+import com.notes.nicefact.util.FileTypeUtil;
 import com.notes.nicefact.util.Utils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -69,29 +70,15 @@ public class FileTO {
 		} else {
 			String extension = FilenameUtils.getExtension(file.getName());
 			
-			if(extension.equals("pdf")) {
+			if(FileTypeUtil.isPdf(extension)) {
 				this.thumbnailLink = Constants.NO_PREVIEW_PDF;
-			} else if(extension.equals("bmp")
-					|| extension.equals("cur")
-					|| extension.equals("ico")
-					|| extension.equals("gif")
-					|| extension.equals("jpg")
-					|| extension.equals("jpeg")
-					|| extension.equals("png")
-					|| extension.equals("psd")
-					|| extension.equals("raw")
-					|| extension.equals("tif")) {
+			} else if(FileTypeUtil.isImage(extension)) {
 				this.thumbnailLink = Constants.NO_PREVIEW_IMAGE;
-			} else if(extension.equals("doc")
-					|| extension.equals("docx")) {
+			} else if(FileTypeUtil.isDoc(extension)) {
 				this.thumbnailLink = Constants.NO_PREVIEW_DOC;
-			} else if(extension.equals("pps")
-					|| extension.equals("ppt")
-					|| extension.equals("pptx")) {
+			} else if(FileTypeUtil.isPpt(extension)) {
 				this.thumbnailLink = Constants.NO_PREVIEW_PPT;
-			} else if(extension.equals("xls")
-					|| extension.equals("xlsx")
-					|| extension.equals("xlr")) {
+			} else if(FileTypeUtil.isExcel(extension)) {
 				this.thumbnailLink = Constants.NO_PREVIEW_EXCEL;
 			} else {
 				this.thumbnailLink = Constants.NO_PREVIEW_AVAILABLE;
