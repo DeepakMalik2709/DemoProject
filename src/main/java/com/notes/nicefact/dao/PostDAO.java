@@ -17,7 +17,6 @@ import com.notes.nicefact.entity.AbstractFile.UPLOAD_TYPE;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.PostFile;
-import com.notes.nicefact.entity.Tutorial;
 import com.notes.nicefact.to.SearchTO;
 import com.notes.nicefact.util.Constants;
 
@@ -42,7 +41,7 @@ public class PostDAO extends CommonDAOImpl<Post> {
 		}
 		return results;
 	}
-
+	
 	public List<Post> fetchMyPosts(SearchTO searchTO , AppUser appuser) {
 		List<Post> results = new ArrayList<>();
 		EntityManager pm = super.getEntityManager();

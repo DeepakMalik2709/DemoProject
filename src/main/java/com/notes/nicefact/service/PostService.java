@@ -336,7 +336,7 @@ public class PostService extends CommonService<Post> {
 		}
 		return toList;
 	}
-
+	
 	public Map<Long,TaskSubmissionTO> getUserWiseTaskSubmissionforPosts(List<Post> posts, SearchTO searchTO) {
 		List<Long> postIdList = new ArrayList<>();
 		for (Post post : posts) {

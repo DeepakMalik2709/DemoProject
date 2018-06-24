@@ -4,15 +4,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
+import org.apache.log4j.Logger;
+
 import com.notes.nicefact.dao.impl.CommonDAOImpl;
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.to.SearchInfoTO;
 
 public class AppUserDAO extends CommonDAOImpl<AppUser> {
 	static Logger logger = Logger.getLogger(AppUserDAO.class.getSimpleName());
@@ -116,6 +118,23 @@ public class AppUserDAO extends CommonDAOImpl<AppUser> {
 		}
 
 		return new ArrayList<>(results);
+	}
+	
+	public List<AppUser> getAllUserExceptLoggedIn(SearchInfoTO searchInfoTO, Long appUserId) {
+		List<AppUser> results = new ArrayList<>();
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select au from AppUser au where au.id != :appUserId and where au.name LIKE CONCAT('%',:searchTerm,'%') order by t.updatedTime desc");
+		query.setParameter("appUserId", appUserId);
+		query.setParameter("searchTerm", searchInfoTO.getSearchData());
+		
+		query.setFirstResult(searchInfoTO.getFirst());
+		query.setMaxResults(searchInfoTO.getLimit());
+		
+		try {
+			results = (List<AppUser>) query.getResultList();
+		} catch (NoResultException nre) {
+		}
+		return results;
 	}
 
 }
