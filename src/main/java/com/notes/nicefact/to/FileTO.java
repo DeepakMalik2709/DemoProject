@@ -1,5 +1,6 @@
 package com.notes.nicefact.to;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -62,7 +63,41 @@ public class FileTO {
 		this.downloadCount = file.getDownloadCount();
 		this.id = file.getId();
 		this.hasThumbnail = StringUtils.isNotBlank(file.getThumbnail());
-		this.thumbnailLink = file.getThumbnail();
+		
+		if(StringUtils.isNotBlank(file.getThumbnail())) {
+			this.thumbnailLink = file.getThumbnail();
+		} else {
+			String extension = FilenameUtils.getExtension(file.getName());
+			
+			if(extension.equals("pdf")) {
+				this.thumbnailLink = Constants.NO_PREVIEW_PDF;
+			} else if(extension.equals("bmp")
+					|| extension.equals("cur")
+					|| extension.equals("ico")
+					|| extension.equals("gif")
+					|| extension.equals("jpg")
+					|| extension.equals("jpeg")
+					|| extension.equals("png")
+					|| extension.equals("psd")
+					|| extension.equals("raw")
+					|| extension.equals("tif")) {
+				this.thumbnailLink = Constants.NO_PREVIEW_IMAGE;
+			} else if(extension.equals("doc")
+					|| extension.equals("docx")) {
+				this.thumbnailLink = Constants.NO_PREVIEW_DOC;
+			} else if(extension.equals("pps")
+					|| extension.equals("ppt")
+					|| extension.equals("pptx")) {
+				this.thumbnailLink = Constants.NO_PREVIEW_PPT;
+			} else if(extension.equals("xls")
+					|| extension.equals("xlsx")
+					|| extension.equals("xlr")) {
+				this.thumbnailLink = Constants.NO_PREVIEW_EXCEL;
+			} else {
+				this.thumbnailLink = Constants.NO_PREVIEW_AVAILABLE;
+			}
+		}
+		
 		this.icon = file.getIcon();
 		this.embedLink = file.getEmbedLink();
 		this.driveLink = file.getDriveLink();
