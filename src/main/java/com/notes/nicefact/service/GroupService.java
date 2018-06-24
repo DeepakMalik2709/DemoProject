@@ -329,9 +329,12 @@ public GroupAttendanceTO fetchStudentAttendance(SearchTO searchTO,long groupId, 
 		GroupMember member = groupMemberDAO.get(memberId);
 		if (member != null) {
 			Group group = member.getGroup();
-			if (group.getAdmins().contains(appUser.getEmail())) {
+			if (group.getAdmins().contains(appUser.getEmail()) || group.getTeachers().contains(appUser.getEmail())) {
 				groupMemberDAO.remove(memberId);
 				udpateAppUserAccesPermissions(member.getEmail());
+				group.getAdmins().remove(appUser.getEmail());
+				group.getTeachers().remove(appUser.getEmail());
+				groupDao.upsert(group);
 			} else {
 				throw new UnauthorizedException("You cannot update this group");
 			}
@@ -535,7 +538,7 @@ public GroupMember fetchGroupMemberByEmail(long groupId, String email) {
 	
 	public GroupMember approveJoinGroup(long groupId, GroupMemberTO memberTO, AppUser user) {
 		GroupMember  member =null;
-		Group group = CacheUtils.getGroup(groupId);
+		Group group = groupDao.get(groupId);
 		if (group != null && group.getAdmins().contains(user.getEmail())) {
 			member = fetchGroupMemberByEmail(groupId, memberTO.getEmail());
 			if (member != null && !member.getIsJoinRequestApproved()) {
@@ -559,14 +562,13 @@ public GroupMember fetchGroupMemberByEmail(long groupId, String email) {
 						group.getTeachers().add(memberTO.getEmail());
 					}
 					
-					groupDao.upsert(group);
 				}
-				groupMemberDAO.upsert(member);
+				groupMemberDAO.upsert(member);			
 				AppUser dbUser = appUserService.getAppUserByEmail(memberTO.getEmail());
 				dbUser.getJoinRequestGroups().remove(groupId);
 				dbUser.getGroupIds().add(groupId);
 				appUserService.upsert(dbUser);
-				
+				groupDao.upsert(group);
 				
 				NotificationService notificationService = new NotificationService(em);
 				Notification notification = new Notification(user);
