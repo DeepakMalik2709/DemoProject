@@ -1,6 +1,12 @@
 package com.notes.nicefact.quiz.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
@@ -62,14 +68,27 @@ public class AnsweredQuestionService extends CommonService<AnsweredQuestion> {
 		} else {
 			answeredQuestionDB = answeredQuestionDao.get(answeredQuestionTO.getId());
 		}
-		answeredQuestionDB.setQuiz(quizService.get(answeredQuestionTO.getQuizTO().getId()));
-		answeredQuestionDB.setQuestion(questionService.get(answeredQuestionTO.getQuestionTO().getId()));
-		answeredQuestionDB.setOption(optionService.get(answeredQuestionTO.getOptionTO().getId()));
+		answeredQuestionDB.setQuiz(quizService.get(answeredQuestionTO.getQuizId()));
+		answeredQuestionDB.setQuestion(questionService.get(answeredQuestionTO.getQuestionId()));
+		answeredQuestionDB.setOption(optionService.get(answeredQuestionTO.getOptionId()));
 		answeredQuestionDB.setStudent(user);
 
 		answeredQuestionDB =answeredQuestionDao.upsert(answeredQuestionDB);
 		logger.info("upsertQuiz : ");
 		return answeredQuestionDB;
+	}
+
+	public List<AnsweredQuestionTO> queryRecord(AnsweredQuestionTO answeredQuestionTO, AppUser user) {
+		Map<String,Object> queryMap = new  HashMap<>();
+		if(answeredQuestionTO.getQuizId()!=null) {
+			queryMap.put("quiz_id", answeredQuestionTO.getQuizId());
+		}
+		List<AnsweredQuestionTO> ansQuesTOList = new ArrayList<>();
+		List<AnsweredQuestion> ansQuesList = answeredQuestionDao.getActiveListByMap(queryMap);
+		for (AnsweredQuestion answeredQuestion : ansQuesList) {
+			ansQuesTOList.add(new AnsweredQuestionTO(answeredQuestion));
+		}
+		return ansQuesTOList;
 	}
 
 

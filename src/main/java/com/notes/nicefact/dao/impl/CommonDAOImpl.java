@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -383,6 +384,36 @@ public abstract class CommonDAOImpl<E extends CommonEntity> implements CommonDAO
 		}
 		return objects;
 	}
+	
+	public List<E> getActiveListByMap(Map<String,Object> fieldsMap) {
+		EntityManager pm = getEntityManager();
+		String queryStr = "select * from " + this.clazz.getSimpleName() + " h where h."; 
+		for(String key:fieldsMap.keySet()) {
+			queryStr+=key+"= :"+key+" and ";
+		}
+		queryStr += "isActive = true and isDeleted = false";
+		Query query = pm.createNativeQuery(queryStr,this.clazz);
+		for(String key:fieldsMap.keySet()) {
+			query.setParameter(key, fieldsMap.get(key));
+		}
+		List<E> objects = null;
+		try {
+			objects = (List<E>) query.getResultList();
+			for (E e : objects) {
+				pm.detach(e);
+			}
+
+		} catch (NoResultException nre) {
+			logger.warn(nre.getMessage());
+			objects = new ArrayList<>();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			
+		}
+		return objects;
+	}
+	
 	public boolean softDeleteAll(long[] ids) {
 		boolean success = true;
 		E object = null;

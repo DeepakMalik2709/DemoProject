@@ -9,54 +9,28 @@ import com.notes.nicefact.quiz.enums.AnsweredQuesStatus;
 public class AnsweredQuestionTO{
 
 	private Long id;
-	private QuizTO quizTO;
-	private AppUser studentTO;
-	private QuestionTO questionTO;
-	private OptionTO optionTO;
+	private Long quizId;
+	private String studentId;
+	private Long questionId;
+	private Long optionId;
 	private AnsweredQuesStatus status;
 	
 	public AnsweredQuestionTO(AnsweredQuestion answeredQuestion) {
 		this.id = answeredQuestion.getId();
-		this.quizTO =new QuizTO(answeredQuestion.getQuiz());		
-		this.optionTO=new OptionTO(answeredQuestion.getOption());
-		this.questionTO=new QuestionTO(answeredQuestion.getQuestion());
+		this.quizId =answeredQuestion.getQuiz().getId();		
+		this.optionId=answeredQuestion.getOption().getId();
+		this.questionId=answeredQuestion.getQuestion().getId();
 		this.status = answeredQuestion.getStatus();
-		this.studentTO = answeredQuestion.getStudent();
+		this.studentId = answeredQuestion.getStudent().getEmail();
 	}
 
 	public AnsweredQuestionTO() {
 	}
 	
-	public QuizTO getQuizTO() {
-		return quizTO;
-	}
+	
 
-	public void setQuizTO(QuizTO quizTO) {
-		this.quizTO = quizTO;
-	}
-
-	public AppUser getStudentTO() {
-		return studentTO;
-	}
-
-	public void setStudentTO(AppUser studentTO) {
-		this.studentTO = studentTO;
-	}
-
-	public QuestionTO getQuestionTO() {
-		return questionTO;
-	}
-
-	public void setQuestionTO(QuestionTO questionTO) {
-		this.questionTO = questionTO;
-	}
-
-	public OptionTO getOptionTO() {
-		return optionTO;
-	}
-
-	public void setOptionTO(OptionTO optionTO) {
-		this.optionTO = optionTO;
+	public AnsweredQuestionTO(long quizId) {
+		this.quizId =quizId;	
 	}
 
 	public AnsweredQuesStatus getStatus() {
@@ -73,6 +47,38 @@ public class AnsweredQuestionTO{
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getQuizId() {
+		return quizId;
+	}
+
+	public void setQuizId(Long quizId) {
+		this.quizId = quizId;
+	}
+
+	public String getStudentId() {
+		return studentId;
+	}
+
+	public void setStudentId(String studentId) {
+		this.studentId = studentId;
+	}
+
+	public Long getQuestionId() {
+		return questionId;
+	}
+
+	public void setQuestionId(Long questionId) {
+		this.questionId = questionId;
+	}
+
+	public Long getOptionId() {
+		return optionId;
+	}
+
+	public void setOptionId(Long optionId) {
+		this.optionId = optionId;
 	}
 
 	

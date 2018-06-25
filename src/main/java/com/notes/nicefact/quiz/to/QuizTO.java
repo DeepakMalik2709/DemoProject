@@ -56,6 +56,10 @@ public class QuizTO {
 	
 	}
 
+	public QuizTO(Long quizId) {
+		this.id=quizId;
+	}
+
 	public Long getId() {
 		return id;
 	}
