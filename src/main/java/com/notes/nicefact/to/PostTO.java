@@ -1,5 +1,7 @@
 package com.notes.nicefact.to;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +22,8 @@ import com.notes.nicefact.entity.PostRecipient;
 import com.notes.nicefact.entity.PostTag;
 import com.notes.nicefact.enums.ScheduleAttendeeResponseType;
 import com.notes.nicefact.util.CacheUtils;
+import com.notes.nicefact.util.CommonContext;
+import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
 
 /**
@@ -77,11 +81,16 @@ public class PostTO {
 	int totalAttendee=0;
 	long fromDate;
 	long toDate;
+	
+	String fromDateString;
+	String toDateString;
+	
 	private List<String> weekdays;
 	
 	int noOfSubmissions;
 	Boolean allDayEvent;
 	long deadlineTime;
+	String deadlineTimeString;
 	private String googleEventId;
 	public String getGoogleEventId() {
 		return googleEventId;
@@ -179,7 +188,9 @@ public class PostTO {
 		this.title = post.getTitle();
 		
 		if(null != post.getDeadline()){
+			DateFormat dateFormat = new SimpleDateFormat(Constants.DATE_FORMAT_2);
 			this.deadlineTime = post.getDeadline().getTime();
+			this.deadlineTimeString = dateFormat.format(post.getDeadline());
 			this.canSubmit = this.deadlineTime > new Date().getTime();
 		}else{
 			this.canSubmit = true;
@@ -303,11 +314,16 @@ public class PostTO {
 		}
 		this.googleEventId = post.getGoogleEventId();
 		this.location = post.getLocation();
+		
+		DateFormat dateFormat = new SimpleDateFormat(Constants.DATE_FORMAT_2);
+		
 		if(null !=post.getFromDate()){
 			this.fromDate = post.getFromDate().getTime();
+			this.fromDateString = dateFormat.format(post.getFromDate());
 		}
 		if(null !=post.getToDate()){
 			this.toDate = post.getToDate().getTime();
+			this.toDateString = dateFormat.format(post.getToDate());
 		}
 		this.allDayEvent = post.getAllDayEvent();
 		this.weekdays = new ArrayList<>(post.getWeekdays());
@@ -362,6 +378,24 @@ public class PostTO {
 	
 	
 	
+	public String getDeadlineTimeString() {
+		return deadlineTimeString;
+	}
+	public void setDeadlineTimeString(String deadlineTimeString) {
+		this.deadlineTimeString = deadlineTimeString;
+	}
+	public String getFromDateString() {
+		return fromDateString;
+	}
+	public void setFromDateString(String fromDateString) {
+		this.fromDateString = fromDateString;
+	}
+	public String getToDateString() {
+		return toDateString;
+	}
+	public void setToDateString(String toDateString) {
+		this.toDateString = toDateString;
+	}
 	public String getTitle() {
 		return title;
 	}

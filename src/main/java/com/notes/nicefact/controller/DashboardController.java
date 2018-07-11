@@ -25,8 +25,10 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.notes.nicefact.entity.AppUser;
 import com.notes.nicefact.service.AppUserService;
+import com.notes.nicefact.service.PostService;
 import com.notes.nicefact.service.ScheduleService;
 import com.notes.nicefact.to.EventTO;
+import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.util.CommonContext;
 import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.CurrentContext;
@@ -37,6 +39,33 @@ public class DashboardController extends CommonController {
 
 	private final static Logger logger = Logger.getLogger(DashboardController.class.getName());
 
+	@GET
+	@Path("/")
+	public void getDashboardAfterLoginData(@Context HttpServletRequest request, @Context HttpServletResponse response){
+		logger.info("Dashboard After login start");
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+		try {
+			PostService postService = new PostService(em);
+			Map<String, List<PostTO>> postMapByType = postService.getUserDashboardData(CurrentContext.getAppUser());		
+			json.put(Constants.CODE, Constants.RESPONSE_OK);
+			json.put(Constants.TASK_LIST, postMapByType.get(Constants.TASK_LIST));
+			json.put(Constants.SCHEDULE_LIST, postMapByType.get(Constants.SCHEDULE_LIST));
+			json.put(Constants.TASK_LIST_COUNT, postMapByType.get(Constants.TASK_LIST).size());
+			json.put(Constants.SCHEDULE_LIST_COUNT, postMapByType.get(Constants.SCHEDULE_LIST).size());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+
+			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
+			json.put(Constants.MESSAGE, e.getMessage());
+		} finally {
+			if (em.isOpen()) {
+				em.close();
+			}
+		}
+		renderResponseJson(json, response);
+		logger.info("Dashboard After login exit");
+	}
 	
 	@GET
 	@Path("/items")
@@ -138,37 +167,5 @@ public class DashboardController extends CommonController {
 		return null;
 	}
 
-	@GET
-	@Path("/dataList")
-	public void getDashboardAfterLoginData(@Context HttpServletRequest request, @Context HttpServletResponse response){
-		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
-		logger.info("dashboard data fetch start");
-		Map<String, Object> json = new HashMap<>();
-		try {
-			ScheduleService scheduleService = new ScheduleService(em);
-			Events events = scheduleService.fetchTodayGoogleEvents();
-			List<Event> items = events.getItems();
-			List<EventTO> eventTos = new ArrayList<EventTO>();
-
-			if (items.size() == 0) {
-				json.put(Constants.CODE, Constants.NO_RESULT);
-				System.out.println("No upcoming events found.");
-			} else {
-				System.out.println("Upcoming events");
-				for (Event event : items) {
-					EventTO  eventTO = scheduleService.convertToEventTO(event);
-					eventTos.add(eventTO);
-				}
-				json.put(Constants.CODE, Constants.RESPONSE_OK);
-				json.put("todaySchedules", eventTos);
-			}
-			json.put(Constants.TOTAL, items.size());			
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			json.put(Constants.CODE, Constants.ERROR_WITH_MSG);
-			json.put(Constants.MESSAGE, e.getMessage());
-		}
-		renderResponseJson(json, response);
-		logger.info("fetchTutorial exit");
-	}
+	
 }

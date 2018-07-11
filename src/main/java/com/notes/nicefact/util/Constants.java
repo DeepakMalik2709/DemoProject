@@ -105,7 +105,14 @@ public class Constants {
 	//public static final String REDIRECT_URL = "/a/public/login?redirect=";
 	public static final String REDIRECT_URL = "/a/oauth/googleLogin?redirect=";
 	public static final String DATE_FORMAT_1 = "dd-MMM-yy hh:mm a";
+	public static final String DATE_FORMAT_2 = "dd/MM/yy hh:mm a";
 	public static final Long FIRST_LOGIN_TEST_GROUP = -905L;
 	public static final String APPLICATION_URL = "url";
 	public static final String INDIA_TIMEZONE = "Asia/Kolkata";
+
+	public static final String TASK_LIST = "taskList";
+	public static final String SCHEDULE_LIST = "scheduleList";
+	public static final String TASK_LIST_COUNT = "taskListCount";
+	public static final String SCHEDULE_LIST_COUNT = "scheduleListCount";
+	
 }

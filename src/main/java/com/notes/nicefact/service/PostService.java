@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,6 +54,7 @@ import com.notes.nicefact.to.TagTO;
 import com.notes.nicefact.to.TaskSubmissionTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
+import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.Utils;
 
 public class PostService extends CommonService<Post> {
@@ -691,6 +693,43 @@ public class PostService extends CommonService<Post> {
 
 		logger.info("upsertEvent : ");
 		return posts;
+	}
+
+	public Map<String, List<PostTO>> getUserDashboardData(AppUser appUser) {
+		Map<String, List<PostTO>> postsMapbyType = new HashMap<>();
+		
+		int endDateInt = Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
+		Calendar currentDate = Calendar.getInstance();
+		currentDate.set(Calendar.HOUR, 0);
+		currentDate.set(Calendar.MINUTE, 0);
+		currentDate.set(Calendar.SECOND, 0);
+		currentDate.set(Calendar.MILLISECOND, 0);
+		
+		currentDate.set(Calendar.DAY_OF_MONTH, 1);
+		Date startDate = currentDate.getTime();
+		
+		currentDate.set(Calendar.DAY_OF_MONTH, endDateInt);
+		Date endDate = currentDate.getTime();
+		
+		List<Post> currentMonthTaskAndSchedules = postDAO.fetchUserWiseTaskAndSchedulesForDateRange(startDate, endDate, appUser);
+		
+		List<PostTO> tasks = new ArrayList<>();
+		List<PostTO> schedules = new ArrayList<>();
+		
+		for(Post post : currentMonthTaskAndSchedules){
+			PostTO postTO = new PostTO(post);
+			
+			if(POST_TYPE.SCHEDULE.equals(post.getPostType())){
+				schedules.add(postTO);
+			}else if(POST_TYPE.TASK.equals(post.getPostType())){
+				tasks.add(postTO);
+			}
+		}
+		
+		postsMapbyType.put(Constants.TASK_LIST, tasks);
+		postsMapbyType.put(Constants.SCHEDULE_LIST, schedules);		
+		
+		return postsMapbyType;
 	}
 
 }

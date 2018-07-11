@@ -189,4 +189,25 @@ public class PostDAO extends CommonDAOImpl<Post> {
 		return count;
 	}
 
+	@SuppressWarnings("unchecked")
+	public List<Post> fetchUserWiseTaskAndSchedulesForDateRange(Date startDate, Date endDate, AppUser appUser) {
+		List<Post> results = new ArrayList<>();		
+		EntityManager pm = super.getEntityManager();
+		Query query = pm.createQuery("select t from Post t where t.groupId in (:groupIds) and t.isDeleted = :isDeleted and t.isActive = :isActive"
+						+" and ((t.fromDate >= :startDate and t.fromDate <= :endDate)"
+						+" or (t.deadline >= :startDate and t.deadline <= :endDate))");
+		query.setParameter("groupIds", appUser.getGroupIds());
+		query.setParameter("startDate",startDate);
+		query.setParameter("endDate",endDate);
+		query.setParameter("isDeleted", false);
+		query.setParameter("isActive", true);
+		
+		try {
+			results = (List<Post>) query.getResultList();
+		} catch (NoResultException nre) {
+			
+		} 		
+		return results;
+	}
+
 }

@@ -292,12 +292,6 @@ public class SecureController extends CommonController {
 		renderResponseJson(json, response);
 		logger.info("fetchTutorialList exit");
 	}
-
-	@GET
-	@Path("/dashboard")
-	public Viewable dashboard(@Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
-		return new Viewable("/jsp/index.jsp", null);
-	}
 	
 	@GET
 	@Path("/groups/mine")
