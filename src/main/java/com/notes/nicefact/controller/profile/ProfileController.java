@@ -141,7 +141,12 @@ public class ProfileController extends CommonController {
 		EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
 		AppUserService appUserService = new AppUserService(em);
 		
-		AppUser profileUser = appUserService.get(id);
+		AppUser profileUser = null;
+		if(id == -1){
+			profileUser = user;
+		}else{
+			profileUser = appUserService.get(id);
+		}
 		
 		if(null == profileUser) {
 			// No user exist

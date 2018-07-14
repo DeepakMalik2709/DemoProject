@@ -59,7 +59,7 @@ public class Constants {
 //	public static final String DASHBOARD_PAGE = "/a/secure/dashboard";
 	public static final String DASHBOARD_PAGE = "/dashboard";
 	public static final String HOME_PAGE = "/";
-	public static final String PROFILE_PAGE = "/profile";
+	public static final String PROFILE_PAGE = "/profile/-1";
 	
 	public static final String OK = "OK";
 	
