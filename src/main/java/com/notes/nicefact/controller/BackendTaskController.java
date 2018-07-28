@@ -57,6 +57,7 @@ import com.notes.nicefact.enums.NotificationType;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
 import com.notes.nicefact.service.CommonEntityService;
+import com.notes.nicefact.service.FirebaseService;
 import com.notes.nicefact.service.GoogleDriveService;
 import com.notes.nicefact.service.GoogleDriveService.FOLDER;
 import com.notes.nicefact.service.GroupService;
@@ -1526,6 +1527,7 @@ public class BackendTaskController extends CommonController {
 
 			NotificationService notificationService = new NotificationService(em);
 			PushService pushService = PushService.getInstance();
+			FirebaseService firebaseService = FirebaseService.getInstance();
 			Notification notification = notificationService.get(notificationId);
 			if (null != notification) {
 				NotificationTO notificationTO;
@@ -1547,6 +1549,7 @@ public class BackendTaskController extends CommonController {
 							notificationTO.setItem(commentTO);
 							json.put("data", notificationTO);
 							pushService.sendChannelMessage(recipient.getEmail(), json);
+							firebaseService.sendMessage(recipient.getEmail(), notificationTO);
 						}
 					}
 				}

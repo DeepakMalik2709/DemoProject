@@ -139,7 +139,9 @@ public class Post extends AbstractComment {
 		for (PostRecipientTO postRecipientTO : post.getRecipients()) {
 			recipient = new PostRecipient();
 			recipient.setEmail(postRecipientTO.getEmail());
-			recipient.setScheduleResponse(ScheduleAttendeeResponseType.valueOf(postRecipientTO.getScheduleResponse()) );
+			if(null !=postRecipientTO.getScheduleResponse()){
+				recipient.setScheduleResponse(ScheduleAttendeeResponseType.valueOf(postRecipientTO.getScheduleResponse()) );
+			}
 			recipient.setName(postRecipientTO.getLabel());
 			recipient.setPost(this);
 			AppUser hr = CacheUtils.getAppUser(postRecipientTO.getEmail());

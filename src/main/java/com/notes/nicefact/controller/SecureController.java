@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -45,9 +46,7 @@ import com.notes.nicefact.entity.PostFile;
 import com.notes.nicefact.entity.Tag;
 import com.notes.nicefact.entity.TaskSubmission;
 import com.notes.nicefact.entity.Tutorial;
-import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.enums.UserPosition;
-import com.notes.nicefact.exception.NotFoundException;
 import com.notes.nicefact.exception.UnauthorizedException;
 import com.notes.nicefact.service.AppUserService;
 import com.notes.nicefact.service.BackendTaskService;
@@ -1681,4 +1680,33 @@ public class SecureController extends CommonController {
 		logger.info("exit : updateGroupFiles");
 	}
 	
+	@POST
+	@Path("/saveFirebaseChannelKey")
+	public void updateGroupFiles(@FormParam("key") String key, @Context HttpServletResponse response, @Context HttpServletRequest request) {
+		logger.info("start : updateGroupMemberPositions, key : " + key);
+		Map<String, Object> json = new HashMap<>();
+		EntityManager em = null;
+		try {
+			if (StringUtils.isBlank(key)) {
+				logger.error("firebase key is null ");
+			} else {
+				AppUser sessionuser = CurrentContext.getAppUser();
+				if (!sessionuser.getFirebaseChannelKeys().contains(key)) {
+					 em = EntityManagerHelper.getDefaulteEntityManager();
+					AppUserService appUserService = new AppUserService(em);
+					AppUser user = appUserService.get(sessionuser.getId());
+					user.addFirebaseChannelKey(key);
+					appUserService.upsert(user);
+					request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
+				}
+			}
+		} finally {
+			if (null !=em && em.isOpen()) {
+				em.close();
+			}
+		}
+		json.put(Constants.CODE, Constants.RESPONSE_OK);
+		renderResponseJson(json, response);
+		logger.info("exit : updateGroupFiles");
+	}
 }

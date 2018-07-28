@@ -66,11 +66,13 @@ import com.notes.nicefact.entity.Institute;
 import com.notes.nicefact.entity.InstituteMember;
 import com.notes.nicefact.entity.Post;
 import com.notes.nicefact.entity.Tutorial;
+import com.notes.nicefact.enums.NotificationType;
 import com.notes.nicefact.enums.SHARING;
 import com.notes.nicefact.google.GoogleAppUtils;
 import com.notes.nicefact.service.PushService;
 import com.notes.nicefact.to.AppUserTO;
 import com.notes.nicefact.to.FileTO;
+import com.notes.nicefact.to.NotificationTO;
 import com.notes.nicefact.to.PostTO;
 import com.notes.nicefact.to.TutorialTO;
 
@@ -774,5 +776,28 @@ public class Utils {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+	
+	public static String getUrlFromNotification(NotificationTO notification) {
+		String url = null;
+		if (notification.getEntityId() != null) {
+			if (notification.getIsPost() || notification.getIsTask() || notification.getIsSchedule() || NotificationType.COMMENT.equals(notification.getType())
+					|| NotificationType.COMMENT_REPLY.equals(notification.getType())) {
+				url = "group/post/" + notification.getEntityId();
+			} else if (notification.getGroupId() != null) {
+				if (notification.getShowDetailpage()) {
+					url = "group/" + notification.getGroupId() + "/view";
+				} else {
+					url = "group/" + notification.getGroupId() + "/posts";
+				}
+			} else if (notification.getInstituteId() != null) {
+				if (notification.getShowDetailpage()) {
+					url = "institute/" + notification.getInstituteId() + "/view";
+				} else {
+					url = "institute/" + notification.getInstituteId();
+				}
+			}
+		}
+		return url;
 	}
 }

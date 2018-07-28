@@ -55,6 +55,9 @@ public class AppUser extends CommonEntity {
 	private String currentCity;
 	private String about;
 	
+	@ElementCollection(fetch = FetchType.EAGER)
+	private Set<String> firebaseChannelKeys ;
+	
 	@OneToMany(targetEntity=Certificate.class, mappedBy="appUser", fetch=FetchType.EAGER)
 	private Set<Certificate> certificates;
 
@@ -729,6 +732,22 @@ public class AppUser extends CommonEntity {
 
 	public void setLastSeenNotificationId(Long lastSeenNotificationId) {
 		this.lastSeenNotificationId = lastSeenNotificationId;
+	}
+
+	public Set<String> getFirebaseChannelKeys() {
+		if(null == firebaseChannelKeys){
+			firebaseChannelKeys = new HashSet<>();
+		}
+		return firebaseChannelKeys;
+	}
+
+	public void setFirebaseChannelKeys(Set<String> firebaseChannelKeys) {
+		this.firebaseChannelKeys = firebaseChannelKeys;
+	}
+
+
+	public void addFirebaseChannelKey(String firebaseChannelKey) {
+		this.getFirebaseChannelKeys().add(firebaseChannelKey);
 	}
 
 	@Override

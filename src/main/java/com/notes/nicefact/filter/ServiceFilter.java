@@ -60,7 +60,7 @@ public class ServiceFilter implements Filter {
 			} else {
 
 				if (user == null && bypassLogin && !AppProperties.getInstance().isProduction()) {
-					user = CacheUtils.getAppUser("deepmalik786@gmail.com");
+					user = CacheUtils.getAppUser("jitender@nicefact.co.in");
 			//		Utils.refreshToken(user);
 					request.getSession().setAttribute(Constants.SESSION_KEY_lOGIN_USER, user);
 				}
