@@ -459,13 +459,14 @@ public class BackendTaskController extends CommonController {
 			Post post = postService.get(postId);
 			PostComment comment = postService.getPostCommentById(commentId);
 			AppUser postSender = CacheUtils.getAppUser(post.getCreatedBy());
+			AppUser commentSender = CacheUtils.getAppUser(comment.getCreatedBy());
 			AppUser user;
 			NotificationRecipient notificationRecipient;
 			Set<String> recipientEmailSet = new HashSet<>();
 			/* add person who created comment to avoid sending notification */
 			recipientEmailSet.add(comment.getCreatedBy());
 
-			Notification notification = new Notification(post, comment, postSender);
+			Notification notification = new Notification(post, comment, commentSender);
 			notificationService.upsert(notification);
 
 			/* check and create notification for post creator */

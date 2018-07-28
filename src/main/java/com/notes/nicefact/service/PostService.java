@@ -372,7 +372,7 @@ public class PostService extends CommonService<Post> {
 		PostComment postComment = new PostComment(commentTO);
 		if (appUser.getGroupIds().contains(post.getGroupId()) || post.getPostCategory().equals(POST_CATEGORY.PUBLIC)) {
 			
-			if(post.getPostCategory().equals(POST_CATEGORY.PRIVATE)) {
+			if(POST_CATEGORY.PRIVATE.equals(post.getPostCategory())) {
 				Group group = CacheUtils.getGroup(post.getGroupId());
 				if (group.getBlocked().contains(appUser.getEmail())) {
 					throw new UnauthorizedException(
