@@ -2,6 +2,8 @@ package com.notes.nicefact.service;
 
 import java.util.Random;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -13,10 +15,12 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.notes.nicefact.entity.AppUser;
+import com.notes.nicefact.exception.FirebaseChannelNotFoundException;
 import com.notes.nicefact.to.NotificationTO;
 import com.notes.nicefact.util.AppProperties;
 import com.notes.nicefact.util.CacheUtils;
 import com.notes.nicefact.util.Constants;
+import com.notes.nicefact.util.EntityManagerHelper;
 import com.notes.nicefact.util.Utils;
 
 public class FirebaseService {
@@ -76,7 +80,12 @@ public class FirebaseService {
 					json.put("body", body);
 				}
 				for (String channelKey : user.getFirebaseChannelKeys()) {
-					sendFirebaseMessage(channelKey, json);
+					try {
+						sendFirebaseMessage(channelKey, json);
+					} catch (FirebaseChannelNotFoundException e) {
+						logger.error(e.getMessage() + " , email : " + user.getEmail() + " , channel : " + channelKey);
+						removeChannelKeyForAppuser(user.getEmail() , channelKey);
+					}
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
@@ -86,12 +95,28 @@ public class FirebaseService {
 		}
 	}
 
+	private void removeChannelKeyForAppuser(String email, String channelKey) {
+		try {
+			logger.info("removeChannelKeyForAppuser email : " + email + " , channelKey : " + channelKey );
+			EntityManager em = EntityManagerHelper.getDefaulteEntityManager();
+			AppUserService appUserService = new AppUserService(em);
+			AppUser user = appUserService.getAppUserByEmail(email);
+			user.getFirebaseChannelKeys().remove(channelKey);
+			appUserService.upsert(user);
+			em.close();
+			logger.info("removeChannelKeyForAppuser success");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+
+	}
+
 	private void sendFirebaseMessage(String channelKey, JSONObject notification) throws Exception {
 		if (channelKey != null) {
 			HttpClient client = HttpClients.createDefault();
 			for (int i = 0; i < 4; i++) {
 				logger.info("i: " + i);
-				try {
+				try {channelKey = channelKey + "1";
 					JSONObject parentJson = new JSONObject();
 					parentJson.put("notification", notification);
 					parentJson.put("to", channelKey);
@@ -101,18 +126,27 @@ public class FirebaseService {
 					req.addHeader(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_JSON);
 					ByteArrayEntity entity = new ByteArrayEntity(completeMessage.getBytes(Constants.UTF_8));
 					req.setEntity(entity);
-
 					HttpResponse resp = client.execute(req);
-					if (resp.getStatusLine().getStatusCode() != 200) {
-						String respMessage = new String(IOUtils.toByteArray(resp.getEntity().getContent()), Constants.UTF_8);
+					String respMessage = null;
+					if (null !=resp && null != resp.getEntity()) {
+						respMessage = new String(IOUtils.toByteArray(resp.getEntity().getContent()), Constants.UTF_8);
+					}
+					if (resp.getStatusLine().getStatusCode() == 200) {
+						if(respMessage.contains("\"failure\":1")){
+							throw new FirebaseChannelNotFoundException();
+						}
+						break;
+					} else {
 						logger.error(resp.getStatusLine().getStatusCode() + " : " + respMessage);
 						Thread.sleep((i * 1000) + new Random().nextInt(1000));
-					} else {
-						break;
 					}
+				} catch (FirebaseChannelNotFoundException e) {
+					throw e;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
+				/* if we reach here there was error sending message */
+				
 			}
 
 		}

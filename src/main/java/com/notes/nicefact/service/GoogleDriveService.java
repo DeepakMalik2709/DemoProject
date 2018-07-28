@@ -520,6 +520,21 @@ public class GoogleDriveService {
 		}
 		return driveFile;
 	}
+	
+	public GoogleDriveFile copyFile(String fileId,  AppUser user) {
+		logger.info("copyFile start , fileId : " + fileId + " , user : " + user.getEmail() );
+		String	url = DRIVE_FILES_URL + fileId + "/copy?prettyPrint=false";
+		GoogleDriveFile driveFile = null;
+		JSONObject responseJson = doJsonPost(url, null,null, user);
+		if (responseJson == null) {
+			logger.error("copying file failed!");
+		}else{
+			driveFile = new GoogleDriveFile(responseJson);
+		}
+		logger.info("exit copyFile");
+		return driveFile;
+	}
+
 
 	public GoogleDriveFile getFileFieldsServiceAccount(String fileId, String fields) {
 		fields = addRequiredFields(fields);
