@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -14,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.notes.nicefact.util.Constants;
 import com.notes.nicefact.util.Utils;
 
 import flexjson.JSONSerializer;
@@ -40,7 +38,6 @@ public class GoogleDriveFile {
 	String thumbnailLink;
 	String lastModifyingUserPicture;
 	String description;
-	String ctags = "";
 	String author;
 	String authorPicture;
 	String authorEmail;
@@ -58,10 +55,6 @@ public class GoogleDriveFile {
 	String userPermission;
 	String currentUser;
 
-	Integer secureLevel;
-	boolean isProcessed = false;
-	boolean isTemplate = false;;
-	String approvalId;
 	String serverPath ; 
 
 	// downloadUrl cannot be found for all files
@@ -85,11 +78,6 @@ public class GoogleDriveFile {
 		} catch (Exception e) {
 
 		}
-		/*
-		 * if(selfLink.contains("/") && selfLink.contains("revisions")){
-		 * String[] selfLinkSplits = selfLink.split("/"); revisions =
-		 * Long.valueOf(selfLinkSplits[selfLinkSplits.length-1]); }
-		 */
 		return revisions;
 	}
 
@@ -186,11 +174,6 @@ public class GoogleDriveFile {
 			}
 			if (fileObject.has("downloadUrl")) {
 				downloadUrl = fileObject.getString("downloadUrl");
-				if (StringUtils.isBlank(embedLink) && StringUtils.isNotBlank(mimeType) && mimeType.indexOf("pdf") > -1) {
-					// embedLink =
-					// downloadUrl.replace("gd=true","").replace("e=download",
-					// "e=view");
-				}
 			}
 			if (fileObject.has("exportLinks")) {
 				JSONObject exportLInksJson = fileObject.getJSONObject("exportLinks");
@@ -253,13 +236,6 @@ public class GoogleDriveFile {
 		return lastViewedByMeDate;
 	}
 
-	public String getApprovalId() {
-		return approvalId;
-	}
-
-	public void setApprovalId(String approvalId) {
-		this.approvalId = approvalId;
-	}
 
 	public List<GoogleDriveParent> getParents() {
 		return parents;
@@ -474,7 +450,6 @@ public class GoogleDriveFile {
 			json.put("title", title);
 			json.put("icon", iconLink);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -490,20 +465,6 @@ public class GoogleDriveFile {
 	}
 
 
-	/**
-	 * @return the isProcessed
-	 */
-	public boolean isProcessed() {
-		return isProcessed;
-	}
-
-	/**
-	 * @param isProcessed
-	 *            the isProcessed to set
-	 */
-	public void setProcessed(boolean isProcessed) {
-		this.isProcessed = isProcessed;
-	}
 
 	/**
 	 * @return the collavateURL
@@ -526,27 +487,6 @@ public class GoogleDriveFile {
 	}
 
 
-	public Integer getSecureLevel() {
-		return secureLevel;
-	}
-
-	private void setSecureLevel(String slevel) {
-		if (StringUtils.isNotBlank(slevel)) {
-			secureLevel = Integer.parseInt(slevel);
-		}
-	}
-
-	public void setSecureLevel(Integer secureLevel) {
-		this.secureLevel = secureLevel;
-	}
-
-	public boolean getIsTemplate() {
-		return isTemplate;
-	}
-
-	public void setTemplate(boolean isTemplate) {
-		this.isTemplate = isTemplate;
-	}
 
 	public Map<String, String> getExportLinks() {
 		return exportLinks;
@@ -578,8 +518,13 @@ public class GoogleDriveFile {
 
 	@Override
 	public String toString() {
-		return "GoogleDriveFile [id=" + id + ", editLink=" + editLink + ", title=" + title + ", mimeType=" + mimeType + ", description=" + description + ", author=" + author + ", pdfExportLink=" + pdfExportLink
-				+ ", isProcessed=" + isProcessed + ", isTemplate=" + isTemplate + ", downloadUrl=" + downloadUrl + ", revisions=" + revisions + "]";
+		return "GoogleDriveFile [id=" + id + ", webContentLink=" + webContentLink + ", editLink=" + editLink + ", selfLink=" + selfLink + ", embedLink=" + embedLink + ", title=" + title
+				+ ", mimeType=" + mimeType + ", createdDate=" + createdDate + ", modifiedDate=" + modifiedDate + ", lastModifiedMiliSeconds=" + lastModifiedMiliSeconds + ", iconLink=" + iconLink
+				+ ", lastModifyingUserName=" + lastModifyingUserName + ", thumbnailLink=" + thumbnailLink + ", lastModifyingUserPicture=" + lastModifyingUserPicture + ", description=" + description
+				+ ", author=" + author + ", authorPicture=" + authorPicture + ", authorEmail=" + authorEmail + ", pdfExportLink=" + pdfExportLink + ", authorPermissionId=" + authorPermissionId
+				+ ", processingState=" + processingState + ", isStarred=" + isStarred + ", isTrashed=" + isTrashed + ", shared=" + shared + ", fileSize=" + fileSize + ", parents=" + parents
+				+ ", exportLinks=" + exportLinks + ", modifiedByMeDate=" + modifiedByMeDate + ", lastViewedByMeDate=" + lastViewedByMeDate + ", userPermission=" + userPermission + ", currentUser="
+				+ currentUser + ", serverPath=" + serverPath + ", downloadUrl=" + downloadUrl + ", revisions=" + revisions + "]";
 	}
 
 }
